@@ -1,0 +1,30 @@
+{
+  "name": "saas-playbook-plans",
+  "displayName": "SaaS Playbook Plans",
+  "description": "Opens plans/*.md as an editable plan view: collapsible steps, checkpoint circles, inline editing, approve.",
+  "publisher": "saas-playbook",
+  "version": "0.1.0",
+  "license": "SEE LICENSE IN README.md",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "main": "./extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "saasPlaybook.plan",
+        "displayName": "Plan",
+        "selector": [{ "filenamePattern": "**/plans/*.md" }],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      { "command": "saasPlaybook.openPlanView", "title": "Open as Plan", "category": "Plans" }
+    ],
+    "menus": {
+      "editor/title": [
+        { "command": "saasPlaybook.openPlanView", "when": "resourcePath =~ /\\/plans\\/[^/]+\\.md$/ && activeCustomEditorId != saasPlaybook.plan", "group": "navigation" }
+      ]
+    }
+  }
+}

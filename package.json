@@ -1,0 +1,17 @@
+{
+  "name": "saas-playbook",
+  "version": "1.0.0",
+  "description": "Rules, workflows and skills that make any AI coding agent build SaaS apps the same way every time.",
+  "license": "MIT",
+  "bin": {
+    "saas-playbook": "install.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/subhash-arabhi/saas-playbook.git"
+  },
+  "keywords": ["agent-skills", "agents-md", "claude-code", "cursor", "codex", "saas"],
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,28 @@
+# Workflow: Pre-PR check
+
+Run by `.agents/workflows/push.md`. Follow every step in order. If a step **blocks**, stop: don't push, and report.
+
+## The project script
+`scripts/pre-pr.sh` runs the **automated** steps (3–8). It's different for every project because it depends on the stack.
+- **If it doesn't exist, create it on the first "push":** use the project's real test, E2E, lint and build commands, plus Gitleaks, Semgrep and OSV-Scanner (pinned versions). Make it exit non-zero on any blocking failure and print one `PASS` / `BLOCK` / `WARN` / `SKIPPED` line per step. Commit it before running.
+- **Keep it current** when the stack's commands change.
+- Steps 1–2 and 9–13 are done by you, the agent, not the script.
+
+## Steps
+| # | Step | How | Blocks when |
+|---|---|---|---|
+| 1 | Simplify the branch's changes | You: `.agents/skills/code-simplification/SKILL.md`, changed code only, one change at a time, tests after each, commit `Simplify <area>`; revert anything that breaks a test | Never |
+| 2 | Local run | You: start the full app at localhost (`README.md` commands), open every page/flow changed on the branch at 1440×900 and 390×844 with Playwright CLI, and check the console and network | Anything broken, or the app doesn't start |
+| 3 | Full test suite | Script: all tests except `live` | Any failure. Stop here if tests fail |
+| 4 | E2E core flows | Script: Playwright against the full app running locally | Any failure |
+| 5 | Secrets and private values | Script: Gitleaks on the branch, code and docs; then search all tracked files (except `.agents/`) and the branch's commit messages for every `.env.local` value and for the hostname suffixes the project's cloud uses for its services (list them in `scripts/pre-pr.sh`) | Any secret or private value |
+| 6 | `ARCHITECTURE.md` updated | Script: `git diff --name-only <base>...HEAD` includes it | Not updated |
+| 7 | Code scan | Script: Semgrep on changed files (OWASP + the repo's languages) | A high-severity finding that isn't a confirmed false positive |
+| 8 | Vulnerable packages | Script: OSV-Scanner on every lockfile | A reachable critical/high vulnerability with no documented deferral |
+| 9 | UI audit (only if UI files changed) | You: `.agents/skills/web-design-guidelines/SKILL.md` on changed UI files: interface rules, `DESIGN.md` tokens and components, desktop + mobile layout | Never (warnings) |
+| 10 | Code review | You: `.agents/reviewers/code-reviewer.md`, pre-PR mode, on the branch diff | A Critical finding, including an inaccurate `ARCHITECTURE.md`. Required findings are listed for the user to fix or accept |
+| 11 | Security review | You: `.agents/reviewers/security-auditor.md`, pre-PR mode | A Critical or High finding, or any secret |
+| 12 | LLM red-team (only if AI code or prompts changed) | You: run the project's promptfoo suite | Any failing injection, jailbreak or prompt-leak test |
+| 13 | Report | You: one line per step (PASS / BLOCK / WARN / SKIPPED), simplification commits, then the code-review and security-review reports | — |
+
+Target runtime: about 5–10 minutes.
