@@ -105,7 +105,7 @@ Each skill follows the playbook's rules when `.agents/rules/` exists, and stands
 | `incremental-implementation` | Builds in thin, tested, committed steps |
 | `api-and-interface-design` | Stable APIs: contracts, errors, pagination, additive changes, idempotency |
 | `frontend-ui-engineering` | Production UI from the design system, every state, desktop and mobile, no "AI look" |
-| `design-motion-principles` | Purposeful, restrained motion with reduced-motion handling |
+| `design-motion-principles` | Purposeful motion: CSS first, Motion (formerly Framer Motion) when needed, restrained in apps, expressive on marketing pages |
 | `browser-testing-with-devtools` | Checks pages in a real browser: console, network, layout, performance |
 | `playwright-cli` | Browser automation and Playwright tests (vendored from Microsoft) |
 | `security-and-hardening` | OWASP Top 10 and LLM Top 10, secrets, auth, uploads, supply chain |

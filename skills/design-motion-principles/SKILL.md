@@ -16,6 +16,7 @@ Build UI motion that has a purpose, feels fast, and gets out of the way.
 - **On demand only:** when something appears, disappears, changes state or gives feedback, and an instant change would feel broken. Not a default step of every UI change, pre-PR or release. Most SaaS UI changes need no new motion.
 - **On request** ("does this motion feel right?"): the Quick Inline Review below.
 - **Scope:** web/app UI motion (CSS, JS animation libraries, motion tokens). The frequency gate also applies to Lottie, Rive or video; the recipes may not. Examples are CSS and Motion for React; translate to the project's stack.
+- **Tools, lightest first:** CSS (transitions, scroll-driven animations, View Transitions); then a component animation library such as Motion (formerly Framer Motion) for exits, layout changes, gestures and springs; then a timeline library such as GSAP only for long choreography. Use what the project already has.
 
 ## Lenses: Restraint First
 

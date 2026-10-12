@@ -24,10 +24,17 @@ Stack: the frontend framework is chosen per project (`.agents/rules/stack.md`). 
 - **Every UI change is checked at desktop 1440×900 and mobile 390×844.** Both must look right and work.
 - On mobile: no horizontal scrolling, touch targets at least 44×44px, readable text without zoom, and navigation that works one-handed.
 
+## Motion
+- **Use the lightest tool that does the job,** in this order:
+  1. **CSS:** Tailwind transitions, scroll-driven animations and View Transitions. Covers hover and press feedback, reveal-on-scroll, scroll progress, parallax and page transitions, with no JavaScript.
+  2. **Motion** (`motion`, or `motion-v` for Vue; MIT, formerly Framer Motion) when CSS can't: exit animations, layout and shared-element transitions, gestures and drag, springs, interruptible motion. Load it with `LazyMotion` (or the framework's equivalent) to keep the bundle small. Adding it for these cases needs no extra approval.
+  3. **GSAP** only with the user's OK (proprietary licence), for long choreographed timelines or heavy scroll storytelling on marketing pages.
+- **Restraint in the app, expression on marketing pages** (`design-motion-principles` skill).
+- **Durations and easing come from `DESIGN.md` motion tokens.** Every animation honours `prefers-reduced-motion`.
+
 ## How to build UI
 - Follow the `frontend-ui-engineering` skill, including "Avoid the AI look".
 - When a screen needs a clear direction, study two or three relevant screens from `.agents/references/design-systems/` or ones the user supplied.
-- Motion only when needed (`design-motion-principles` skill).
 - Every data view has loading, empty and error states.
 - Accessibility basics always (real buttons and links, labels on inputs, visible focus, alt text). The full WCAG 2.2 AA audit happens only at publish (`.agents/workflows/publish.md`, using `.agents/references/accessibility-checklist.md`).
 - **UI audit** (`web-design-guidelines` skill): on push, only over changed UI files, as warnings. It skips `[a11y]` rules unless the user asks, noting `Accessibility-only rules skipped; covered at publish.` Publish runs every rule.

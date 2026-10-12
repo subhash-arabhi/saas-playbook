@@ -1,6 +1,6 @@
 {
   "name": "saas-playbook",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Rules, workflows and skills that make any AI coding agent build SaaS apps the same way every time.",
   "license": "MIT",
   "files": [
