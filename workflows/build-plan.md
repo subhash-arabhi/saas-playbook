@@ -28,11 +28,12 @@ If the finished step has **`checkpoint: true`** (set by the user):
 1. Commit the step as usual.
 2. Show the user what the step built: what to open at localhost, and what changed.
 3. Add "checkpoint shown" to its Build log line.
-4. Stop.
+4. Stop, and ask with the question tool (`.agents/rules/asking.md`): continue with the next step, or stop here to review.
 
-The next `/build` continues from the next step with `done: false`. Never change `checkpoint` yourself.
+If the user chooses to continue, carry on as if they ran `/build`; otherwise the next `/build` continues from the next step with `done: false`. Never change `checkpoint` yourself.
 
 ## 4. Stop and ask the user when
+Report what happened in chat, then ask with the question tool, offering the realistic ways forward (e.g. for a failing check: try a named different approach, or stop so the user can look).
 - A check keeps failing and you're going in circles. Report what fails, what you tried and your best theory.
 - A step is unclear, or needs a decision the plan doesn't cover.
 - A step's **Stop and ask if** condition is hit.

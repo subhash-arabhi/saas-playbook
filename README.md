@@ -41,7 +41,7 @@ npx github:subhash-arabhi/saas-playbook
 | `/deploy` | Merges the PR and deploys to production, then smoke-checks it |
 | `/publish` | Readiness for real users (rare): legal pages, consent, privacy, accessibility, licenses, domain |
 
-Typing the plain word ("push") works too. Large work outside a plan gets a suggestion to run `/plan`, and the agent asks when it's unsure.
+Typing the plain word ("push") works too. Large work outside a plan gets a suggestion to run `/plan`, and the agent asks when it's unsure. Questions come as multiple-choice cards in the agent's own question interface (Cursor, Claude Code, Codex, VS Code), with a recommended option first, not as text in the chat.
 
 ### The plan view
 

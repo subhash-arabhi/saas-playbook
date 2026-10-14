@@ -44,7 +44,7 @@ steps:
 …
 
 ## Open questions
-- <Question for the user. Replace the list with "None." before approval.>
+- <Question for the user, with its 2–3 options and your recommendation. Replace the list with "None." once answered.>
 
 ## Build log
 | Step | Date | Result | Notes |
