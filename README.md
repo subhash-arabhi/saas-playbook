@@ -45,7 +45,7 @@ Typing the plain word ("push") works too. Large work outside a plan gets a sugge
 
 ### The plan view
 
-Plans are plain markdown in `plans/`, shown as an editable view in Cursor and VS Code, or in the browser from any tool. The agent opens the plan for you whenever it writes or changes one, stops at a checkpoint, or finishes a build; `node .agents/tools/plan.mjs open plans/<name>.md` does the same by hand. Expand a step to read or edit it, click a circle to make the build pause after that step, and approve when there are no open questions.
+Plans are plain markdown in `plans/`, shown as an editable view in Cursor and VS Code, or in the browser from any tool. The plan view opens by itself whenever the agent writes or changes a plan, stops at a checkpoint, or finishes a build (in Cursor, beside the chat), and an open view refreshes as the plan changes. A hook that the installer adds for Cursor and Claude Code makes this automatic; `node .agents/tools/plan.mjs open plans/<name>.md` does the same by hand. Expand a step to read or edit it, click a circle to make the build pause after that step, and approve when there are no open questions.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/plan-view-dark.png">
@@ -71,6 +71,7 @@ It adds:
 | `AGENTS.md` | The mandatory rules, commands and areas table. Fill in its "Project-specific" section | Yes |
 | `CLAUDE.md` | One line, `@AGENTS.md`, so Claude Code reads it | Yes |
 | `.claude/skills` → `.agents/skills` | Link for Claude Code's skill discovery | Yes |
+| `.cursor/hooks.json`, `.claude/settings.json` | A hook that shows a plan in the plan view whenever the agent changes it. Added to existing files, keeping your settings | Yes |
 | `.agents/playbook.json` | The installed version, its reinstall command, and the playbook's skill list | Yes |
 | `.agents/.gitignore` | Keeps the playbook's own files out of git | Yes |
 | `.agents/` rules, workflows, reviewers, references, templates, tools and skills | The playbook itself | **No**, reinstalled from `playbook.json` |

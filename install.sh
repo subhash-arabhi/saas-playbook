@@ -122,7 +122,10 @@ elif [[ ! -L "$DEST/.claude/skills" ]]; then
   echo "! .claude/skills already exists as a folder. Claude Code will still find skills via AGENTS.md."
 fi
 
-# 5. Project folders the playbook expects
+# 5. Hooks that show a plan in the plan view whenever the agent changes it (Cursor and Claude Code)
+node "$SRC/tools/install-hooks.mjs" "$DEST"
+
+# 6. Project folders the playbook expects
 mkdir -p "$DEST/plans"
 echo "✓ plans/ ready"
 
@@ -130,7 +133,7 @@ cat <<'EOF'
 
 Done. Next:
   1. Fill in the 'Project-specific' section of AGENTS.md (product, cloud, project skills).
-  2. Commit AGENTS.md, CLAUDE.md, .claude/skills, plans/ and .agents/ (git skips the playbook's own files
+  2. Commit AGENTS.md, CLAUDE.md, .claude/, .cursor/hooks.json, plans/ and .agents/ (git skips the playbook's own files
      unless you installed with --commit). If they were committed before, untrack them once:
        git rm -r --cached --quiet .agents && git add .agents
   3. Tell your agent: "Read AGENTS.md and follow it strictly."

@@ -24,10 +24,11 @@ Save plans as `plans/<short-name>.md`, using `.agents/templates/plan.md` **exact
   6. `## Build log`
 - **Run `node .agents/tools/plan.mjs check plans/<name>.md` after every write or update of a plan, and fix every error** before continuing.
 - **Plans describe changes only.** No architecture, stack tables or background explanation. The system's design lives in `ARCHITECTURE.md`. A project's first plan includes a step that writes `ARCHITECTURE.md`, with the stack chosen per `.agents/rules/stack.md`, and lists that stack in one **Changes** bullet.
-- **The user reviews and edits plans in the plan view,** so **open the plan for them** every time you write or change it, stop at a checkpoint, or finish a build. They should never have to look for it:
-  - with the coding tool's own open-file tool if it has one (Cursor: `open_resource` with the plan's `file://` URI); the plan editor extension (`.agents/tools/plan-editor/`) shows it as the plan view;
-  - otherwise with `node .agents/tools/plan.mjs open plans/<name>.md`, which opens it in Cursor or VS Code when run from their terminal, or else in the browser viewer, starting the viewer if needed;
-  - and always link the plan file in your message.
+- **The user reviews and edits plans in the plan view,** so **show it to them** every time you write or change a plan, stop at a checkpoint, or finish a build. They should never have to look for it. An open plan view refreshes by itself.
+  - **Cursor and Claude Code:** a hook (`.agents/tools/plan-hook.mjs`, added by the installer) runs after every plan edit and tells you what to do. Follow it.
+  - **Cursor's agent chat:** open the URL from `node .agents/tools/plan.mjs url plans/<name>.md` in the built-in browser beside the chat (`browser_navigate` with `position: "side"`). Cursor's file panel shows plans as plain markdown, not the plan view.
+  - **Anywhere else:** `node .agents/tools/plan.mjs open plans/<name>.md` opens the plan view in Cursor or VS Code when run from their terminal, or else in the browser, unless a tab already shows it.
+  - Always link the plan file in your message too.
 
   The user may edit any section, set checkpoints, and approve. **Re-read the plan file before acting on it**, because the user may have changed it.
 

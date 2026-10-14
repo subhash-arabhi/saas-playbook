@@ -3,10 +3,11 @@
 //   node .agents/tools/plan.mjs check [plans/<name>.md ...]   validate plan format (exit 1 on errors)
 //   node .agents/tools/plan.mjs view [--port 4600]            local viewer/editor at http://localhost:4600
 //   node .agents/tools/plan.mjs open plans/<name>.md          show a plan: in Cursor/VS Code, else in the viewer
+//   node .agents/tools/plan.mjs url plans/<name>.md           print the plan's viewer URL (starts the viewer if needed)
 import { createServer, get as httpGet } from 'node:http'
 import { createHash } from 'node:crypto'
 import { spawn, spawnSync } from 'node:child_process'
-import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync, readdirSync, existsSync, realpathSync } from 'node:fs'
 import { join, basename, dirname, resolve } from 'node:path'
 import { pathToFileURL, fileURLToPath } from 'node:url'
 
@@ -346,7 +347,8 @@ function cmdCheck(files) {
 }
 
 function cmdView(port) {
-  const dir = resolve(process.cwd(), 'plans')
+  const dir = existsSync('plans') ? realpathSync.native('plans') : resolve(process.cwd(), 'plans')
+  const lastPoll = new Map() // plan name → when an open tab last loaded it (tabs poll every 2s)
   const safe = (name) => (typeof name === 'string' && /^[\w.-]+\.md$/.test(name) && existsSync(join(dir, basename(name))) ? join(dir, basename(name)) : null)
   const json = (res, code, obj) => {
     res.writeHead(code, { 'content-type': 'application/json', 'cache-control': 'no-store' })
@@ -359,9 +361,13 @@ function cmdView(port) {
       return res.end(renderPage('web'))
     }
     if (req.method === 'GET' && url.pathname === '/api/plans') return json(res, 200, planFiles(dir))
-    if (req.method === 'GET' && url.pathname === '/api/root') return json(res, 200, { dir, pid: process.pid })
+    if (req.method === 'GET' && url.pathname === '/api/root') {
+      const watching = [...lastPoll].filter(([, t]) => Date.now() - t < 5000).map(([name]) => name)
+      return json(res, 200, { dir, pid: process.pid, watching })
+    }
     if (req.method === 'GET' && url.pathname === '/api/plan') {
       const p = safe(url.searchParams.get('name'))
+      if (p) lastPoll.set(basename(p), Date.now())
       return p ? json(res, 200, stateOf(readFileSync(p, 'utf8'))) : json(res, 404, { error: 'plan not found' })
     }
     if (req.method === 'POST' && url.pathname === '/api/op') {
@@ -400,7 +406,7 @@ export function openTarget(env = process.env, platform = process.platform) {
   return { kind: 'browser', opener: env.BROWSER || { darwin: 'open', win32: 'explorer' }[platform] || 'xdg-open' }
 }
 
-/** The plans dir served on a port; null if nothing listens, '' if something else does. */
+/** What the viewer on a port reports ({ dir, pid, watching }); null if nothing listens, {} if something else does. */
 function viewerAt(port) {
   return new Promise((done) => {
     const req = httpGet({ host: '127.0.0.1', port, path: '/api/root', timeout: 500 }, (res) => {
@@ -408,45 +414,65 @@ function viewerAt(port) {
       res.on('data', (c) => (body += c))
       res.on('end', () => {
         try {
-          done(JSON.parse(body).dir ?? '')
+          done(JSON.parse(body))
         } catch {
-          done('')
+          done({})
         }
       })
     })
     req.on('timeout', () => req.destroy())
-    req.on('error', (e) => done(e.code === 'ECONNREFUSED' ? null : ''))
+    req.on('error', (e) => done(e.code === 'ECONNREFUSED' ? null : {}))
   })
 }
 
-/** Port of a viewer for `dir`, starting one in the background if none is running. */
-async function viewerPort(dir) {
+/** The viewer for a plans dir, started in the background if none is running: { port, watching }. */
+async function viewerFor(dir) {
+  dir = realpathSync.native(dir)
   let free = null
   for (let port = 4600; port < 4610; port++) {
     const at = await viewerAt(port)
-    if (at === dir) return port
+    if (at?.dir === dir) return { port, watching: at.watching || [] }
     if (at === null && free === null) free = port
   }
   if (free === null) throw new Error('ports 4600–4609 are all in use')
-  spawn(process.execPath, [fileURLToPath(import.meta.url), 'view', '--port', String(free)], { cwd: process.cwd(), detached: true, stdio: 'ignore' }).unref()
+  spawn(process.execPath, [fileURLToPath(import.meta.url), 'view', '--port', String(free)], { cwd: dirname(dir), detached: true, stdio: 'ignore' }).unref()
   for (let i = 0; i < 50; i++) {
-    if ((await viewerAt(free)) === dir) return free
+    if ((await viewerAt(free))?.dir === dir) return { port: free, watching: [] }
     await new Promise((r) => setTimeout(r, 100))
   }
   throw new Error(`the plan viewer didn't start on port ${free}`)
 }
 
-async function cmdOpen(file) {
-  const dir = resolve(process.cwd(), 'plans')
-  const path = file ? resolve(file) : ''
-  if (!path || dirname(path) !== dir || !existsSync(path)) return console.log(`✗ not a plan in plans/: ${file || '(none)'}`), 1
-  const target = openTarget()
+/** Plan view URL for plans/<name>.md, and whether a browser tab already shows it (it refreshes by itself). */
+export async function planViewUrl(path) {
+  const { port, watching } = await viewerFor(dirname(path))
+  return { url: `http://localhost:${port}/?plan=${encodeURIComponent(basename(path))}`, open: watching.includes(basename(path)) }
+}
+
+/** Show a plan in the editor whose terminal this is, or else in the browser unless a tab already shows it. */
+export async function openPlan(path, env = process.env) {
+  const target = openTarget(env)
   if (target.kind === 'editor') {
-    for (const cli of target.clis) if (spawnSync(cli, ['-r', path], { stdio: 'ignore' }).status === 0) return console.log(`✓ Opened ${file} in the editor`), 0
+    for (const cli of target.clis) if (spawnSync(cli, ['-r', path], { stdio: 'ignore' }).status === 0) return `✓ Opened ${path} in the editor`
   }
-  const url = `http://localhost:${await viewerPort(dir)}/?plan=${encodeURIComponent(basename(path))}`
-  const { opener } = openTarget({ ...process.env, VSCODE_IPC_HOOK_CLI: '' })
-  console.log(spawnSync(opener, [url], { stdio: 'ignore' }).status === 0 ? `✓ Opened ${url}` : `Open ${url}`)
+  const { url, open } = await planViewUrl(path)
+  if (open) return `✓ Already open at ${url}`
+  const { opener } = openTarget({ ...env, VSCODE_IPC_HOOK_CLI: '' })
+  return spawnSync(opener, [url], { stdio: 'ignore' }).status === 0 ? `✓ Opened ${url}` : `Open ${url}`
+}
+
+/** plans/<name>.md as an absolute path if `file` is one under `root`, else ''. */
+export function planPath(file, root = process.cwd()) {
+  const path = file ? resolve(root, file) : ''
+  if (!path.endsWith('.md') || !existsSync(path) || !existsSync(resolve(root, 'plans'))) return ''
+  const real = realpathSync.native(path)
+  return dirname(real) === realpathSync.native(resolve(root, 'plans')) ? real : ''
+}
+
+async function cmdOpen(file, urlOnly) {
+  const path = planPath(file)
+  if (!path) return console.log(`✗ not a plan in plans/: ${file || '(none)'}`), 1
+  console.log(urlOnly ? (await planViewUrl(path)).url : await openPlan(path))
   return 0
 }
 
@@ -457,13 +483,15 @@ if (isMain) {
   else if (cmd === 'view') {
     const i = args.indexOf('--port')
     cmdView(i >= 0 ? Number(args[i + 1]) : 4600)
-  } else if (cmd === 'open') {
-    cmdOpen(args[0]).then(
+  } else if (cmd === 'open' || cmd === 'url') {
+    cmdOpen(args[0], cmd === 'url').then(
       (code) => process.exit(code),
       (e) => (console.log(`✗ ${e.message}`), process.exit(1)),
     )
   } else {
-    console.log('Usage:\n  node .agents/tools/plan.mjs check [plans/<name>.md ...]\n  node .agents/tools/plan.mjs view [--port 4600]\n  node .agents/tools/plan.mjs open plans/<name>.md')
+    console.log(
+      'Usage:\n  node .agents/tools/plan.mjs check [plans/<name>.md ...]\n  node .agents/tools/plan.mjs view [--port 4600]\n  node .agents/tools/plan.mjs open plans/<name>.md\n  node .agents/tools/plan.mjs url plans/<name>.md',
+    )
     process.exit(cmd ? 1 : 0)
   }
 }
