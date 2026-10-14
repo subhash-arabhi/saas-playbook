@@ -82,7 +82,7 @@ Fix the critical and high-impact issues from the lifecycle audit so the playbook
 ### Step 1: Self-tests and CI
 **Do:**
 1. Add `node:test` suites with no dependencies: installer (fresh install, path with spaces, `--commit` / `--no-commit`, update keeps project skills and `AGENTS.md`), plan core (parse, check, approve, checkpoint, version conflict), plan viewer HTTP API (list, load, edit, path traversal), skill metadata against the Agent Skills spec, and local Markdown links outside code fences.
-2. Add `"test": "node --test tests/"` to `package.json`.
+2. Extend the existing `npm test` (`node --test tests/*.test.mjs`, which already runs `tests/plan-open.test.mjs`) with these suites.
 3. Add `.github/workflows/ci.yml`: `npm test`, ShellCheck, Gitleaks, Semgrep and `npm pack --dry-run` on Ubuntu and macOS for supported Node versions, with every action pinned by commit SHA.
 4. Fix anything ShellCheck reports in the two shell scripts.
 
