@@ -17,6 +17,9 @@
     "tools/",
     "workflows/"
   ],
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  },
   "bin": {
     "saas-playbook": "install.sh"
   },

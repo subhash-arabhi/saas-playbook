@@ -45,7 +45,7 @@ Typing the plain word ("push") works too. Large work outside a plan gets a sugge
 
 ### The plan view
 
-Plans are plain markdown in `plans/`, shown as an editable view in Cursor and VS Code, or in the browser from any tool. Expand a step to read or edit it, click a circle to make the build pause after that step, and approve when there are no open questions.
+Plans are plain markdown in `plans/`, shown as an editable view in Cursor and VS Code, or in the browser from any tool. The agent opens the plan for you whenever it writes or changes one, stops at a checkpoint, or finishes a build; `node .agents/tools/plan.mjs open plans/<name>.md` does the same by hand. Expand a step to read or edit it, click a circle to make the build pause after that step, and approve when there are no open questions.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/plan-view-dark.png">

@@ -26,7 +26,7 @@ Skip steps with `done: true` in the front matter, so the build can resume.
 ## 3. Checkpoints
 If the finished step has **`checkpoint: true`** (set by the user):
 1. Commit the step as usual.
-2. Show the user what the step built: what to open at localhost, and what changed.
+2. Show the user what the step built: what to open at localhost, and what changed. Open the plan (`.agents/rules/planning.md` → plan view).
 3. Add "checkpoint shown" to its Build log line.
 4. Stop, and ask with the question tool (`.agents/rules/asking.md`): continue with the next step, or stop here to review.
 
@@ -43,5 +43,5 @@ Report what happened in chat, then ask with the question tool, offering the real
 ## 5. When all steps are done
 1. Check the whole plan works end to end. Update `ARCHITECTURE.md`, `README.md`, `.env.example` and the API contract for everything the plan changed, and bump "Last updated". Commit `Update ARCHITECTURE.md`.
 2. Set `status: done` in the front matter and run `plan.mjs check`.
-3. Summarise: steps finished, commits, files changed, tests added, anything skipped or flagged.
+3. Summarise: steps finished, commits, files changed, tests added, anything skipped or flagged. Open the plan.
 4. Tell the user it's committed locally. Nothing is pushed until they say "push".

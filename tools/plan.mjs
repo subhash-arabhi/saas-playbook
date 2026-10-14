@@ -2,11 +2,13 @@
 // Plan tools (no dependencies). Also used as the core of the editor extension in tools/plan-editor/.
 //   node .agents/tools/plan.mjs check [plans/<name>.md ...]   validate plan format (exit 1 on errors)
 //   node .agents/tools/plan.mjs view [--port 4600]            local viewer/editor at http://localhost:4600
-import { createServer } from 'node:http'
+//   node .agents/tools/plan.mjs open plans/<name>.md          show a plan: in Cursor/VS Code, else in the viewer
+import { createServer, get as httpGet } from 'node:http'
 import { createHash } from 'node:crypto'
+import { spawn, spawnSync } from 'node:child_process'
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs'
-import { join, basename, resolve } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { join, basename, dirname, resolve } from 'node:path'
+import { pathToFileURL, fileURLToPath } from 'node:url'
 
 const STATUSES = ['draft', 'approved', 'building', 'done']
 const STEP_KEYS = ['id', 'title', 'summary', 'done', 'checkpoint']
@@ -295,7 +297,7 @@ const THEME_WEB = `:root{--bg:#f7f7f5;--card:#fff;--ink:#1c1f23;--muted:#5f6670;
 const THEME_EDITOR = `:root{--bg:var(--vscode-editor-background);--card:var(--vscode-sideBar-background,var(--vscode-editor-background));--ink:var(--vscode-editor-foreground);--muted:var(--vscode-descriptionForeground);--line:var(--vscode-panel-border,var(--vscode-widget-border,#8884));--accent:var(--vscode-button-background);--on-accent:var(--vscode-button-foreground);--ok:var(--vscode-testing-iconPassed,#3fb950);--warn:var(--vscode-editorWarning-foreground,#d29922);--danger:var(--vscode-errorForeground,#f85149);--code:var(--vscode-textCodeBlock-background,#8882);--font:var(--vscode-font-family);--mono:var(--vscode-editor-font-family)}`
 
 const HOST_WEB = `
-const HOST={plan:null,
+const HOST={plan:new URLSearchParams(location.search).get('plan'),
  async list(){return (await fetch('/api/plans')).json()},
  async load(){const r=await fetch('/api/plan?name='+encodeURIComponent(this.plan));return r.json()},
  async op(o,version){const r=await (await fetch('/api/op',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:this.plan,op:o,version})})).json();
@@ -357,6 +359,7 @@ function cmdView(port) {
       return res.end(renderPage('web'))
     }
     if (req.method === 'GET' && url.pathname === '/api/plans') return json(res, 200, planFiles(dir))
+    if (req.method === 'GET' && url.pathname === '/api/root') return json(res, 200, { dir, pid: process.pid })
     if (req.method === 'GET' && url.pathname === '/api/plan') {
       const p = safe(url.searchParams.get('name'))
       return p ? json(res, 200, stateOf(readFileSync(p, 'utf8'))) : json(res, 404, { error: 'plan not found' })
@@ -383,6 +386,70 @@ function cmdView(port) {
   }).listen(port, '127.0.0.1', () => console.log(`Plans: http://localhost:${port}  (Ctrl+C to stop)`))
 }
 
+/** How `open` shows a plan: the editor whose terminal this is (it sets VSCODE_IPC_HOOK_CLI), otherwise the browser. */
+export function openTarget(env = process.env, platform = process.platform) {
+  if (env.VSCODE_IPC_HOOK_CLI) {
+    const cursor = Object.keys(env).some((k) => k.startsWith('CURSOR_'))
+    return {
+      kind: 'editor',
+      clis: cursor
+        ? ['cursor', '/Applications/Cursor.app/Contents/Resources/app/bin/cursor']
+        : ['code', '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code'],
+    }
+  }
+  return { kind: 'browser', opener: env.BROWSER || { darwin: 'open', win32: 'explorer' }[platform] || 'xdg-open' }
+}
+
+/** The plans dir served on a port; null if nothing listens, '' if something else does. */
+function viewerAt(port) {
+  return new Promise((done) => {
+    const req = httpGet({ host: '127.0.0.1', port, path: '/api/root', timeout: 500 }, (res) => {
+      let body = ''
+      res.on('data', (c) => (body += c))
+      res.on('end', () => {
+        try {
+          done(JSON.parse(body).dir ?? '')
+        } catch {
+          done('')
+        }
+      })
+    })
+    req.on('timeout', () => req.destroy())
+    req.on('error', (e) => done(e.code === 'ECONNREFUSED' ? null : ''))
+  })
+}
+
+/** Port of a viewer for `dir`, starting one in the background if none is running. */
+async function viewerPort(dir) {
+  let free = null
+  for (let port = 4600; port < 4610; port++) {
+    const at = await viewerAt(port)
+    if (at === dir) return port
+    if (at === null && free === null) free = port
+  }
+  if (free === null) throw new Error('ports 4600–4609 are all in use')
+  spawn(process.execPath, [fileURLToPath(import.meta.url), 'view', '--port', String(free)], { cwd: process.cwd(), detached: true, stdio: 'ignore' }).unref()
+  for (let i = 0; i < 50; i++) {
+    if ((await viewerAt(free)) === dir) return free
+    await new Promise((r) => setTimeout(r, 100))
+  }
+  throw new Error(`the plan viewer didn't start on port ${free}`)
+}
+
+async function cmdOpen(file) {
+  const dir = resolve(process.cwd(), 'plans')
+  const path = file ? resolve(file) : ''
+  if (!path || dirname(path) !== dir || !existsSync(path)) return console.log(`✗ not a plan in plans/: ${file || '(none)'}`), 1
+  const target = openTarget()
+  if (target.kind === 'editor') {
+    for (const cli of target.clis) if (spawnSync(cli, ['-r', path], { stdio: 'ignore' }).status === 0) return console.log(`✓ Opened ${file} in the editor`), 0
+  }
+  const url = `http://localhost:${await viewerPort(dir)}/?plan=${encodeURIComponent(basename(path))}`
+  const { opener } = openTarget({ ...process.env, VSCODE_IPC_HOOK_CLI: '' })
+  console.log(spawnSync(opener, [url], { stdio: 'ignore' }).status === 0 ? `✓ Opened ${url}` : `Open ${url}`)
+  return 0
+}
+
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href
 if (isMain) {
   const [cmd, ...args] = process.argv.slice(2)
@@ -390,8 +457,13 @@ if (isMain) {
   else if (cmd === 'view') {
     const i = args.indexOf('--port')
     cmdView(i >= 0 ? Number(args[i + 1]) : 4600)
+  } else if (cmd === 'open') {
+    cmdOpen(args[0]).then(
+      (code) => process.exit(code),
+      (e) => (console.log(`✗ ${e.message}`), process.exit(1)),
+    )
   } else {
-    console.log('Usage:\n  node .agents/tools/plan.mjs check [plans/<name>.md ...]\n  node .agents/tools/plan.mjs view [--port 4600]')
+    console.log('Usage:\n  node .agents/tools/plan.mjs check [plans/<name>.md ...]\n  node .agents/tools/plan.mjs view [--port 4600]\n  node .agents/tools/plan.mjs open plans/<name>.md')
     process.exit(cmd ? 1 : 0)
   }
 }
