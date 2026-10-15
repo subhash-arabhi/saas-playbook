@@ -1,11 +1,11 @@
 ---
 name: "Critical fixes from the lifecycle audit"
-status: draft
+status: building
 steps:
   - id: 1
     title: "Self-tests and CI"
     summary: "Add a dependency-free test suite and a CI workflow so every later fix is checked automatically"
-    done: false
+    done: true
     checkpoint: false
   - id: 2
     title: "Plan approval and template"
@@ -58,7 +58,6 @@ steps:
     done: false
     checkpoint: false
 ---
-
 # Plan: Critical fixes from the lifecycle audit
 
 ## What we're building
@@ -89,9 +88,9 @@ Fix the critical and high-impact issues from the lifecycle audit so the playbook
 **Files:** `tests/installer.test.mjs` (new), `tests/plan.test.mjs` (new), `tests/plan-viewer.test.mjs` (new), `tests/repo.test.mjs` (new), `package.json` (edit), `.github/workflows/ci.yml` (new), `install.sh` (edit), `tools/plan-editor/install.sh` (edit)
 
 **Done when:**
-- [ ] `npm test` passes locally and covers each area in Do 1
-- [ ] ShellCheck reports no errors for both shell scripts
-- [ ] `actionlint` accepts `ci.yml`, and every command it runs passes locally
+- [x] `npm test` passes locally and covers each area in Do 1
+- [x] ShellCheck reports no errors for both shell scripts
+- [x] `actionlint` accepts `ci.yml`, and every command it runs passes locally
 
 **Check:** `npm test`, `shellcheck install.sh tools/plan-editor/install.sh`, `actionlint .github/workflows/ci.yml`
 
@@ -277,3 +276,4 @@ None.
 ## Build log
 | Step | Date | Result | Notes |
 |---|---|---|---|
+| 1 | 2026-10-15 | Done | 35 tests in 6 files; CI runs tests on Ubuntu and macOS (Node 20, 22, 24), ShellCheck, the plan check, Gitleaks and Semgrep. Also added `tests/helpers.mjs` (shared fixtures); ShellCheck was already clean, so the shell scripts are unchanged. |

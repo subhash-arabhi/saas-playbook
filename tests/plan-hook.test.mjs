@@ -6,9 +6,10 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { installHooks, CURSOR_HOOK, CLAUDE_HOOK } from '../tools/install-hooks.mjs'
+import { demoPlan } from './helpers.mjs'
 
 const HOOK = fileURLToPath(new URL('../tools/plan-hook.mjs', import.meta.url))
-const PLAN = readFileSync(fileURLToPath(new URL('../plans/critical-fixes.md', import.meta.url)), 'utf8')
+const PLAN = demoPlan()
 const root = realpathSync(mkdtempSync(join(tmpdir(), 'plan-hook-')))
 const servers = new Set()
 after(() => {
