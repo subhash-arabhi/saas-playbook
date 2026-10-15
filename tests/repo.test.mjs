@@ -41,9 +41,13 @@ function localLinks(text) {
   text.split('\n').forEach((line, i) => {
     if (/^\s*(```|~~~)/.test(line)) return void (fence = !fence)
     if (fence) return
-    for (const m of line.replace(/`[^`]*`/g, '').matchAll(/!?\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g)) {
-      const target = m[1]
-      if (/^(https?:|mailto:|#|<)/.test(target)) continue
+    const text = line.replace(/`[^`]*`/g, '')
+    const targets = [
+      ...[...text.matchAll(/!?\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g)].map((m) => m[1]),
+      ...[...text.matchAll(/\s(?:src|srcset|href)="([^"]+)"/g)].flatMap((m) => m[1].split(',').map((s) => s.trim().split(/\s+/)[0])),
+    ]
+    for (const target of targets) {
+      if (/^(https?:|mailto:|#|<|data:)/.test(target)) continue
       links.push({ line: i + 1, target })
     }
   })
@@ -97,4 +101,12 @@ test('skill files stay under 500 lines', () => {
 
 test('the link check notices a broken link', () => {
   assert.deepEqual(localLinks('[a](missing.md) `[b](code.md)`\n```\n[c](fenced.md)\n```\n[d](https://x.y)'), [{ line: 1, target: 'missing.md' }])
+})
+
+test('the link check also reads HTML images', () => {
+  assert.deepEqual(localLinks('<source media="(x)" srcset="docs/dark.png 2x, docs/dark-1x.png">\n<img alt="a" src="docs/light.png" width="8">'), [
+    { line: 1, target: 'docs/dark.png' },
+    { line: 1, target: 'docs/dark-1x.png' },
+    { line: 2, target: 'docs/light.png' },
+  ])
 })

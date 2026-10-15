@@ -1,6 +1,6 @@
 # SaaS Playbook
 
-**Rules, workflows and skills that make any AI coding agent build SaaS apps the same way every time.**
+**Rules, workflows and skills that take a SaaS app through its lifecycle with an AI coding agent: from first idea to production today, with billing, growth, support and sunset planned ([coverage](#lifecycle-coverage)).**
 
 Install it into a repo and your agent (Claude Code, Cursor, Codex, or anything that reads `AGENTS.md`) explores the idea first, plans before it builds, tests every step, checks security before every PR, and deploys to your cloud only when you say so.
 
@@ -10,8 +10,8 @@ npx github:subhash-arabhi/saas-playbook
 
 ## Highlights
 
-- **One setup for every agent.** Claude Code, Cursor, Codex, GitHub Copilot and other agents read the same `AGENTS.md`, rules and skills, the same way. Switch tools mid-project without re-adapting anything.
-- **Cloud, stack and language agnostic.** Nothing assumes a provider, framework or language. The agent picks the best stack for each project within the cloud you name, and the rules and skills apply unchanged. Tailwind is the one fixed choice, for consistent UI.
+- **One setup for Cursor, Claude Code, Codex and Copilot.** All four read the same `AGENTS.md`, rules and skills. How each finds skills and runs commands differs a little; see [Agent compatibility](#agent-compatibility).
+- **Any cloud, a few fixed assumptions.** The agent picks the stack for each project within the cloud you name. The rules assume container images, infrastructure as code, a secret store read through workload identity, Tailwind, and Cloudflare in front of the custom domain at publish; see [What the rules assume](#what-the-rules-assume).
 - **Six commands drive the whole lifecycle.** `/explore` → `/plan` → `/build` → `/push` → `/deploy` → `/publish`. The agent never pushes, deploys or publishes on its own.
 - **Explore before you build.** Test the idea with a minimal local prototype, on the cheapest models, before any production work starts.
 - **Plans you can read and edit.** Short plans with collapsible steps in a plan view inside Cursor or VS Code. Click a step's circle to make the build pause there, edit inline, then approve. A checker enforces the format.
@@ -51,6 +51,33 @@ Plans are plain markdown in `plans/`, shown as an editable view in Cursor and VS
   <source media="(prefers-color-scheme: dark)" srcset="docs/plan-view-dark.png">
   <img alt="The plan view: a plan with six steps, two done, one expanded with its Do, Files, Done when and Check, and a checkpoint set on step 3" src="docs/plan-view-light.png" width="800">
 </picture>
+
+## Lifecycle coverage
+
+| Stage | Status | What covers it |
+|---|---|---|
+| Discovery | Covered | `/explore`: a minimal local prototype on the cheapest models; findings and the decision go in `EXPLORE.md` ([`workflows/explore.md`](workflows/explore.md)) |
+| Build | Covered | `/plan` and `/build`: approved plans, one tested commit per step, rules for each area and 12 skills ([`workflows/build-plan.md`](workflows/build-plan.md), [`rules/`](rules/)) |
+| Release | Covered | `/push` runs the pre-PR check and opens the PR; `/deploy` deploys the reviewed commit with a smoke check and rollback; `/publish` covers legal pages, consent, accessibility and the domain ([`workflows/`](workflows/)) |
+| Operations | Covered | Logs, metrics and alerts with a runbook entry each, a budget cap with alerts, backups that count only once a restore is tested ([`rules/deployment.md`](rules/deployment.md), [`rules/system-design.md`](rules/system-design.md)). Incident response is planned |
+| Billing | Planned | Today only a rule: the agent asks before any payments change |
+| Growth | Planned | Today analytics only appear as personal data: recorded in `ARCHITECTURE.md` and covered by consent at publish |
+| Support | Planned | Nothing yet |
+| Sunset | Planned | Today account deletion and data export are checked at publish |
+
+Planned stages come in follow-up releases; see [`CHANGELOG.md`](CHANGELOG.md).
+
+## Agent compatibility
+
+The playbook is tested in Cursor. For the other agents, each entry was checked against the agent's documentation on 2026-10-15.
+
+| | Cursor | Claude Code | Codex | Copilot (VS Code) |
+|---|---|---|---|---|
+| Reads `AGENTS.md` | Yes (tested) | Through `CLAUDE.md` → `@AGENTS.md`, which the installer adds (docs) | Yes (docs) | Yes (docs) |
+| Finds the skills | `.agents/skills/` (tested) | `.claude/skills/`, which the installer links to `.agents/skills/` (docs) | `.agents/skills/` (docs) | `.agents/skills/` (docs) |
+| Command skills run only when asked | Yes, `disable-model-invocation` (docs) | Yes, `disable-model-invocation` (docs) | **No**: Codex ignores `disable-model-invocation`, so only `AGENTS.md`'s "never run unasked" rule holds it back (docs) | Yes, `disable-model-invocation` (docs) |
+| Slash commands | `/push` (tested) | `/push` (docs) | `$push` or the `/skills` menu; the plain word works too (docs) | `/push` (docs) |
+| Plan view opens by itself | Yes, through the installed hook (tested) | Through the installed hook (docs; the hook's output has unit tests) | No hook; run `plan.mjs open` | No hook; run `plan.mjs open` |
 
 ## Install
 
@@ -145,10 +172,20 @@ The agent creates the per-project files as it goes: `ARCHITECTURE.md`, `DESIGN.m
 
 ## Requirements
 
-- An agent that reads `AGENTS.md` or Agent Skills: Claude Code, Cursor, Codex, GitHub Copilot and others
+- An agent that reads `AGENTS.md` and Agent Skills ([compatibility](#agent-compatibility))
 - Node 18+, git and bash
 - Docker, for the local database
 - Your cloud's CLI, already logged in, when you deploy
+
+### What the rules assume
+
+The stack is chosen per project, but the rules expect the cloud to provide:
+
+- **Container images** in the cloud's registry, tagged with the commit SHA, so a deploy or rollback switches the apps to another tag ([`rules/deployment.md`](rules/deployment.md))
+- **Infrastructure as code** in `infra/`, one resource group per app with a budget cap, deployed from your machine with the cloud's CLI (there's no CI/CD pipeline)
+- **A secret store** that the app reads through the cloud's managed (workload) identity, with no keys in settings or images
+- **Tailwind CSS** for styling, fed by `DESIGN.md` ([`rules/frontend.md`](rules/frontend.md))
+- **Cloudflare** in front of the custom domain, set up at `/publish`; before that the app uses the cloud's own URL ([`rules/stack.md`](rules/stack.md))
 
 ## Credits
 

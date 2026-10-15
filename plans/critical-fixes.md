@@ -55,7 +55,7 @@ steps:
   - id: 11
     title: "README claims match the playbook"
     summary: "Full-lifecycle coverage table, stated platform assumptions, a checked agent compatibility table and the missing images"
-    done: false
+    done: true
     checkpoint: false
 ---
 # Plan: Critical fixes from the lifecycle audit
@@ -260,13 +260,13 @@ Fix the critical and high-impact issues from the lifecycle audit so the playbook
 3. Replace "every agent reads it the same way" with a compatibility table for Cursor, Claude Code, Codex and Copilot: skill discovery, manual-only commands and slash commands, each marked as checked against docs (with date) or tested.
 4. Add `docs/plan-view-light.png` and `docs/plan-view-dark.png` from the plan viewer.
 
-**Files:** `README.md` (edit), `docs/plan-view-light.png` (new), `docs/plan-view-dark.png` (new), `tests/repo.test.mjs` (edit)
+**Files:** `README.md` (edit), `docs/plan-view-light.png` (new), `docs/plan-view-dark.png` (new), `tests/repo.test.mjs` (edit), `package.json` (edit)
 
 **Done when:**
-- [ ] The coverage table marks every lifecycle stage as covered or planned, matching the playbook's actual files
-- [ ] The README makes no "agnostic" or "same way" claim the playbook doesn't back
-- [ ] The compatibility table says how each entry was checked
-- [ ] Both README images exist, and the link test also checks images
+- [x] The coverage table marks every lifecycle stage as covered or planned, matching the playbook's actual files
+- [x] The README makes no "agnostic" or "same way" claim the playbook doesn't back
+- [x] The compatibility table says how each entry was checked
+- [x] Both README images exist, and the link test also checks images
 
 **Check:** `npm test`, then view the README rendered on GitHub after the user pushes
 
@@ -286,3 +286,4 @@ None.
 | 8 | 2026-10-15 | Done | Added `video-recording.md` to Files (approved). `SKILL.md` is 459 lines. The safety test also blocks skipped tests and reading auth cookies, and joins shell line continuations; a planted example in `tracing.md` was caught. The skill's own rules were reworded so they no longer quote the forbidden commands. |
 | 9 | 2026-10-15 | Done | Release steps run locally for v1.0.2. That run found npx and clone installs recording different checksums (npm leaves out ignore files and the extension's build output), so `install.sh` and its tests were added to Files (approved) and the installer now skips those files; a test checks the two installs match. Turned on private vulnerability reporting (approved). `main` requires a PR (0 approvals) and the 8 CI checks; admins can still bypass. The VSIX holds 4 extension files plus its manifest. |
 | 10 | 2026-10-15 | Done | Publish mode labels accessibility findings with the scanner's severities (critical, serious, moderate, minor) and ends with `n warnings, m blocking`. Publish also checks the Personal data table against the code. The deferral search finds nothing. |
+| 11 | 2026-10-15 | Done | 51 tests. Both images were already in the repo and match the current viewer, so they weren't recaptured. Docs show Codex ignores `disable-model-invocation`, so it may start command skills on its own; the README says so (fix: `agents/openai.yaml` per command skill, a follow-up). Added `package.json` to Files (approved) for its "same way" description. GitHub rendering is checked after push. |
