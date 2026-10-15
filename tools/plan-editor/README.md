@@ -10,4 +10,6 @@ Opens `plans/*.md` as a plan view, right in the editor:
 
 Install: `bash .agents/tools/plan-editor/install.sh`. It packages the extension and installs it into Cursor and VS Code if they're present. Re-run it after updating the playbook.
 
-Part of the SaaS playbook. Free to use and modify.
+The package holds only `extension.js`, `plan-core.mjs` (a copy of `../plan.mjs`, made by `install.sh`), this README and `package.json`.
+
+Part of the SaaS playbook. MIT license (the playbook's `LICENSE`).

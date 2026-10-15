@@ -45,7 +45,7 @@ steps:
   - id: 9
     title: "Repository governance and releases"
     summary: "Security policy, dependency updates, attested GitHub Releases with checksums, VSIX allowlist, protected main"
-    done: false
+    done: true
     checkpoint: false
   - id: 10
     title: "Privacy decisions during planning"
@@ -224,13 +224,13 @@ Fix the critical and high-impact issues from the lifecycle audit so the playbook
 4. Add a `files` allowlist and a real license field to `tools/plan-editor/package.json`.
 5. Protect `main` with `gh api` (the user approved this): require a PR and the CI checks from Step 1.
 
-**Files:** `SECURITY.md` (new), `.github/dependabot.yml` (new), `.github/workflows/release.yml` (new), `CHANGELOG.md` (new), `tools/plan-editor/package.json` (edit), `tools/plan-editor/README.md` (edit)
+**Files:** `SECURITY.md` (new), `.github/dependabot.yml` (new), `.github/workflows/release.yml` (new), `CHANGELOG.md` (new), `tools/plan-editor/package.json` (edit), `tools/plan-editor/README.md` (edit), `install.sh` (edit), `tests/installer.test.mjs` (edit)
 
 **Done when:**
-- [ ] `actionlint` accepts `release.yml`, and its build steps pass locally
-- [ ] Packaging the VSIX gives no allowlist warning and it contains only the extension files
-- [ ] `SECURITY.md`, Dependabot and `CHANGELOG.md` are in place
-- [ ] `main` requires a PR and passing CI
+- [x] `actionlint` accepts `release.yml`, and its build steps pass locally
+- [x] Packaging the VSIX gives no allowlist warning and it contains only the extension files
+- [x] `SECURITY.md`, Dependabot and `CHANGELOG.md` are in place
+- [x] `main` requires a PR and passing CI
 
 **Check:** `actionlint .github/workflows/release.yml`, package the VSIX in a temp folder and list its contents, `gh api repos/subhash-arabhi/saas-playbook/branches/main/protection`
 
@@ -284,3 +284,4 @@ None.
 | 6 | 2026-10-15 | Done | `git mv` keeps the template byte-identical to the old root `AGENTS.md`; compared with v1.0.2 the only change is this session's question-tool rule. `package.json` still ships the root `AGENTS.md` in the package (harmless, not in this step's Files). |
 | 7 | 2026-10-15 | Done | 46 tests (3 new, using an alterable copy of the source); also passes with GNU tools. The checksum is a SHA-256 over the per-file hashes, which also fill `files`. Installs from before the checksum existed skip the check once. |
 | 8 | 2026-10-15 | Done | Added `video-recording.md` to Files (approved). `SKILL.md` is 459 lines. The safety test also blocks skipped tests and reading auth cookies, and joins shell line continuations; a planted example in `tracing.md` was caught. The skill's own rules were reworded so they no longer quote the forbidden commands. |
+| 9 | 2026-10-15 | Done | Release steps run locally for v1.0.2. That run found npx and clone installs recording different checksums (npm leaves out ignore files and the extension's build output), so `install.sh` and its tests were added to Files (approved) and the installer now skips those files; a test checks the two installs match. Turned on private vulnerability reporting (approved). `main` requires a PR (0 approvals) and the 8 CI checks; admins can still bypass. The VSIX holds 4 extension files plus its manifest. |

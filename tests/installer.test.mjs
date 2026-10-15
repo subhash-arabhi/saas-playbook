@@ -97,7 +97,7 @@ test('playbook.json records every installed file with its SHA-256', () => {
   const sum = spawnSync('shasum', ['-a', '256', join(dest, '.agents', 'rules', 'asking.md')], { encoding: 'utf8' }).stdout.split(' ')[0]
   assert.equal(files['rules/asking.md'], sum)
   const shipped = ['rules', 'workflows', 'reviewers', 'references', 'templates', 'tools', 'licenses', 'skills']
-    .flatMap((d) => readdirSync(join(REPO, d), { recursive: true, withFileTypes: true }).filter((e) => e.isFile() && e.name !== '.DS_Store'))
+    .flatMap((d) => readdirSync(join(REPO, d), { recursive: true, withFileTypes: true }).filter((e) => e.isFile() && !['.DS_Store', '.gitignore', '.npmignore', 'plan-core.mjs'].includes(e.name) && !e.name.endsWith('.vsix')))
   assert.equal(Object.keys(files).length, shipped.length + 1)
 })
 
@@ -170,6 +170,19 @@ test('reinstalling the same version from altered source stops, unless --force', 
   assert.equal(installFrom(src, dest, '--force').status, 0)
   assert.equal(read(dest, '.agents/rules/asking.md'), 'changed upstream\n')
   assert.notEqual(state(dest).checksum, before.checksum)
+})
+
+test('an install from the npm package records the same checksum as one from a clone', () => {
+  const packed = mkdtempSync(join(root, 'pack-'))
+  const r = spawnSync('npm', ['pack', '--silent', '--pack-destination', packed], { cwd: REPO, encoding: 'utf8', env: cleanEnv() })
+  assert.equal(r.status, 0, r.stderr)
+  spawnSync('tar', ['-xzf', join(packed, r.stdout.trim()), '-C', packed])
+  const fromPackage = project()
+  assert.equal(installFrom(join(packed, 'package'), fromPackage).status, 0)
+  const fromClone = project()
+  install(fromClone)
+  assert.deepEqual(state(fromPackage).files, state(fromClone).files)
+  assert.equal(state(fromPackage).checksum, state(fromClone).checksum)
 })
 
 test('updating to a new version records the new checksum', () => {

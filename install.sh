@@ -62,8 +62,11 @@ fi
 # What this version installs (relative to the playbook source and to .agents/).
 SKILLS=()
 for skill in "$SRC"/skills/*/; do SKILLS+=("$(basename "$skill")"); done
+# Skip what the npm package leaves out, so installs from npx and from a clone are identical:
+# ignore files, and the plan editor's build output.
 # shellcheck disable=SC2086 # DIRS is a fixed list of folder names
-(cd "$SRC" && { echo LICENSE; find $DIRS skills -type f ! -name .DS_Store; } | LC_ALL=C sort) > "$TMP/new-files"
+(cd "$SRC" && { echo LICENSE; find $DIRS skills -type f ! -name .DS_Store ! -name .gitignore ! -name .npmignore \
+  ! -path tools/plan-editor/plan-core.mjs ! -path 'tools/plan-editor/*.vsix'; } | LC_ALL=C sort) > "$TMP/new-files"
 hashes "$SRC" < "$TMP/new-files" > "$TMP/new-sums"
 # One checksum over all of this version's content, so a moved or altered tag is noticed.
 CHECKSUM="$("${SHA[@]}" < "$TMP/new-sums" | cut -d' ' -f1)"
