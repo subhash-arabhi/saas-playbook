@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, writeFileSync, readFileSync, existsSync, readlinkSync, readdirSync } from 'node:fs'
+import { cpSync, mkdirSync, mkdtempSync, writeFileSync, readFileSync, existsSync, readlinkSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { REPO, tempRoot, cleanEnv } from './helpers.mjs'
 
@@ -138,6 +138,54 @@ test('a project skill with a playbook skill name stops the install', () => {
   assert.match(refused(dest), /\bplan\b/)
   assert.equal(read(dest, '.agents/skills/plan/SKILL.md'), 'my plan skill\n')
   assert.equal(existsSync(join(dest, '.agents', 'playbook.json')), false)
+})
+
+function sourceCopy() {
+  const src = mkdtempSync(join(root, 'src-'))
+  cpSync(REPO, src, { recursive: true, filter: (p) => !/\/(\.git|node_modules|plans)(\/|$)/.test(p.slice(REPO.length)) })
+  return src
+}
+const installFrom = (src, dest, ...args) => spawnSync('bash', [join(src, 'install.sh'), ...args, dest], { encoding: 'utf8', env: cleanEnv() })
+
+test('playbook.json records a content checksum with the version', () => {
+  const dest = project()
+  install(dest)
+  assert.match(state(dest).checksum, /^[0-9a-f]{64}$/)
+  const first = state(dest).checksum
+  install(dest)
+  assert.equal(state(dest).checksum, first)
+})
+
+test('reinstalling the same version from altered source stops, unless --force', () => {
+  const src = sourceCopy()
+  const dest = project()
+  assert.equal(installFrom(src, dest).status, 0)
+  const before = state(dest)
+  writeFileSync(join(src, 'rules', 'asking.md'), 'changed upstream\n')
+  const r = installFrom(src, dest)
+  assert.notEqual(r.status, 0)
+  assert.match(r.stderr, new RegExp(`v${VERSION.replace(/\./g, '\\.')}.*checksum`, 's'))
+  assert.deepEqual(state(dest), before, 'nothing changes')
+  assert.equal(read(dest, '.agents/rules/asking.md'), read(REPO, 'rules/asking.md'))
+  assert.equal(installFrom(src, dest, '--force').status, 0)
+  assert.equal(read(dest, '.agents/rules/asking.md'), 'changed upstream\n')
+  assert.notEqual(state(dest).checksum, before.checksum)
+})
+
+test('updating to a new version records the new checksum', () => {
+  const src = sourceCopy()
+  const dest = project()
+  assert.equal(installFrom(src, dest).status, 0)
+  const before = state(dest).checksum
+  writeFileSync(join(src, 'rules', 'asking.md'), 'next release\n')
+  const pkg = JSON.parse(readFileSync(join(src, 'package.json'), 'utf8'))
+  pkg.version = '99.0.0'
+  writeFileSync(join(src, 'package.json'), JSON.stringify(pkg, null, 2))
+  const r = installFrom(src, dest)
+  assert.equal(r.status, 0, r.stderr)
+  assert.equal(state(dest).version, '99.0.0')
+  assert.match(state(dest).checksum, /^[0-9a-f]{64}$/)
+  assert.notEqual(state(dest).checksum, before)
 })
 
 test('an update from v1.0.x (no file list) works without --force', () => {

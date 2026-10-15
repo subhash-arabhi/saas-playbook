@@ -82,9 +82,11 @@ Commit, then start a session with: *"Read AGENTS.md and follow it strictly."*
 
 **Your skills and the playbook's stay separate.** The playbook's skills are listed in `.agents/playbook.json` and gitignored; every other folder in `.agents/skills/` is yours, committed with the project and never touched by updates. Name your skills in `AGENTS.md` → Project-specific.
 
-**Fresh clones set themselves up.** `AGENTS.md` tells the agent to run the pinned install command from `playbook.json` when `.agents/rules/` is missing, so teammates and cloud agents get exactly the same version. To keep the playbook in git instead, install with `--commit` (the choice is remembered).
+**Fresh clones set themselves up, with your OK.** When `.agents/rules/` is missing, `AGENTS.md` tells the agent to show the pinned install command from `playbook.json` and ask before running it, so teammates and cloud agents get exactly the same version. To keep the playbook in git instead, install with `--commit` (the choice is remembered).
 
-**Update** with `npx github:subhash-arabhi/saas-playbook` (latest) or `#vX.Y.Z` (a specific release). It replaces the playbook's files, removes skills the playbook dropped, keeps yours, and never overwrites your `AGENTS.md`; if the playbook's `AGENTS.md` changed, it writes `AGENTS.playbook.md` for you to merge.
+**Each version is pinned to its content.** `playbook.json` records a checksum of everything the installer copied. Reinstalling the same version with different content (a moved tag, or a changed download) stops with an explanation and changes nothing; `--force` installs it anyway.
+
+**Update deliberately:** run `npx github:subhash-arabhi/saas-playbook#vX.Y.Z` with the release you want (or without `#vX.Y.Z` for the latest), review the changes, and commit `playbook.json` so everyone gets the same version and checksum. It replaces the playbook's files, removes skills the playbook dropped, keeps yours, and never overwrites your `AGENTS.md`; if the playbook's `AGENTS.md` changed, it writes `AGENTS.playbook.md` for you to merge.
 
 **Updates only touch what the playbook installed.** It deletes only the files listed in `playbook.json`. A file you edited is copied to `.agents/.backup/<timestamp>/` before it's replaced, so you can carry the change over (better: put it in a project skill or `AGENTS.md` → Project-specific). The install stops, changing nothing, if `.agents/` already has playbook folders but no `playbook.json`, or if one of your skills has the same name as a playbook skill. Rename or move them, or run with `--force` to back them up and install over them.
 

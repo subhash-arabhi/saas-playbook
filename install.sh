@@ -43,8 +43,8 @@ DIRS="rules workflows reviewers references templates tools licenses"
 if command -v sha256sum >/dev/null 2>&1; then SHA=(sha256sum)
 elif command -v shasum >/dev/null 2>&1; then SHA=(shasum -a 256)
 else echo "The installer needs sha256sum or shasum." >&2; exit 1; fi
-# Paths (relative to .agents/) on stdin -> "<sha256> <path>" lines for those that exist.
-hashes() { (cd "$AG" && while read -r rel; do [[ -f "$rel" ]] && printf '%s\0' "$rel"; done | xargs -0 -r "${SHA[@]}" | sed 's/^\([0-9a-f]*\) [ *]/\1 /') || true; }
+# Paths (relative to the folder given) on stdin -> "<sha256> <path>" lines for those that exist.
+hashes() { (cd "$1" && while read -r rel; do [[ -f "$rel" ]] && printf '%s\0' "$rel"; done | xargs -0 -r "${SHA[@]}" | sed 's/^\([0-9a-f]*\) [ *]/\1 /') || true; }
 
 # Keep the previous mode unless an option says otherwise. Default: the playbook isn't committed.
 if [[ -z "$MODE" ]]; then
@@ -64,6 +64,23 @@ SKILLS=()
 for skill in "$SRC"/skills/*/; do SKILLS+=("$(basename "$skill")"); done
 # shellcheck disable=SC2086 # DIRS is a fixed list of folder names
 (cd "$SRC" && { echo LICENSE; find $DIRS skills -type f ! -name .DS_Store; } | LC_ALL=C sort) > "$TMP/new-files"
+hashes "$SRC" < "$TMP/new-files" > "$TMP/new-sums"
+# One checksum over all of this version's content, so a moved or altered tag is noticed.
+CHECKSUM="$("${SHA[@]}" < "$TMP/new-sums" | cut -d' ' -f1)"
+
+# Stop before changing anything if this version's content isn't what was installed before.
+if [[ -f "$STATE" ]] && [[ -z "$FORCE" ]]; then
+  old_version="$(sed -n 's/^ *"version": *"\([^"]*\)".*/\1/p' "$STATE" | head -1)"
+  old_checksum="$(sed -n 's/^ *"checksum": *"\([0-9a-f]*\)".*/\1/p' "$STATE" | head -1)"
+  if [[ "$old_version" == "$VERSION" && -n "$old_checksum" && "$old_checksum" != "$CHECKSUM" ]]; then
+    {
+      echo "✗ This copy of playbook v$VERSION has different content from the v$VERSION installed here before"
+      echo "  (checksum $CHECKSUM, expected $old_checksum). The release tag may have been moved, or the download changed."
+      echo "  Nothing was changed. Check where the playbook came from, or run again with --force to install it anyway."
+    } >&2
+    exit 1
+  fi
+fi
 
 # Stop before changing anything if .agents/ holds content the playbook didn't install.
 UNMANAGED=(); COLLIDING=()
@@ -95,7 +112,7 @@ for path in "${UNMANAGED[@]+"${UNMANAGED[@]}"}"; do rel="${path#.agents/}"; back
 for name in "${COLLIDING[@]+"${COLLIDING[@]}"}"; do backup "skills/$name"; rm -rf "${AG:?}/skills/$name"; done
 # Delete the previous version's files. Back up any that were edited since they were installed.
 if [[ -s "$TMP/old-files" ]]; then
-  cut -d' ' -f2- "$TMP/old-files" | hashes > "$TMP/current"
+  cut -d' ' -f2- "$TMP/old-files" | hashes "$AG" > "$TMP/current"
   grep -vxFf "$TMP/old-files" "$TMP/current" > "$TMP/edited" || true
   while read -r _ rel; do backup "$rel"; done < "$TMP/edited"
   cut -d' ' -f2- "$TMP/current" | (cd "$AG" && tr '\n' '\0' | xargs -0 rm -f)
@@ -129,6 +146,7 @@ fi
   echo '{'
   echo "  \"source\": \"$REPO\","
   echo "  \"version\": \"$VERSION\","
+  echo "  \"checksum\": \"$CHECKSUM\","
   echo "  \"install\": \"npx $REPO#v$VERSION\","
   echo "  \"commit\": $([[ "$MODE" == commit ]] && echo true || echo false),"
   echo '  "skills": ['
@@ -138,7 +156,7 @@ fi
   done
   echo '  ],'
   echo '  "files": {'
-  hashes < "$TMP/new-files" | sed 's/^\([0-9a-f]*\) \(.*\)$/    "\2": "\1",/; $s/,$//'
+  sed 's/^\([0-9a-f]*\) \(.*\)$/    "\2": "\1",/; $s/,$//' "$TMP/new-sums"
   echo '  }'
   echo '}'
 } > "$STATE"

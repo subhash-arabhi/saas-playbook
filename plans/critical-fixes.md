@@ -35,7 +35,7 @@ steps:
   - id: 7
     title: "Safe fresh-clone bootstrap"
     summary: "Ask before remote install and verify a content checksum so a moved tag can't change what runs"
-    done: false
+    done: true
     checkpoint: false
   - id: 8
     title: "Consistent Playwright safety guidance"
@@ -192,10 +192,10 @@ Fix the critical and high-impact issues from the lifecycle audit so the playbook
 **Files:** `templates/project-AGENTS.md` (edit), `install.sh` (edit), `README.md` (edit), `tests/installer.test.mjs` (edit)
 
 **Done when:**
-- [ ] The Setup instruction tells the agent to ask before running the remote install
-- [ ] Reinstalling the same version from altered source content stops with an explanation
-- [ ] Updating to a new version records the new checksum
-- [ ] Tests cover both installer cases
+- [x] The Setup instruction tells the agent to ask before running the remote install
+- [x] Reinstalling the same version from altered source content stops with an explanation
+- [x] Updating to a new version records the new checksum
+- [x] Tests cover both installer cases
 
 **Check:** `npm test`
 
@@ -282,3 +282,4 @@ None.
 | 4 | 2026-10-15 | Done | Walked both scenarios through the new `deploy.md`: no budget stops before the merge with the cap and missing items listed; a failed smoke check rolls back images and opens a revert PR. The deploy also requires `main` to be an ancestor of the reviewed commit, so the merged files match it. |
 | 5 | 2026-10-15 | Done | 10 installer tests, also run with GNU coreutils, findutils, sed, tar and grep (Docker wasn't running); a real Linux run happens in CI after push. v1.0.x installs upgrade without `--force` (files that differ from the new version are backed up). `--force` also covers colliding skills; `/.backup/` is gitignored. Installs take about 0.2s (batched hashing, one `tar` copy). |
 | 6 | 2026-10-15 | Done | `git mv` keeps the template byte-identical to the old root `AGENTS.md`; compared with v1.0.2 the only change is this session's question-tool rule. `package.json` still ships the root `AGENTS.md` in the package (harmless, not in this step's Files). |
+| 7 | 2026-10-15 | Done | 46 tests (3 new, using an alterable copy of the source); also passes with GNU tools. The checksum is a SHA-256 over the per-file hashes, which also fill `files`. Installs from before the checksum existed skip the check once. |
