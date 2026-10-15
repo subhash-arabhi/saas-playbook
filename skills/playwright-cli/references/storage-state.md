@@ -1,6 +1,37 @@
 # Storage Management
 
+<!-- Vendored from microsoft/playwright-cli@b85c7a7 (Apache-2.0, see licenses/). Changes: auth state only for project test accounts, in gitignored files; removed reading auth cookies or tokens and the cookie-injection roundtrip; examples use non-auth values; added the command list from SKILL.md. -->
+
 Manage cookies, localStorage, sessionStorage, and browser storage state.
+
+**Rules:** save auth state only for sessions logged in with the project's **test accounts**, into a gitignored file (under `.playwright-cli/`). Never read auth cookies, tokens or session data, and never inject them into a session.
+
+## Command list
+
+```bash
+playwright-cli state-save .playwright-cli/test-user.auth-state.json
+playwright-cli state-load .playwright-cli/test-user.auth-state.json
+
+# Cookies
+playwright-cli cookie-list --domain=localhost
+playwright-cli cookie-set theme dark
+playwright-cli cookie-delete theme
+playwright-cli cookie-clear
+
+# LocalStorage
+playwright-cli localstorage-list
+playwright-cli localstorage-get theme
+playwright-cli localstorage-set theme dark
+playwright-cli localstorage-delete theme
+playwright-cli localstorage-clear
+
+# SessionStorage
+playwright-cli sessionstorage-list
+playwright-cli sessionstorage-get step
+playwright-cli sessionstorage-set step 3
+playwright-cli sessionstorage-delete step
+playwright-cli sessionstorage-clear
+```
 
 ## Storage State
 
@@ -9,21 +40,18 @@ Save and restore complete browser state including cookies and storage.
 ### Save Storage State
 
 ```bash
-# Save to auto-generated filename (storage-state-{timestamp}.json)
-playwright-cli state-save
-
-# Save to specific filename
-playwright-cli state-save my-auth-state.json
+# Save to a gitignored file
+playwright-cli state-save .playwright-cli/test-user.auth-state.json
 ```
 
 ### Restore Storage State
 
 ```bash
 # Load storage state from file
-playwright-cli state-load my-auth-state.json
+playwright-cli state-load .playwright-cli/test-user.auth-state.json
 
 # Reload page to apply cookies
-playwright-cli open https://example.com
+playwright-cli open http://localhost:3000
 ```
 
 ### Storage State File Format
@@ -34,71 +62,58 @@ The saved file contains:
 {
   "cookies": [
     {
-      "name": "session_id",
-      "value": "abc123",
-      "domain": "example.com",
+      "name": "theme",
+      "value": "dark",
+      "domain": "localhost",
       "path": "/",
       "expires": 1893456000,
-      "httpOnly": true,
-      "secure": true,
+      "httpOnly": false,
+      "secure": false,
       "sameSite": "Lax"
     }
   ],
   "origins": [
     {
-      "origin": "https://example.com",
+      "origin": "http://localhost:3000",
       "localStorage": [
-        { "name": "theme", "value": "dark" },
-        { "name": "user_id", "value": "12345" }
+        { "name": "theme", "value": "dark" }
       ]
     }
   ]
 }
 ```
 
+For a logged-in session the file also holds the session cookie, so treat it like a password: gitignored, deleted when done.
+
 ## Cookies
 
-### List All Cookies
+### List Cookies
 
 ```bash
 playwright-cli cookie-list
-```
-
-### Filter Cookies by Domain
-
-```bash
-playwright-cli cookie-list --domain=example.com
-```
-
-### Filter Cookies by Path
-
-```bash
+playwright-cli cookie-list --domain=localhost
 playwright-cli cookie-list --path=/api
 ```
 
-### Get Specific Cookie
-
-```bash
-playwright-cli cookie-get session_id
-```
+`cookie-list` prints values too, so use it only in test-account sessions, to check which cookies exist and their flags (`HttpOnly`, `Secure`, `SameSite`). Never copy a session value out of it.
 
 ### Set a Cookie
 
 ```bash
 # Basic cookie
-playwright-cli cookie-set session abc123
+playwright-cli cookie-set theme dark
 
 # Cookie with options
-playwright-cli cookie-set session abc123 --domain=example.com --path=/ --httpOnly --secure --sameSite=Lax
+playwright-cli cookie-set theme dark --domain=localhost --path=/ --sameSite=Lax
 
 # Cookie with expiration (Unix timestamp)
-playwright-cli cookie-set remember_me token123 --expires=1893456000
+playwright-cli cookie-set consent accepted --expires=1893456000
 ```
 
 ### Delete a Cookie
 
 ```bash
-playwright-cli cookie-delete session_id
+playwright-cli cookie-delete theme
 ```
 
 ### Clear All Cookies
@@ -114,8 +129,8 @@ For complex scenarios like adding multiple cookies at once, use `run-code`:
 ```bash
 playwright-cli run-code "async page => {
   await page.context().addCookies([
-    { name: 'session_id', value: 'sess_abc123', domain: 'example.com', path: '/', httpOnly: true },
-    { name: 'preferences', value: JSON.stringify({ theme: 'dark' }), domain: 'example.com', path: '/' }
+    { name: 'consent', value: 'accepted', domain: 'localhost', path: '/' },
+    { name: 'preferences', value: JSON.stringify({ theme: 'dark' }), domain: 'localhost', path: '/' }
   ]);
 }"
 ```
@@ -131,7 +146,7 @@ playwright-cli localstorage-list
 ### Get Single Value
 
 ```bash
-playwright-cli localstorage-get token
+playwright-cli localstorage-get theme
 ```
 
 ### Set Value
@@ -149,7 +164,7 @@ playwright-cli localstorage-set user_settings '{"theme":"dark","language":"en"}'
 ### Delete Single Item
 
 ```bash
-playwright-cli localstorage-delete token
+playwright-cli localstorage-delete theme
 ```
 
 ### Clear All localStorage
@@ -165,9 +180,9 @@ For complex scenarios like setting multiple values at once, use `run-code`:
 ```bash
 playwright-cli run-code "async page => {
   await page.evaluate(() => {
-    localStorage.setItem('token', 'jwt_abc123');
-    localStorage.setItem('user_id', '12345');
-    localStorage.setItem('expires_at', Date.now() + 3600000);
+    localStorage.setItem('theme', 'dark');
+    localStorage.setItem('language', 'en');
+    localStorage.setItem('onboarding_done', 'true');
   });
 }"
 ```
@@ -229,47 +244,31 @@ playwright-cli run-code "async page => {
 
 ## Common Patterns
 
-### Authentication State Reuse
+### Authentication State Reuse (project test accounts only)
 
 ```bash
-# Step 1: Login and save state
-playwright-cli open https://app.example.com/login
+# Step 1: Log in with a project test account and save state
+playwright-cli open http://localhost:3000/login
 playwright-cli snapshot
-playwright-cli fill e1 "user@example.com"
-playwright-cli fill e2 "password123"
+playwright-cli fill e1 "$TEST_USER_EMAIL"
+playwright-cli fill e2 "$TEST_USER_PASSWORD"
 playwright-cli click e3
 
-# Save the authenticated state
-playwright-cli state-save auth.json
+# Save the authenticated state to a gitignored file
+playwright-cli state-save .playwright-cli/test-user.auth-state.json
 
 # Step 2: Later, restore state and skip login
-playwright-cli state-load auth.json
-playwright-cli open https://app.example.com/dashboard
+playwright-cli state-load .playwright-cli/test-user.auth-state.json
+playwright-cli open http://localhost:3000/dashboard
 # Already logged in!
 ```
 
-### Save and Restore Roundtrip
-
-```bash
-# Set up authentication state
-playwright-cli open https://example.com
-playwright-cli eval "() => { document.cookie = 'session=abc123'; localStorage.setItem('user', 'john'); }"
-
-# Save state to file
-playwright-cli state-save my-session.json
-
-# ... later, in a new session ...
-
-# Restore state
-playwright-cli state-load my-session.json
-playwright-cli open https://example.com
-# Cookies and localStorage are restored!
-```
+Test account credentials come from `.env.local` (or the test setup), never from a real user.
 
 ## Security Notes
 
-- Never commit storage state files containing auth tokens
-- Add `*.auth-state.json` to `.gitignore`
+- Only project test accounts, never a real user's or your own account
+- Keep state files under `.playwright-cli/` (gitignored); never commit them
 - Delete state files after automation completes
-- Use environment variables for sensitive data
+- Use environment variables for test credentials
 - By default, sessions run in-memory mode which is safer for sensitive operations

@@ -3,7 +3,7 @@ name: security-auditor
 description: Security engineer focused on vulnerability detection, threat modeling, and secure coding practices. Use for the pre-PR security review of a branch's changes, a security-focused code review, threat analysis, or hardening recommendations.
 ---
 
-<!-- Adapted from addyosmani/agent-skills@1401c8b (MIT, see licenses/). Changes: pre-PR mode, our-setup checks, PASS/BLOCK verdict, composition. -->
+<!-- Adapted from addyosmani/agent-skills@1401c8b (MIT, see licenses/). Changes: pre-PR mode, our-setup checks, personal data record check, PASS/BLOCK verdict, composition. -->
 
 # Security Auditor
 
@@ -52,6 +52,7 @@ Work from `.agents/skills/security-and-hardening/SKILL.md` (guidance) and `.agen
 - Are sensitive fields excluded from API responses and logs?
 - Is data encrypted in transit (HTTPS) and at rest (if required)?
 - Is PII handled according to applicable regulations?
+- Does every piece of personal data the change adds (new fields, new outside services or analytics that receive it) have a row in `ARCHITECTURE.md` → "Personal data" with purpose, retention, deletion and sharing? A missing row is a **High** finding.
 - Are database backups encrypted?
 
 ### 4. Infrastructure

@@ -1,5 +1,7 @@
 # Test generation (plan → generate → heal)
 
+<!-- Vendored from microsoft/playwright-cli@b85c7a7 (Apache-2.0, see licenses/). Changes: Playwright is bootstrapped at a pinned version; a test that catches a confirmed bug stays failing instead of being marked fixme. -->
+
 End-to-end workflow for authoring and maintaining Playwright tests with `playwright-cli`. Every `playwright-cli` action emits the equivalent Playwright TypeScript, and that generated code is the raw material for every test. The sections below can be used independently:
 
 - **How generation works** — the core mechanic everything else relies on: actions become TypeScript, plus how to add assertions.
@@ -153,10 +155,11 @@ test -f playwright.config.ts || test -f playwright.config.js
 npx --no-install playwright --version
 ```
 
-If there is no Playwright install, bootstrap one and let the user pick the defaults:
+If there is no Playwright install, ask the user first, then add it as a dev dependency pinned to an exact version:
 
 ```bash
-npm init playwright@latest
+npm install --save-dev --save-exact @playwright/test@<version>
+npx playwright install chromium
 ```
 
 ### 1.2 Prerequisite: seed test
@@ -420,7 +423,7 @@ Only after the user answers, either update the spec (intentional change) or file
 ### 3.5 Iteration and giving up
 
 - Fix failures one at a time; rerun after each.
-- If after thorough investigation you are confident the test is correct but the app is wrong *and* the user has confirmed it's a bug: mark the test `test.fixme(...)` with a comment pointing at the user's decision or issue link. Never silently skip.
+- If after thorough investigation you are confident the test is correct but the app is wrong *and* the user has confirmed it's a bug: keep the test as it is. It's the failing test for that bug, so fix the bug next (or, if the user decides to fix it later, record it in the plan). Never skip, mark as fixme or disable a test.
 
 ---
 

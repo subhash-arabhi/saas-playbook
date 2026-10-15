@@ -81,6 +81,13 @@ There's no staging: changes go from local straight to production on "deploy".
 ## Data model
 <Main tables/collections and how they relate. One line each.>
 
+## Personal data
+Every piece of personal data the app stores, sends to an outside service or collects through analytics. Add the row in the step that adds the data.
+
+| Data | Purpose | Retention | Deletion | Shared with |
+|---|---|---|---|---|
+| <e.g. email> | <sign-in, receipts> | <until the account is deleted> | <account deletion removes it from the database and, within N days, backups> | <none, or the service and why> |
+
 ## Key flows
 <2–3 sequence diagrams (mermaid `sequenceDiagram`): e.g. sign-in, the core create action, an async job (202 → poll → result). They match the Playwright E2E flows.>
 

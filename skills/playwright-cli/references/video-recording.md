@@ -1,5 +1,7 @@
 # Video Recording
 
+<!-- Vendored from microsoft/playwright-cli@b85c7a7 (Apache-2.0, see licenses/). Changes: recordings for a PR go on the pr-assets branch instead of being uploaded with gh's attach flag. -->
+
 Capture browser automation sessions as video for debugging, documentation, or verification. Produces WebM (VP8/VP9 codec).
 
 ## Basic Recording
@@ -189,17 +191,9 @@ Embrace creativity, overlays are powerful.
 | `page.screencast.showActions({ cursor, duration, position, style })` | Cursor, click point, target highlight and action title |
 | `page.screencast.hideActions()` | Stop annotating actions and hide the cursor |
 
-### 3. Attach the recording to the pull request
+### 3. Add the recording to the pull request
 
-A hero script recording is the best proof of work for a user-facing change. GitHub accepts WebM as is, so once the recording looks right, attach it with `gh` 2.99+ instead of describing the flow in words:
-
-```bash
-gh pr create --title "feat(todo): add items inline" --body-file body.md --attach ./demo.webm
-gh pr comment 123 --body "Walkthrough of the new flow." --attach ./demo.webm
-gh issue comment 456 --body "Recording of the repro steps." --attach ./repro.webm
-```
-
-`gh` appends unreferenced attachments to the end of the body, which is the right place for a walkthrough. Videos are limited to 10 MB on free plans and 100 MB on paid plans, so keep the script focused, record at a modest size such as 1280x800 and drop chapters that do not add to the story. See [pr-attachments.md](pr-attachments.md) for the full set of commands, including attaching test artifacts from CI.
+A hero script recording is the best proof of work for a user-facing change. Once the recording looks right, commit the WebM to the repository's `pr-assets` branch under `pr-<branch-name>/` and link it from the PR description, instead of describing the flow in words. Keep the script focused, record at a modest size such as 1280x800 and drop chapters that do not add to the story. See [pr-attachments.md](pr-attachments.md) for the commands, including keeping test output from CI.
 
 ## Tracing vs Video
 

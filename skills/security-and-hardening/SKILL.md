@@ -1,9 +1,9 @@
 ---
 name: security-and-hardening
-description: Hardens code against vulnerabilities. Use when handling untrusted input, authentication, sessions, data storage, file uploads, webhooks, outside services or LLM calls; when auditing a handler or login flow against the OWASP Top Ten; when auditing dependencies or assessing a new package; or when personal data is involved. Privacy compliance (GDPR, CCPA, DPDP) is handled when launching to real users, not while building.
+description: Hardens code against vulnerabilities. Use when handling untrusted input, authentication, sessions, data storage, file uploads, webhooks, outside services or LLM calls; when auditing a handler or login flow against the OWASP Top Ten; when auditing dependencies or assessing a new package; or when personal data is involved. Privacy decisions (purpose, retention, deletion, sharing) are made when the data is added; legal pages and consent come before launching to real users.
 ---
 
-<!-- Adapted from addyosmani/agent-skills@1401c8b (MIT, see licenses/). Changes: layered (general guidance here, playbook decisions in .agents/rules/); cloud-agnostic; web app baseline, secret store and managed identity, shared-store rate limiting, private file storage, pre-PR checks, privacy compliance at launch; trimmed (detail in references/). -->
+<!-- Adapted from addyosmani/agent-skills@1401c8b (MIT, see licenses/). Changes: layered (general guidance here, playbook decisions in .agents/rules/); cloud-agnostic; web app baseline, secret store and managed identity, shared-store rate limiting, private file storage, pre-PR checks, privacy decided when data is added (legal pages at launch); trimmed (detail in references/). -->
 
 **Project rules first.** If the project has `.agents/rules/` (installed with the SaaS playbook), read `.agents/rules/security.md` and `.agents/rules/database.md` and follow them: they override this skill where they differ. Without them, follow this skill as written.
 
@@ -60,7 +60,8 @@ Follow the reference procedure when adding or upgrading dependencies.
 - Collect only what a feature needs, for a stated purpose.
 - Keep it out of logs, telemetry and LLM prompts.
 - Keep it findable: tables keyed by user/owner, not free-text blobs. Classify fields as you add them.
-- At launch only: privacy policy, consent, retention, export, real deletion (stores and backups, not a flag), vendor DPAs.
+- Decide as you add it: purpose, retention, how it's really deleted (stores and backups, not a flag), export, and which outside services or analytics receive it. Record it where the project keeps its data decisions (in the SaaS playbook, `ARCHITECTURE.md` → "Personal data").
+- Before launching to real users: privacy policy, consent UI, vendor DPAs, and a final check that the record matches the code.
 - A privacy incident starts the breach-notification clock; postmortem with `debugging-and-error-recovery`.
 
 ## 8. AI / LLM features (OWASP LLM Top 10)

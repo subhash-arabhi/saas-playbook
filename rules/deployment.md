@@ -18,9 +18,11 @@
 - **Only when the user says "deploy"** (`.agents/workflows/deploy.md`), and only after the production build has passed a local smoke check at `http://localhost` and the resource group has its budget cap.
 - **From this machine with the cloud's CLI**, through `infra/deploy.sh`. There's no CI/CD pipeline.
   - Build and push images to the cloud's container registry, tagged with the git commit SHA, then point the apps at the new tag.
+- **Only the reviewed commit:** images are built from the commit the pre-PR check passed on and tagged with its SHA. Everything the deploy needs (budget, resources in `infra/`, keys in `.env.example`) is in the PR before the merge; the deploy never edits committed files.
 - **Order:** database migrations, then API, then website.
+- **Migrations work with both the running and the new version,** because the old API keeps serving while they run and after a rollback. Expand first (add columns, tables, indexes), deploy the code that uses them, and contract (drop or rename what's no longer used) in a later deploy. A migration that deletes or rewrites data ships in a later deploy than the code that stops using it, and only with the user's OK.
 - **Infrastructure as code:** every cloud resource is defined in `infra/` (the cloud's own IaC tool, or Terraform/OpenTofu), so production can be recreated from the repo.
-- **Rollback:** point the apps at the previous image tag; roll back migrations only if safe.
+- **Rollback:** point the apps at the previous image tags and open a revert PR for the merge. Migrations stay in place (they work with the previous version); roll one back only if safe.
 
 ## Secrets in the cloud
 - **Deployed secrets live in the cloud's secret store**, read by the app through the cloud's managed (workload) identity. No keys in app settings, images or `infra/`.

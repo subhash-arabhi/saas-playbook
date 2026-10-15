@@ -1,10 +1,12 @@
-# Attaching Screenshots and Videos to Pull Requests
+# Screenshots and Videos in Pull Requests
 
-`gh` 2.99+ uploads local images and videos with the repeatable `--attach` flag on `gh pr create`, `gh pr comment`, `gh pr edit`, `gh issue create`, `gh issue comment` and `gh issue edit`. PNG, JPEG, GIF, WebP, SVG, MP4, MOV and WebM are accepted, so `playwright-cli screenshot` and `video-start` output can be attached as is.
+<!-- Vendored from microsoft/playwright-cli@b85c7a7 (Apache-2.0, see licenses/). Changes: rewritten to commit images and videos to the pr-assets branch and link them, instead of uploading them with gh's attach flag; CI keeps failure output as a workflow artifact. -->
 
-## When to attach
+Images and videos for a PR go on the repository's **`pr-assets` branch**, which never merges into `main`, under `pr-<branch-name>/`. The PR description links to them. Don't upload them with `gh`'s attach flag. In a project with the SaaS playbook, `.agents/workflows/push.md` says when to capture them (desktop and mobile, before and after) and pushes the branch only when the user says "push".
 
-Attach visual evidence when it saves the reviewer a checkout: a screenshot of a UI fix, a before/after pair, a short video of a new user-facing flow, or the failure state when filing a bug. Skip it for refactors, backend-only changes and anything the diff already shows.
+## When to include
+
+Include visual evidence when it saves the reviewer a checkout: a screenshot of a UI fix, a before/after pair, a short video of a new user-facing flow. Skip it for refactors, backend-only changes and anything the diff already shows. Never capture secrets or real personal data.
 
 ## From a local session
 
@@ -17,44 +19,43 @@ playwright-cli click e5
 playwright-cli fill e7 "New name" --submit
 playwright-cli video-stop
 
-# attach when creating the PR; alt text goes after "#" (images only)
-gh pr create --title "fix(settings): keep name after save" --body-file body.md \
-  --attach './settings-after.png#Settings page after saving' --attach ./settings-flow.webm
-
-# or comment on an existing PR / issue
-gh pr comment 123 --body "Recorded the new flow end to end." --attach ./settings-flow.webm
-gh issue comment 456 --body "Failure state after submitting the form." --attach ./failure.png
+# commit it to pr-assets in a separate worktree, so the working branch is untouched
+git fetch origin pr-assets && git worktree add ../pr-assets pr-assets
+# (first time only, when the branch doesn't exist: git worktree add --orphan -b pr-assets ../pr-assets)
+mkdir -p ../pr-assets/pr-fix-settings-name
+cp settings-after.png settings-flow.webm ../pr-assets/pr-fix-settings-name/
+git -C ../pr-assets add pr-fix-settings-name
+git -C ../pr-assets commit -m "Screenshots for fix-settings-name"
 ```
 
-Reference the file in the body as `![alt](./settings-after.png)` to place it inline and `gh` rewrites the path to the uploaded URL. Unreferenced attachments are appended at the end in flag order.
+Pushing `pr-assets` happens with the working branch, when the user says "push".
 
-## Limits
+Then link the files in the PR description. Images show inline; videos open from the link:
 
-- Images up to 10 MB, videos up to 10 MB on free plans and 100 MB on paid plans, so keep recordings short.
-- Alt text is not supported on videos.
-- Uploads need push access to the repository.
-- Available on GitHub.com and GitHub Enterprise Cloud only.
+```markdown
+![Settings page after saving](https://github.com/<owner>/<repo>/raw/pr-assets/pr-fix-settings-name/settings-after.png)
+[Recording of the new flow](https://github.com/<owner>/<repo>/raw/pr-assets/pr-fix-settings-name/settings-flow.webm)
+```
+
+## Keep them small
+
+- Crop screenshots to what changed, and keep recordings short (record at a modest size such as 1280x800).
+- Remove the worktree when you're done: `git worktree remove ../pr-assets`.
 
 ## From CI
 
-Attach the screenshots and videos Playwright Test already saves under `test-results` (`screenshot: 'only-on-failure'`, `video: 'retain-on-failure'`) with the same command:
+Keep the screenshots and videos Playwright Test saves under `test-results` (`screenshot: 'only-on-failure'`, `video: 'retain-on-failure'`) as a workflow artifact, and link the run from the PR when it helps:
 
 ```yaml
-permissions:
-  pull-requests: write
 steps:
   - run: npx playwright test
-  - name: Attach failure screenshots and videos to the PR
-    if: failure() && github.event_name == 'pull_request'
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    run: |
-      files=$(find test-results -name '*.png' -o -name '*.webm' | head -20)
-      if [ -n "$files" ]; then
-        gh pr comment ${{ github.event.pull_request.number }} \
-          --body "Failure screenshots and videos from run ${{ github.run_id }}." \
-          $(printf -- '--attach %s ' $files)
-      fi
+  - name: Keep failure screenshots and videos
+    if: failure()
+    uses: actions/upload-artifact@<commit-sha> # pin by SHA
+    with:
+      name: playwright-results
+      path: test-results/
+      retention-days: 7
 ```
 
-For a polished walkthrough of a new feature, record a hero script as described in [video-recording.md](video-recording.md) and attach the resulting WebM the same way.
+For a polished walkthrough of a new feature, record a hero script as described in [video-recording.md](video-recording.md) and add the resulting WebM to `pr-assets` the same way.
