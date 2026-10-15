@@ -43,6 +43,8 @@ npx github:subhash-arabhi/saas-playbook
 
 Typing the plain word ("push") works too. Large work outside a plan gets a suggestion to run `/plan`, and the agent asks when it's unsure. Questions come as multiple-choice cards in the agent's own question interface (Cursor, Claude Code, Codex, VS Code), with a recommended option first, not as text in the chat.
 
+**CI is your choice.** The first `/push` asks whether the automated checks should also run in GitHub Actions on every PR, or stay local only. "Turn CI on" or "turn CI off" changes it later. CI only checks; deploys always run from your machine on `/deploy`.
+
 ### The plan view
 
 Plans are plain markdown in `plans/`, shown as an editable view in Cursor and VS Code, or in the browser from any tool. The plan view opens by itself whenever the agent writes or changes a plan, stops at a checkpoint, or finishes a build (in Cursor, beside the chat), and an open view refreshes as the plan changes. A hook that the installer adds for Cursor and Claude Code makes this automatic; `node .agents/tools/plan.mjs open plans/<name>.md` does the same by hand. Expand a step to read or edit it, click a circle to make the build pause after that step, and approve when there are no open questions.
@@ -104,6 +106,8 @@ It adds:
 | `.agents/` rules, workflows, reviewers, references, templates, tools and skills | The playbook itself | **No**, reinstalled from `playbook.json` |
 | `.agents/skills/<your-skill>/` | Your project's own skills, side by side with the playbook's | Yes |
 | `plans/` | Where plans go | Yes |
+
+Later, if you choose CI on the first `/push`, the agent adds `.github/workflows/pre-pr.yml` from `.agents/templates/ci.yml`: pinned actions, read-only access, no secrets. It can also make the check required on `main`, only if you say yes.
 
 Commit, then start a session with: *"Read AGENTS.md and follow it strictly."*
 
@@ -182,7 +186,7 @@ The agent creates the per-project files as it goes: `ARCHITECTURE.md`, `DESIGN.m
 The stack is chosen per project, but the rules expect the cloud to provide:
 
 - **Container images** in the cloud's registry, tagged with the commit SHA, so a deploy or rollback switches the apps to another tag ([`rules/deployment.md`](rules/deployment.md))
-- **Infrastructure as code** in `infra/`, one resource group per app with a budget cap, deployed from your machine with the cloud's CLI (there's no CI/CD pipeline)
+- **Infrastructure as code** in `infra/`, one resource group per app with a budget cap, deployed from your machine with the cloud's CLI (deploys never run from CI)
 - **A secret store** that the app reads through the cloud's managed (workload) identity, with no keys in settings or images
 - **Tailwind CSS** for styling, fed by `DESIGN.md` ([`rules/frontend.md`](rules/frontend.md))
 - **Cloudflare** in front of the custom domain, set up at `/publish`; before that the app uses the cloud's own URL ([`rules/stack.md`](rules/stack.md))

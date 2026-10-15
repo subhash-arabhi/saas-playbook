@@ -16,7 +16,7 @@
 ## Deploying
 - **Straight to production.** There is no staging: local, then production.
 - **Only when the user says "deploy"** (`.agents/workflows/deploy.md`), and only after the production build has passed a local smoke check at `http://localhost` and the resource group has its budget cap.
-- **From this machine with the cloud's CLI**, through `infra/deploy.sh`. There's no CI/CD pipeline.
+- **From this machine with the cloud's CLI**, through `infra/deploy.sh`. Deploys never run from CI. Optional CI (`AGENTS.md` → CI) only runs the automated pre-PR checks.
   - Build and push images to the cloud's container registry, tagged with the git commit SHA, then point the apps at the new tag.
 - **Only the reviewed commit:** images are built from the commit the pre-PR check passed on and tagged with its SHA. Everything the deploy needs (budget, resources in `infra/`, keys in `.env.example`) is in the PR before the merge; the deploy never edits committed files.
 - **Order:** database migrations, then API, then website.

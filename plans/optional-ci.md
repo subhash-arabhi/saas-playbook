@@ -15,7 +15,7 @@ steps:
   - id: 3
     title: "Rules and docs"
     summary: "Deployment and repo-structure rules, README and CHANGELOG describe optional CI"
-    done: false
+    done: true
     checkpoint: false
 ---
 
@@ -74,8 +74,8 @@ Projects that install the playbook can choose whether their pull requests also r
 **Files:** `rules/deployment.md` (edit), `rules/repo-structure.md` (edit), `README.md` (edit), `CHANGELOG.md` (edit)
 
 **Done when:**
-- [ ] No playbook file still says projects have no CI
-- [ ] README and CHANGELOG describe the choice and that deploys stay local
+- [x] No playbook file still says projects have no CI
+- [x] README and CHANGELOG describe the choice and that deploys stay local
 
 **Check:** `npm test`, `rg -n -i 'no CI' rules workflows templates README.md`
 
@@ -87,3 +87,4 @@ None.
 |---|---|---|---|
 | 1 | 2026-10-15 | Done | 54 tests. The "by hand" check became a test: it plants a tag pin, a `secrets.` reference, an extra permission and a deploy step, and each is caught. actionlint is clean. The script gets `BASE_REF` for its diff-based steps. |
 | 2 | 2026-10-15 | Done | 55 tests. Walked a fixture install (GitHub remote) through `pre-pr.md` → CI: `not chosen` after install, the copied workflow passes actionlint and its run line works, "turn CI off" removes it and records `local only`. A missing CI line in older projects counts as `not chosen`. Turning CI off never changes branch protection without asking. Moved to a fresh branch after PR #1 merged. |
+| 3 | 2026-10-15 | Done | 55 tests; the "no CI" search finds nothing. The README's Install table lists only what the installer adds, so the CI workflow got a paragraph under it instead of a row; How it works has the choice. The assumptions list also says deploys never run from CI. |

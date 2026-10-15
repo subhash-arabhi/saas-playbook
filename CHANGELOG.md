@@ -4,6 +4,7 @@ Each release is a `vX.Y.Z` tag. Its GitHub Release carries the `npm pack` tarbal
 
 ## Unreleased
 
+- Optional CI for projects: the first push asks whether to run the automated pre-PR checks in GitHub Actions (`templates/ci.yml`: pinned, read-only, no secrets) and whether to require them on `main`. `AGENTS.md` records the choice, and "turn CI on/off" changes it. Deploys still never run from CI.
 - Agents ask questions with the coding tool's question interface (`rules/asking.md`), and plans open in the plan view whenever they change (hooks for Cursor and Claude Code).
 - Plans can be approved only when Open questions says exactly "None."; the plan template passes the checker.
 - The build workflow commits every plan update with its step; a file outside a step's list needs an approved plan edit.

@@ -13,6 +13,7 @@ README.md                 what it is, how to run and test
 plans/                    plans (.agents/templates/plan.md)
 infra/                    infrastructure as code + infra/deploy.sh
 scripts/pre-pr.sh         automated pre-PR checks for this project's stack
+.github/workflows/pre-pr.yml  runs scripts/pre-pr.sh on every PR, only when AGENTS.md → CI is github-actions
 docker-compose.yml        local services (database, storage emulator, …)
 ```
 
