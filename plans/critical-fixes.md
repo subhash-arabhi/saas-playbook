@@ -20,7 +20,7 @@ steps:
   - id: 4
     title: "Deploy only the reviewed commit"
     summary: "No edits after the pre-PR check, prerequisites in the PR, revert on failure, compatible migrations"
-    done: false
+    done: true
     checkpoint: false
   - id: 5
     title: "Installer ownership guard"
@@ -138,10 +138,10 @@ Fix the critical and high-impact issues from the lifecycle audit so the playbook
 **Files:** `workflows/deploy.md` (edit), `rules/deployment.md` (edit), `rules/database.md` (edit), `skills/deploy/SKILL.md` (edit)
 
 **Done when:**
-- [ ] No step after the pre-PR check edits a committed file
-- [ ] A first deploy with no budget stops before the merge and lists exactly what to add
-- [ ] A failed smoke check ends with rolled-back images and an open revert PR
-- [ ] The expand/contract migration rule is in both `deployment.md` and `database.md`
+- [x] No step after the pre-PR check edits a committed file
+- [x] A first deploy with no budget stops before the merge and lists exactly what to add
+- [x] A failed smoke check ends with rolled-back images and an open revert PR
+- [x] The expand/contract migration rule is in both `deployment.md` and `database.md`
 
 **Check:** re-read `deploy.md` end to end against two scenarios (first deploy without a budget; a failed smoke check) and confirm each ends in the state above; confirm no step after "Merge" writes to tracked files
 
@@ -279,3 +279,4 @@ None.
 | 1 | 2026-10-15 | Done | 35 tests in 6 files; CI runs tests on Ubuntu and macOS (Node 20, 22, 24), ShellCheck, the plan check, Gitleaks and Semgrep. Also added `tests/helpers.mjs` (shared fixtures); ShellCheck was already clean, so the shell scripts are unchanged. |
 | 2 | 2026-10-15 | Done | 38 tests. Also fixed viewer edits dropping the blank line after the front matter, and added the template to the CI plan check (`ci.yml`). |
 | 3 | 2026-10-15 | Done | Walked a two-step fixture through the workflow (checkpoint on step 1): clean worktree at the checkpoint and at the end. From here on, unlisted files need an approved plan edit. |
+| 4 | 2026-10-15 | Done | Walked both scenarios through the new `deploy.md`: no budget stops before the merge with the cap and missing items listed; a failed smoke check rolls back images and opens a revert PR. The deploy also requires `main` to be an ancestor of the reviewed commit, so the merged files match it. |
