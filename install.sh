@@ -122,8 +122,11 @@ if [[ -s "$TMP/old-files" ]]; then
 elif [[ -f "$STATE" ]]; then
   # Installed before files were recorded (v1.0.x): back up any that differ from this version.
   # shellcheck disable=SC2086
-  (cd "$AG" && { [[ -f LICENSE ]] && echo LICENSE; for d in $DIRS; do [[ -d "$d" ]] && find "$d" -type f; done
-    while read -r s; do [[ -d "skills/$s" ]] && find "skills/$s" -type f; done < "$TMP/old-skills"; } || true) > "$TMP/legacy-files"
+  (cd "$AG" && {
+    if [[ -f LICENSE ]]; then echo LICENSE; fi
+    for d in $DIRS; do if [[ -d "$d" ]]; then find "$d" -type f; fi; done
+    while read -r s; do if [[ -d "skills/$s" ]]; then find "skills/$s" -type f; fi; done < "$TMP/old-skills"
+  }) > "$TMP/legacy-files"
   while read -r rel; do
     cmp -s "$AG/$rel" "$SRC/$rel" || backup "$rel"
   done < "$TMP/legacy-files"

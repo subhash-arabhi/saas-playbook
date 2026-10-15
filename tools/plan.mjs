@@ -428,19 +428,27 @@ function viewerAt(port) {
 /** The viewer for a plans dir, started in the background if none is running: { port, watching }. */
 async function viewerFor(dir) {
   dir = realpathSync.native(dir)
-  let free = null
-  for (let port = 4600; port < 4610; port++) {
-    const at = await viewerAt(port)
-    if (at?.dir === dir) return { port, watching: at.watching || [] }
-    if (at === null && free === null) free = port
+  const lost = new Set()
+  for (;;) {
+    let free = null
+    for (let port = 4600; port < 4610; port++) {
+      const at = await viewerAt(port)
+      if (at?.dir === dir) return { port, watching: at.watching || [] }
+      if (at === null && free === null && !lost.has(port)) free = port
+    }
+    if (free === null) throw new Error('ports 4600–4609 are all in use')
+    spawn(process.execPath, [fileURLToPath(import.meta.url), 'view', '--port', String(free)], { cwd: dirname(dir), detached: true, stdio: 'ignore' }).unref()
+    let taken = false
+    for (let i = 0; i < 50 && !taken; i++) {
+      const at = await viewerAt(free)
+      if (at?.dir === dir) return { port: free, watching: [] }
+      // Another process took the port first, so this viewer couldn't start there.
+      taken = at !== null
+      if (!taken) await new Promise((r) => setTimeout(r, 100))
+    }
+    if (!taken) throw new Error(`the plan viewer didn't start on port ${free}`)
+    lost.add(free)
   }
-  if (free === null) throw new Error('ports 4600–4609 are all in use')
-  spawn(process.execPath, [fileURLToPath(import.meta.url), 'view', '--port', String(free)], { cwd: dirname(dir), detached: true, stdio: 'ignore' }).unref()
-  for (let i = 0; i < 50; i++) {
-    if ((await viewerAt(free))?.dir === dir) return { port: free, watching: [] }
-    await new Promise((r) => setTimeout(r, 100))
-  }
-  throw new Error(`the plan viewer didn't start on port ${free}`)
 }
 
 /** Plan view URL for plans/<name>.md, and whether a browser tab already shows it (it refreshes by itself). */

@@ -1,6 +1,6 @@
 import { test, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { spawnSync } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, chmodSync, realpathSync, rmSync, existsSync, symlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -60,6 +60,21 @@ test('Cursor: works when the project path goes through a symlink', async () => {
   const out = runHook(p, { hook_event_name: 'postToolUse', tool_input: { path: join(link, 'plans', 'demo.md') } }, { CURSOR_PROJECT_DIR: link })
   assert.match(out.additional_context || '', /^plans\/demo\.md changed\. Show it/)
   await trackViewer(out.additional_context)
+})
+
+test('Cursor: hooks for several projects at once each get their own viewer', async () => {
+  const run = (p) =>
+    new Promise((done) => {
+      const child = spawn(process.execPath, [HOOK], { cwd: p.dir, env: { ...p.env, CURSOR_PROJECT_DIR: p.dir } })
+      let out = ''
+      child.stdout.on('data', (c) => (out += c))
+      child.on('close', () => done(JSON.parse(out).additional_context || ''))
+      child.stdin.end(JSON.stringify({ hook_event_name: 'postToolUse', tool_input: { path: join(p.dir, 'plans', 'demo.md') } }))
+    })
+  const texts = await Promise.all([project(), project(), project()].map(run))
+  const ports = await Promise.all(texts.map(trackViewer))
+  for (const text of texts) assert.match(text, /^plans\/demo\.md changed\. Show it/)
+  assert.equal(new Set(ports).size, 3)
 })
 
 test('Cursor: tool_input given as a JSON string is understood', () => {
