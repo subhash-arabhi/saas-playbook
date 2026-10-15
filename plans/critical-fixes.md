@@ -50,7 +50,7 @@ steps:
   - id: 10
     title: "Privacy decisions during planning"
     summary: "Record personal data purpose, retention and deletion when it's added, not first at publish"
-    done: false
+    done: true
     checkpoint: false
   - id: 11
     title: "README claims match the playbook"
@@ -246,10 +246,10 @@ Fix the critical and high-impact issues from the lifecycle audit so the playbook
 **Files:** `rules/security.md` (edit), `skills/security-and-hardening/SKILL.md` (edit), `templates/ARCHITECTURE.md` (edit), `reviewers/security-auditor.md` (edit), `workflows/publish.md` (edit), `skills/web-design-guidelines/SKILL.md` (edit)
 
 **Done when:**
-- [ ] No rule or skill defers privacy design to publish
-- [ ] The ARCHITECTURE template has the Personal data table
-- [ ] The security reviewer blocks new personal data without an entry
-- [ ] Critical or serious accessibility findings block publish sign-off
+- [x] No rule or skill defers privacy design to publish
+- [x] The ARCHITECTURE template has the Personal data table
+- [x] The security reviewer blocks new personal data without an entry
+- [x] Critical or serious accessibility findings block publish sign-off
 
 **Check:** `rg -n 'only on "publish"|At launch only' rules skills` returns nothing; re-read the edited sections together for consistency
 
@@ -285,3 +285,4 @@ None.
 | 7 | 2026-10-15 | Done | 46 tests (3 new, using an alterable copy of the source); also passes with GNU tools. The checksum is a SHA-256 over the per-file hashes, which also fill `files`. Installs from before the checksum existed skip the check once. |
 | 8 | 2026-10-15 | Done | Added `video-recording.md` to Files (approved). `SKILL.md` is 459 lines. The safety test also blocks skipped tests and reading auth cookies, and joins shell line continuations; a planted example in `tracing.md` was caught. The skill's own rules were reworded so they no longer quote the forbidden commands. |
 | 9 | 2026-10-15 | Done | Release steps run locally for v1.0.2. That run found npx and clone installs recording different checksums (npm leaves out ignore files and the extension's build output), so `install.sh` and its tests were added to Files (approved) and the installer now skips those files; a test checks the two installs match. Turned on private vulnerability reporting (approved). `main` requires a PR (0 approvals) and the 8 CI checks; admins can still bypass. The VSIX holds 4 extension files plus its manifest. |
+| 10 | 2026-10-15 | Done | Publish mode labels accessibility findings with the scanner's severities (critical, serious, moderate, minor) and ends with `n warnings, m blocking`. Publish also checks the Personal data table against the code. The deferral search finds nothing. |
