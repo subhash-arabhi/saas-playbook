@@ -9,10 +9,20 @@ const root = tempRoot('installer-')
 const VERSION = JSON.parse(readFileSync(join(REPO, 'package.json'), 'utf8')).version
 
 const project = (name = 'p-') => mkdtempSync(join(root, name))
+const run = (dest, ...args) => spawnSync('bash', [join(REPO, 'install.sh'), ...args, dest], { encoding: 'utf8', env: cleanEnv() })
 function install(dest, ...args) {
-  const r = spawnSync('bash', [join(REPO, 'install.sh'), ...args, dest], { encoding: 'utf8', env: cleanEnv() })
+  const r = run(dest, ...args)
   assert.equal(r.status, 0, r.stderr + r.stdout)
   return r.stdout
+}
+function refused(dest, ...args) {
+  const r = run(dest, ...args)
+  assert.notEqual(r.status, 0, r.stdout)
+  return r.stderr
+}
+const backups = (dest) => {
+  const dir = join(dest, '.agents', '.backup')
+  return existsSync(dir) ? readdirSync(dir).map((ts) => join(dir, ts)) : []
 }
 const read = (dest, path) => readFileSync(join(dest, path), 'utf8')
 const state = (dest) => JSON.parse(read(dest, '.agents/playbook.json'))
@@ -74,4 +84,70 @@ test('an update removes skills the playbook no longer ships', () => {
   mkdirSync(join(dest, '.agents', 'skills', 'retired-skill'))
   install(dest)
   assert.equal(existsSync(join(dest, '.agents', 'skills', 'retired-skill')), false)
+})
+
+test('playbook.json records every installed file with its SHA-256', () => {
+  const dest = project()
+  install(dest)
+  const { files } = state(dest)
+  assert.ok(files['LICENSE'] && files['rules/asking.md'] && files['skills/plan/SKILL.md'])
+  const sum = spawnSync('shasum', ['-a', '256', join(dest, '.agents', 'rules', 'asking.md')], { encoding: 'utf8' }).stdout.split(' ')[0]
+  assert.equal(files['rules/asking.md'], sum)
+  const shipped = ['rules', 'workflows', 'reviewers', 'references', 'templates', 'tools', 'licenses', 'skills']
+    .flatMap((d) => readdirSync(join(REPO, d), { recursive: true, withFileTypes: true }).filter((e) => e.isFile() && e.name !== '.DS_Store'))
+  assert.equal(Object.keys(files).length, shipped.length + 1)
+})
+
+test('an update deletes only installed files and backs up local edits', () => {
+  const dest = project()
+  install(dest)
+  writeFileSync(join(dest, '.agents', 'rules', 'my-rule.md'), 'mine\n')
+  writeFileSync(join(dest, '.agents', 'rules', 'asking.md'), 'edited\n')
+  const out = install(dest)
+  assert.equal(read(dest, '.agents/rules/my-rule.md'), 'mine\n')
+  assert.equal(read(dest, '.agents/rules/asking.md'), read(REPO, 'rules/asking.md'))
+  const [b] = backups(dest)
+  assert.equal(readFileSync(join(b, 'rules', 'asking.md'), 'utf8'), 'edited\n')
+  assert.equal(existsSync(join(b, 'rules', 'my-rule.md')), false)
+  assert.match(out, /\.agents\/\.backup\//)
+  install(dest)
+  assert.equal(backups(dest).length, 1, 'an unedited install needs no backup')
+})
+
+test('unmanaged .agents/ content stops the install, and --force backs it up first', () => {
+  const dest = project()
+  mkdirSync(join(dest, '.agents', 'rules'), { recursive: true })
+  writeFileSync(join(dest, '.agents', 'rules', 'team.md'), 'our rules\n')
+  assert.match(refused(dest), /\.agents\/rules/)
+  assert.equal(read(dest, '.agents/rules/team.md'), 'our rules\n')
+  assert.equal(existsSync(join(dest, '.agents', 'playbook.json')), false)
+  assert.equal(existsSync(join(dest, 'AGENTS.md')), false)
+  install(dest, '--force')
+  const [b] = backups(dest)
+  assert.equal(readFileSync(join(b, 'rules', 'team.md'), 'utf8'), 'our rules\n')
+  assert.equal(state(dest).version, VERSION)
+})
+
+test('a project skill with a playbook skill name stops the install', () => {
+  const dest = project()
+  mkdirSync(join(dest, '.agents', 'skills', 'plan'), { recursive: true })
+  writeFileSync(join(dest, '.agents', 'skills', 'plan', 'SKILL.md'), 'my plan skill\n')
+  assert.match(refused(dest), /\bplan\b/)
+  assert.equal(read(dest, '.agents/skills/plan/SKILL.md'), 'my plan skill\n')
+  assert.equal(existsSync(join(dest, '.agents', 'playbook.json')), false)
+})
+
+test('an update from v1.0.x (no file list) works without --force', () => {
+  const dest = project()
+  install(dest)
+  const s = state(dest)
+  delete s.files
+  writeFileSync(join(dest, '.agents', 'playbook.json'), JSON.stringify(s, null, 2))
+  writeFileSync(join(dest, '.agents', 'rules', 'asking.md'), 'edited\n')
+  install(dest)
+  assert.ok(state(dest).files['rules/asking.md'])
+  assert.equal(read(dest, '.agents/rules/asking.md'), read(REPO, 'rules/asking.md'))
+  const [b] = backups(dest)
+  assert.equal(readFileSync(join(b, 'rules', 'asking.md'), 'utf8'), 'edited\n')
+  assert.equal(existsSync(join(b, 'rules', 'planning.md')), false, 'unchanged files are not backed up')
 })

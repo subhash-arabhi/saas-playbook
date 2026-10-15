@@ -25,7 +25,7 @@ steps:
   - id: 5
     title: "Installer ownership guard"
     summary: "Delete only files the playbook installed, back up local edits, and stop on unmanaged or colliding content"
-    done: false
+    done: true
     checkpoint: false
   - id: 6
     title: "Separate maintainer and project AGENTS.md"
@@ -156,10 +156,10 @@ Fix the critical and high-impact issues from the lifecycle audit so the playbook
 **Files:** `install.sh` (edit), `tests/installer.test.mjs` (edit), `README.md` (edit, Install section)
 
 **Done when:**
-- [ ] Installing into a repo with an unmanaged `.agents/rules/` stops and deletes nothing
-- [ ] A locally edited playbook file is backed up before it's replaced
-- [ ] A colliding project skill stops the install with its name
-- [ ] All installer tests pass on macOS and Linux
+- [x] Installing into a repo with an unmanaged `.agents/rules/` stops and deletes nothing
+- [x] A locally edited playbook file is backed up before it's replaced
+- [x] A colliding project skill stops the install with its name
+- [x] All installer tests pass on macOS and Linux
 
 **Check:** `npm test`
 
@@ -280,3 +280,4 @@ None.
 | 2 | 2026-10-15 | Done | 38 tests. Also fixed viewer edits dropping the blank line after the front matter, and added the template to the CI plan check (`ci.yml`). |
 | 3 | 2026-10-15 | Done | Walked a two-step fixture through the workflow (checkpoint on step 1): clean worktree at the checkpoint and at the end. From here on, unlisted files need an approved plan edit. |
 | 4 | 2026-10-15 | Done | Walked both scenarios through the new `deploy.md`: no budget stops before the merge with the cap and missing items listed; a failed smoke check rolls back images and opens a revert PR. The deploy also requires `main` to be an ancestor of the reviewed commit, so the merged files match it. |
+| 5 | 2026-10-15 | Done | 10 installer tests, also run with GNU coreutils, findutils, sed, tar and grep (Docker wasn't running); a real Linux run happens in CI after push. v1.0.x installs upgrade without `--force` (files that differ from the new version are backed up). `--force` also covers colliding skills; `/.backup/` is gitignored. Installs take about 0.2s (batched hashing, one `tar` copy). |

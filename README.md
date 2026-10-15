@@ -72,7 +72,7 @@ It adds:
 | `CLAUDE.md` | One line, `@AGENTS.md`, so Claude Code reads it | Yes |
 | `.claude/skills` → `.agents/skills` | Link for Claude Code's skill discovery | Yes |
 | `.cursor/hooks.json`, `.claude/settings.json` | A hook that shows a plan in the plan view whenever the agent changes it. Added to existing files, keeping your settings | Yes |
-| `.agents/playbook.json` | The installed version, its reinstall command, and the playbook's skill list | Yes |
+| `.agents/playbook.json` | The installed version, its reinstall command, the playbook's skill list, and every file it installed with its SHA-256 | Yes |
 | `.agents/.gitignore` | Keeps the playbook's own files out of git | Yes |
 | `.agents/` rules, workflows, reviewers, references, templates, tools and skills | The playbook itself | **No**, reinstalled from `playbook.json` |
 | `.agents/skills/<your-skill>/` | Your project's own skills, side by side with the playbook's | Yes |
@@ -85,6 +85,8 @@ Commit, then start a session with: *"Read AGENTS.md and follow it strictly."*
 **Fresh clones set themselves up.** `AGENTS.md` tells the agent to run the pinned install command from `playbook.json` when `.agents/rules/` is missing, so teammates and cloud agents get exactly the same version. To keep the playbook in git instead, install with `--commit` (the choice is remembered).
 
 **Update** with `npx github:subhash-arabhi/saas-playbook` (latest) or `#vX.Y.Z` (a specific release). It replaces the playbook's files, removes skills the playbook dropped, keeps yours, and never overwrites your `AGENTS.md`; if the playbook's `AGENTS.md` changed, it writes `AGENTS.playbook.md` for you to merge.
+
+**Updates only touch what the playbook installed.** It deletes only the files listed in `playbook.json`. A file you edited is copied to `.agents/.backup/<timestamp>/` before it's replaced, so you can carry the change over (better: put it in a project skill or `AGENTS.md` → Project-specific). The install stops, changing nothing, if `.agents/` already has playbook folders but no `playbook.json`, or if one of your skills has the same name as a playbook skill. Rename or move them, or run with `--force` to back them up and install over them.
 
 **Plan view in Cursor or VS Code** (optional): `bash .agents/tools/plan-editor/install.sh`, then open any `plans/*.md`. Elsewhere, `node .agents/tools/plan.mjs view` serves it at http://localhost:4600.
 
