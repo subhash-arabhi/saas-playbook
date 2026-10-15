@@ -40,7 +40,7 @@ steps:
   - id: 8
     title: "Consistent Playwright safety guidance"
     summary: "Remove vendored examples that contradict the playbook's install, credential and browser rules, with a test"
-    done: false
+    done: true
     checkpoint: false
   - id: 9
     title: "Repository governance and releases"
@@ -207,12 +207,12 @@ Fix the critical and high-impact issues from the lifecycle audit so the playbook
 4. Align `references/test-generation.md` (`test.fixme`) with the no-skip rule, and `references/pr-attachments.md` with the `pr-assets` rule in `rules/git.md`.
 5. Add a repo test that fails if any skill contains `@latest`, `attach --cdp`, `attach --extension` or `gh pr create --attach`. Record each change in `licenses/README.md`, as Apache-2.0 requires.
 
-**Files:** `skills/playwright-cli/SKILL.md` (edit), `skills/playwright-cli/references/storage-state.md` (edit), `skills/playwright-cli/references/session-management.md` (edit), `skills/playwright-cli/references/test-generation.md` (edit), `skills/playwright-cli/references/pr-attachments.md` (edit), `licenses/README.md` (edit), `tests/repo.test.mjs` (edit)
+**Files:** `skills/playwright-cli/SKILL.md` (edit), `skills/playwright-cli/references/storage-state.md` (edit), `skills/playwright-cli/references/session-management.md` (edit), `skills/playwright-cli/references/test-generation.md` (edit), `skills/playwright-cli/references/pr-attachments.md` (edit), `skills/playwright-cli/references/video-recording.md` (edit), `licenses/README.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] The safety test passes, and fails when a forbidden example is planted
-- [ ] `skills/playwright-cli/SKILL.md` is under 500 lines
-- [ ] `licenses/README.md` lists the changes to the vendored files
+- [x] The safety test passes, and fails when a forbidden example is planted
+- [x] `skills/playwright-cli/SKILL.md` is under 500 lines
+- [x] `licenses/README.md` lists the changes to the vendored files
 
 **Check:** `npm test`
 
@@ -283,3 +283,4 @@ None.
 | 5 | 2026-10-15 | Done | 10 installer tests, also run with GNU coreutils, findutils, sed, tar and grep (Docker wasn't running); a real Linux run happens in CI after push. v1.0.x installs upgrade without `--force` (files that differ from the new version are backed up). `--force` also covers colliding skills; `/.backup/` is gitignored. Installs take about 0.2s (batched hashing, one `tar` copy). |
 | 6 | 2026-10-15 | Done | `git mv` keeps the template byte-identical to the old root `AGENTS.md`; compared with v1.0.2 the only change is this session's question-tool rule. `package.json` still ships the root `AGENTS.md` in the package (harmless, not in this step's Files). |
 | 7 | 2026-10-15 | Done | 46 tests (3 new, using an alterable copy of the source); also passes with GNU tools. The checksum is a SHA-256 over the per-file hashes, which also fill `files`. Installs from before the checksum existed skip the check once. |
+| 8 | 2026-10-15 | Done | Added `video-recording.md` to Files (approved). `SKILL.md` is 459 lines. The safety test also blocks skipped tests and reading auth cookies, and joins shell line continuations; a planted example in `tracing.md` was caught. The skill's own rules were reworded so they no longer quote the forbidden commands. |

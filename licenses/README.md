@@ -12,4 +12,12 @@ Third-party content in this playbook, pinned to the commit it was copied from. E
 | references/design-systems (Linear, Vercel, Cal) | [VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md) | `13be5c0` | `voltagent-awesome-design-md.LICENSE` (MIT) |
 | DESIGN.md format | [google-labs-code/design.md](https://github.com/google-labs-code/design.md) | — | Referenced, not copied |
 
-Most files were adapted. Each one notes its changes in a comment at the top. To update one from upstream, re-download it at a new commit, re-apply the playbook changes, and update this table.
+Most files were adapted. Each one notes its changes in a comment at the top.
+
+**Changes to playwright-cli** (Apache-2.0 asks that modified files say so; each also notes it at the top):
+- `SKILL.md`: added "Project rules first" and "Agent rules"; moved the Storage command list to `references/storage-state.md`; removed the examples that read auth cookies, attach to a running browser or upload with `gh`'s attach flag; Installation uses a pinned project dev dependency through `npx`; PR screenshots point to the `pr-assets` branch; added `npx playwright-cli` to `allowed-tools`.
+- `references/storage-state.md`: auth state only for project test accounts, in gitignored files; removed reading auth cookies or tokens and the cookie-injection roundtrip; non-auth example values.
+- `references/session-management.md`: removed attaching to a running browser and detach; `--profile` points at a project folder.
+- `references/test-generation.md`: pinned Playwright bootstrap; a test for a confirmed bug stays failing instead of being marked fixme.
+- `references/pr-attachments.md`: rewritten for the `pr-assets` branch; CI keeps failure output as a workflow artifact.
+- `references/video-recording.md`: recordings for a PR go on the `pr-assets` branch. To update one from upstream, re-download it at a new commit, re-apply the playbook changes, and update this table.

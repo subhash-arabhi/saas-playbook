@@ -60,6 +60,41 @@ test('local Markdown links point to files that exist', () => {
   assert.deepEqual(broken, [])
 })
 
+/** Examples the playbook's rules forbid, found in a skill's text (shell line continuations joined). */
+const FORBIDDEN = [
+  [/@latest\b/, 'unpinned @latest install'],
+  [/\battach\s+--(cdp|extension)\b/, 'attaching to an everyday browser'],
+  [/\bgh\s+(pr|issue)\s+(create|comment|edit)\b[^\n]*--attach\b/, 'gh --attach (PR images go on the pr-assets branch)'],
+  [/\btest\.(fixme|skip)\(/, 'skipped test'],
+  [/\bcookie-get\b|\blocalstorage-get\s+token\b/, 'reading auth cookies or tokens'],
+]
+function forbiddenIn(text) {
+  const joined = text.replace(/\\\n\s*/g, ' ')
+  return FORBIDDEN.filter(([re]) => re.test(joined)).map(([, why]) => why)
+}
+
+test('skills contain no examples the playbook forbids', () => {
+  const found = []
+  for (const file of tracked('skills/**/*.md')) {
+    for (const why of forbiddenIn(readFileSync(join(REPO, file), 'utf8'))) found.push(`${file}: ${why}`)
+  }
+  assert.deepEqual(found, [])
+})
+
+test('the forbidden-example check notices each pattern', () => {
+  assert.deepEqual(forbiddenIn('npm i -g @playwright/cli@latest'), ['unpinned @latest install'])
+  assert.deepEqual(forbiddenIn('playwright-cli attach --cdp=chrome'), ['attaching to an everyday browser'])
+  assert.deepEqual(forbiddenIn('gh pr create --title x \\\n  --attach ./a.png'), ['gh --attach (PR images go on the pr-assets branch)'])
+  assert.deepEqual(forbiddenIn("test.fixme('later')"), ['skipped test'])
+  assert.deepEqual(forbiddenIn('TOKEN=$(playwright-cli --raw cookie-get session_id)'), ['reading auth cookies or tokens'])
+  assert.deepEqual(forbiddenIn('npx playwright-cli open http://localhost:3000'), [])
+})
+
+test('skill files stay under 500 lines', () => {
+  const long = tracked('skills/*/SKILL.md').filter((f) => readFileSync(join(REPO, f), 'utf8').split('\n').length >= 500)
+  assert.deepEqual(long, [])
+})
+
 test('the link check notices a broken link', () => {
   assert.deepEqual(localLinks('[a](missing.md) `[b](code.md)`\n```\n[c](fenced.md)\n```\n[d](https://x.y)'), [{ line: 1, target: 'missing.md' }])
 })
