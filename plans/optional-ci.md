@@ -1,11 +1,11 @@
 ---
 name: "Optional CI for projects"
-status: draft
+status: building
 steps:
   - id: 1
     title: "CI workflow template"
     summary: "A GitHub Actions template that runs scripts/pre-pr.sh on every PR, pinned and read-only"
-    done: false
+    done: true
     checkpoint: false
   - id: 2
     title: "Ask, record and change the choice"
@@ -42,8 +42,8 @@ Projects that install the playbook can choose whether their pull requests also r
 **Files:** `templates/ci.yml` (new), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] The template exists and passes the new test
-- [ ] The test fails when an action is pinned by tag, or a `secrets.` reference is added (checked once by hand)
+- [x] The template exists and passes the new test
+- [x] The test fails when an action is pinned by tag, or a `secrets.` reference is added (checked once by hand)
 
 **Check:** `npm test`
 
@@ -85,3 +85,4 @@ None.
 ## Build log
 | Step | Date | Result | Notes |
 |---|---|---|---|
+| 1 | 2026-10-15 | Done | 54 tests. The "by hand" check became a test: it plants a tag pin, a `secrets.` reference, an extra permission and a deploy step, and each is caught. actionlint is clean. The script gets `BASE_REF` for its diff-based steps. |

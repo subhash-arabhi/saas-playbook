@@ -1,0 +1,34 @@
+# Optional CI: runs the automated pre-PR checks (scripts/pre-pr.sh) on every pull request.
+# Copied to .github/workflows/pre-pr.yml when AGENTS.md → CI is github-actions (.agents/workflows/pre-pr.md).
+# It only checks: no secrets, read-only access, and it never deploys. Deploys stay local ("deploy").
+name: Pre-PR check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pre-pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-pr:
+    name: Pre-PR check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # <Stack setup: the runtimes and package installs scripts/pre-pr.sh needs, each action pinned by commit SHA.>
+      # For example, Node:
+      #   - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      #     with:
+      #       node-version-file: .nvmrc
+      #   - run: npm ci
+      - run: CI=true scripts/pre-pr.sh
+        env:
+          BASE_REF: origin/${{ github.base_ref }}
