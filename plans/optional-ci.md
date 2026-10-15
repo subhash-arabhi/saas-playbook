@@ -10,7 +10,7 @@ steps:
   - id: 2
     title: "Ask, record and change the choice"
     summary: "The first push asks whether to add CI, AGENTS.md records the answer, and the user can switch it later"
-    done: false
+    done: true
     checkpoint: false
   - id: 3
     title: "Rules and docs"
@@ -58,10 +58,10 @@ Projects that install the playbook can choose whether their pull requests also r
 **Files:** `workflows/pre-pr.md` (edit), `templates/project-AGENTS.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] A walk-through of the first "push" on a fixture project asks once, and with "github-actions" produces a committed `.github/workflows/pre-pr.yml`
-- [ ] The branch-protection question follows only "github-actions", and settings change only on "yes"
-- [ ] With "local only", no workflow file is created and the next push doesn't ask again
-- [ ] "turn CI off" removes the workflow and updates the CI line
+- [x] A walk-through of the first "push" on a fixture project asks once, and with "github-actions" produces a committed `.github/workflows/pre-pr.yml`
+- [x] The branch-protection question follows only "github-actions", and settings change only on "yes"
+- [x] With "local only", no workflow file is created and the next push doesn't ask again
+- [x] "turn CI off" removes the workflow and updates the CI line
 
 **Check:** `npm test`, plus the walk-through above
 
@@ -86,3 +86,4 @@ None.
 | Step | Date | Result | Notes |
 |---|---|---|---|
 | 1 | 2026-10-15 | Done | 54 tests. The "by hand" check became a test: it plants a tag pin, a `secrets.` reference, an extra permission and a deploy step, and each is caught. actionlint is clean. The script gets `BASE_REF` for its diff-based steps. |
+| 2 | 2026-10-15 | Done | 55 tests. Walked a fixture install (GitHub remote) through `pre-pr.md` → CI: `not chosen` after install, the copied workflow passes actionlint and its run line works, "turn CI off" removes it and records `local only`. A missing CI line in older projects counts as `not chosen`. Turning CI off never changes branch protection without asking. Moved to a fresh branch after PR #1 merged. |

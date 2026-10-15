@@ -128,6 +128,19 @@ test('the project CI template is pinned, read-only and runs only the pre-PR scri
   assert.deepEqual(ciProblems(readFileSync(join(REPO, 'templates', 'ci.yml'), 'utf8')), [])
 })
 
+test('projects choose CI on the first push, and can switch it later', () => {
+  const agents = readFileSync(join(REPO, 'templates', 'project-AGENTS.md'), 'utf8')
+  assert.match(agents, /^- \*\*CI:\*\* not chosen <!-- not chosen \| github-actions \| local only/m)
+  assert.match(agents, /"Turn CI on" \/ "turn CI off"/)
+  const prePr = readFileSync(join(REPO, 'workflows', 'pre-pr.md'), 'utf8').split('## CI\n')[1] || ''
+  assert.match(prePr, /\.agents\/templates\/ci\.yml/)
+  assert.match(prePr, /ask with the question tool: run these checks in GitHub Actions/)
+  assert.match(prePr, /second question: make this check required on `main`\?/)
+  assert.match(prePr, /Only on "yes"/)
+  assert.match(prePr, /don't ask again/)
+  assert.match(prePr, /CI never deploys/)
+})
+
 test('the CI template check notices tag pins, secrets, extra permissions and deploys', () => {
   const ok = readFileSync(join(REPO, 'templates', 'ci.yml'), 'utf8')
   const bad = {

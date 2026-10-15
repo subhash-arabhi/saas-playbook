@@ -40,6 +40,8 @@ Each command is a skill in `.agents/skills/<name>/`; follow it and its workflow 
 | `/deploy` | Merges the PR and deploys to production |
 | `/publish` | Readiness for real users (rare) |
 
+**"Turn CI on" / "turn CI off"** adds or removes `.github/workflows/pre-pr.yml` and updates the CI line, committed locally like any change (`.agents/workflows/pre-pr.md` → CI).
+
 Large work (several features, or hours of work) gets a plan: suggest `/plan`. **If unsure whether something needs a plan, ask.**
 
 ## Areas (mandatory)
@@ -69,5 +71,6 @@ Rules are in `.agents/rules/`, skills in `.agents/skills/<name>/SKILL.md`. The p
 - **Product:** <one line>
 - **Cloud:** <cloud provider> · **Account:** `.env.local` → `CLOUD_ACCOUNT` · **Resource group:** `.env.local` → `CLOUD_RESOURCE_GROUP`
 - **Stack:** see `ARCHITECTURE.md`
+- **CI:** not chosen <!-- not chosen | github-actions | local only; asked on the first push -->
 - **Project skills:** <name: the area it covers> <!-- skills in .agents/skills/ that aren't the playbook's -->
 - **Project rules / exceptions:** <anything that overrides the playbook for this project>
