@@ -162,11 +162,12 @@ else
 fi
 
 # 2. AGENTS.md at the project root (never overwritten: it holds the project-specific section)
+TEMPLATE="$SRC/templates/project-AGENTS.md"
 if [[ ! -f "$DEST/AGENTS.md" ]]; then
-  cp "$SRC/AGENTS.md" "$DEST/AGENTS.md"
+  cp "$TEMPLATE" "$DEST/AGENTS.md"
   echo "✓ AGENTS.md created. Fill in its 'Project-specific' section."
-elif ! cmp -s "$SRC/AGENTS.md" "$DEST/AGENTS.md"; then
-  cp "$SRC/AGENTS.md" "$DEST/AGENTS.playbook.md"
+elif ! cmp -s "$TEMPLATE" "$DEST/AGENTS.md"; then
+  cp "$TEMPLATE" "$DEST/AGENTS.playbook.md"
   echo "! AGENTS.md already exists. The latest playbook version is in AGENTS.playbook.md."
   echo "  Merge it into AGENTS.md (keep your 'Project-specific' section), then delete AGENTS.playbook.md."
 fi

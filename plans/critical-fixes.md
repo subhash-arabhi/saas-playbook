@@ -30,7 +30,7 @@ steps:
   - id: 6
     title: "Separate maintainer and project AGENTS.md"
     summary: "Move the project template out of the root so agents working on the playbook get correct instructions"
-    done: false
+    done: true
     checkpoint: false
   - id: 7
     title: "Safe fresh-clone bootstrap"
@@ -175,10 +175,10 @@ Fix the critical and high-impact issues from the lifecycle audit so the playbook
 **Files:** `AGENTS.md` (rewrite), `templates/project-AGENTS.md` (new), `install.sh` (edit), `README.md` (edit), `tests/installer.test.mjs` (edit)
 
 **Done when:**
-- [ ] A fresh install produces the same project `AGENTS.md` content as v1.0.2
-- [ ] The root `AGENTS.md` has no project placeholders and describes maintaining the playbook
-- [ ] No file named `AGENTS.md` is installed under `.agents/`
-- [ ] Installer tests pass
+- [x] A fresh install produces the same project `AGENTS.md` content as v1.0.2
+- [x] The root `AGENTS.md` has no project placeholders and describes maintaining the playbook
+- [x] No file named `AGENTS.md` is installed under `.agents/`
+- [x] Installer tests pass
 
 **Check:** `npm test`
 
@@ -281,3 +281,4 @@ None.
 | 3 | 2026-10-15 | Done | Walked a two-step fixture through the workflow (checkpoint on step 1): clean worktree at the checkpoint and at the end. From here on, unlisted files need an approved plan edit. |
 | 4 | 2026-10-15 | Done | Walked both scenarios through the new `deploy.md`: no budget stops before the merge with the cap and missing items listed; a failed smoke check rolls back images and opens a revert PR. The deploy also requires `main` to be an ancestor of the reviewed commit, so the merged files match it. |
 | 5 | 2026-10-15 | Done | 10 installer tests, also run with GNU coreutils, findutils, sed, tar and grep (Docker wasn't running); a real Linux run happens in CI after push. v1.0.x installs upgrade without `--force` (files that differ from the new version are backed up). `--force` also covers colliding skills; `/.backup/` is gitignored. Installs take about 0.2s (batched hashing, one `tar` copy). |
+| 6 | 2026-10-15 | Done | `git mv` keeps the template byte-identical to the old root `AGENTS.md`; compared with v1.0.2 the only change is this session's question-tool rule. `package.json` still ships the root `AGENTS.md` in the package (harmless, not in this step's Files). |

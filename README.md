@@ -122,14 +122,15 @@ Each skill follows the playbook's rules when `.agents/rules/` exists, and stands
 
 | Folder | Contents |
 |---|---|
-| `AGENTS.md` | Phase, the Always rules, commands, and which rules and skills each area needs |
+| `templates/project-AGENTS.md` | The project's `AGENTS.md`: phase, the Always rules, commands, and which rules and skills each area needs |
 | `rules/` | The decisions: planning, stack, system design, AI, repo structure, backend, frontend, database, testing, security, documentation, git, deployment |
 | `workflows/` | Exactly what happens on explore, build, push (with the pre-PR check), deploy and publish |
 | `skills/` | The 12 skills above, plus the six command skills |
 | `reviewers/` | Code reviewer, security auditor, test engineer |
 | `references/` | Security, accessibility and publish checklists; reference design systems |
-| `templates/` | `plan.md`, `ARCHITECTURE.md`, `DESIGN.md`, PR description |
-| `tools/` | Plan checker and viewer (`plan.mjs`), and the plan editor extension |
+| `templates/` | `plan.md`, `ARCHITECTURE.md`, `DESIGN.md`, PR description, and the project's `AGENTS.md` |
+| `tools/` | Plan checker and viewer (`plan.mjs`), the plan hooks, and the plan editor extension |
+| `AGENTS.md`, `tests/` | For working on the playbook itself: maintainer instructions and its test suite |
 
 The agent creates the per-project files as it goes: `ARCHITECTURE.md`, `DESIGN.md`, `infra/`, `scripts/pre-pr.sh` and `docker-compose.yml`.
 
