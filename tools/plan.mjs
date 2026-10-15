@@ -348,7 +348,7 @@ function cmdCheck(files) {
 
 function cmdView(port) {
   const dir = existsSync('plans') ? realpathSync.native('plans') : resolve(process.cwd(), 'plans')
-  const lastPoll = new Map() // plan name → when an open tab last loaded it (tabs poll every 2s)
+  const lastPoll = new Map() // plan name → when an open tab last loaded it (every 2s; hidden tabs about once a minute)
   const safe = (name) => (typeof name === 'string' && /^[\w.-]+\.md$/.test(name) && existsSync(join(dir, basename(name))) ? join(dir, basename(name)) : null)
   const json = (res, code, obj) => {
     res.writeHead(code, { 'content-type': 'application/json', 'cache-control': 'no-store' })
@@ -362,7 +362,7 @@ function cmdView(port) {
     }
     if (req.method === 'GET' && url.pathname === '/api/plans') return json(res, 200, planFiles(dir))
     if (req.method === 'GET' && url.pathname === '/api/root') {
-      const watching = [...lastPoll].filter(([, t]) => Date.now() - t < 5000).map(([name]) => name)
+      const watching = [...lastPoll].filter(([, t]) => Date.now() - t < 65_000).map(([name]) => name)
       return json(res, 200, { dir, pid: process.pid, watching })
     }
     if (req.method === 'GET' && url.pathname === '/api/plan') {
