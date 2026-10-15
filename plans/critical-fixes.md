@@ -1,6 +1,6 @@
 ---
 name: "Critical fixes from the lifecycle audit"
-status: building
+status: done
 steps:
   - id: 1
     title: "Self-tests and CI"
@@ -287,3 +287,4 @@ None.
 | 9 | 2026-10-15 | Done | Release steps run locally for v1.0.2. That run found npx and clone installs recording different checksums (npm leaves out ignore files and the extension's build output), so `install.sh` and its tests were added to Files (approved) and the installer now skips those files; a test checks the two installs match. Turned on private vulnerability reporting (approved). `main` requires a PR (0 approvals) and the 8 CI checks; admins can still bypass. The VSIX holds 4 extension files plus its manifest. |
 | 10 | 2026-10-15 | Done | Publish mode labels accessibility findings with the scanner's severities (critical, serious, moderate, minor) and ends with `n warnings, m blocking`. Publish also checks the Personal data table against the code. The deferral search finds nothing. |
 | 11 | 2026-10-15 | Done | 51 tests. Both images were already in the repo and match the current viewer, so they weren't recaptured. Docs show Codex ignores `disable-model-invocation`, so it may start command skills on its own; the README says so (fix: `agents/openai.yaml` per command skill, a follow-up). Added `package.json` to Files (approved) for its "same way" description. GitHub rendering is checked after push. |
+| End | 2026-10-15 | Done | Fresh install into a path with spaces, then a reinstall: both clean, 98 files recorded, no nested `AGENTS.md`. 51 tests, plan checks and ShellCheck pass. The repo has no `ARCHITECTURE.md`, so `CHANGELOG.md` holds the summary. The Linux CI run happens after push. |

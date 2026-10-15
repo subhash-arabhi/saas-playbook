@@ -13,6 +13,8 @@ Each release is a `vX.Y.Z` tag. Its GitHub Release carries the `npm pack` tarbal
 - The project's `AGENTS.md` template moved to `templates/project-AGENTS.md`; the root `AGENTS.md` is for maintaining the playbook.
 - The Playwright skill no longer suggests global `@latest` installs, attaching to a running browser, reading auth cookies, `test.fixme` or `gh` uploads; a test keeps it that way.
 - Self-tests and CI (tests on Ubuntu and macOS, ShellCheck, Gitleaks, Semgrep), a security policy, Dependabot for Actions, and attested releases.
+- Privacy is designed when personal data is added: `ARCHITECTURE.md` gets a "Personal data" table, the security review flags a missing row, and publish blocks on critical or serious accessibility findings.
+- The README shows which lifecycle stages are covered and which are planned, the platform assumptions the rules make, and how each agent was checked for compatibility.
 
 ## v1.0.2 (2026-10-12)
 
