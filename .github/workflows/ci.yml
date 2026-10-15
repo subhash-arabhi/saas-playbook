@@ -36,6 +36,7 @@ jobs:
           persist-credentials: false
       - run: shellcheck install.sh tools/plan-editor/install.sh
       - run: node tools/plan.mjs check
+      - run: node tools/plan.mjs check templates/plan.md
 
   scan:
     name: Gitleaks and Semgrep

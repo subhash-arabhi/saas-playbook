@@ -41,7 +41,15 @@ steps:
 **Stop and ask if:** <optional>
 
 ### Step 2: <Short step title>
-…
+**Do:**
+1. <Exact action>
+
+**Files:** `path/…` (edit)
+
+**Done when:**
+- [ ] <Specific, checkable result>
+
+**Check:** `<exact command(s)>`
 
 ## Open questions
 - <Question for the user, with its 2–3 options and your recommendation. Replace the list with "None." once answered.>

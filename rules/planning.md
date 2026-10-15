@@ -14,13 +14,13 @@ Save plans as `plans/<short-name>.md`, using `.agents/templates/plan.md` **exact
 - **Front matter** holds the plan's state as data:
   - `name`, and `status` (`draft` → `approved` → `building` → `done`)
   - `steps`: each with `id` (1, 2, …), `title` (≤ 60 characters), a one-line `summary` (≤ 160 characters), `done` and `checkpoint` (true/false)
-  - Use double quotes for strings.
+  - Put `name`, `title` and `summary` in double quotes. Leave `status`, numbers and `true`/`false` unquoted.
 - **The body** is plain markdown (no HTML), in this order:
   1. `# Plan: <name>`
   2. `## What we're building`: 2–4 plain sentences.
   3. `## Changes`: every change the plan makes, one `- **Name:** description` bullet each, at most 2 lines. If a change isn't here, it isn't in the plan.
   4. `## Steps`: one `### Step N: <title>` per step, matching the front matter, each with **Do:**, **Files:**, **Done when:** (`- [ ]` items, at most 5), **Check:** and optionally **Stop and ask if:**.
-  5. `## Open questions`: must say "None." before approval.
+  5. `## Open questions`: before approval it must say exactly "None." and nothing else.
   6. `## Build log`
 - **Run `node .agents/tools/plan.mjs check plans/<name>.md` after every write or update of a plan, and fix every error** before continuing.
 - **Plans describe changes only.** No architecture, stack tables or background explanation. The system's design lives in `ARCHITECTURE.md`. A project's first plan includes a step that writes `ARCHITECTURE.md`, with the stack chosen per `.agents/rules/stack.md`, and lists that stack in one **Changes** bullet.

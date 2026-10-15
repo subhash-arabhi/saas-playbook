@@ -99,7 +99,7 @@ const q = (s) => JSON.stringify(String(s))
 function fromModel({ data, sections: secs, steps }) {
   const fm = ['---', `name: ${q(data.name)}`, `status: ${data.status}`, 'steps:']
   for (const s of data.steps) fm.push(`  - id: ${s.id}`, `    title: ${q(s.title)}`, `    summary: ${q(s.summary)}`, `    done: ${!!s.done}`, `    checkpoint: ${!!s.checkpoint}`)
-  fm.push('---', '')
+  fm.push('---', '', '')
   const body = [`# Plan: ${data.name}`, '']
   for (const k of SECTIONS) {
     body.push(`## ${k}`)
@@ -164,17 +164,17 @@ export function checkPlan(text) {
   })
   for (const id of sec.steps.keys()) if (!steps.find((s) => s.id === id)) errors.push(`Steps: "### Step ${id}" isn't in the front matter`)
 
-  if (data.status !== 'draft' && hasOpenQuestions(sec.h2.get('Open questions') || [])) errors.push(`status is ${data.status} but Open questions isn't empty (write "None.")`)
+  if (data.status !== 'draft' && questionsOpen((sec.h2.get('Open questions') || []).join('\n'))) errors.push(`status is ${data.status} but Open questions doesn't say exactly "None."`)
   return { errors, warnings, plan }
 }
-const hasOpenQuestions = (lines) => lines.some((l) => /^(- |\d+\. )/.test(l))
+const questionsOpen = (text) => text.replace(/<!--[\s\S]*?-->/g, '').trim() !== 'None.'
 
 /** Everything a viewer needs to render a plan. */
 export function stateOf(text) {
   const { errors, warnings, plan } = checkPlan(text)
   if (!plan) return { error: errors.join('; '), version: versionOf(text) }
   const model = toModel(text)
-  const openQuestions = hasOpenQuestions(model.sections['Open questions'].split('\n'))
+  const openQuestions = questionsOpen(model.sections['Open questions'])
   return { data: model.data, sections: model.sections, steps: model.steps, errors, warnings, version: versionOf(text), canApprove: model.data.status === 'draft' && !errors.length && !openQuestions }
 }
 

@@ -1,7 +1,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { parsePlan, checkPlan, stateOf, applyOp, versionOf } from '../tools/plan.mjs'
-import { demoPlan } from './helpers.mjs'
+import { REPO, demoPlan } from './helpers.mjs'
 
 const errorsOf = (text) => checkPlan(text).errors
 
@@ -32,7 +34,7 @@ test('check reports format errors', () => {
 })
 
 test('a non-draft plan with open questions fails check', () => {
-  assert.match(errorsOf(demoPlan({ status: 'approved', openQuestions: '- Which provider?' })).join('\n'), /Open questions isn't empty/)
+  assert.match(errorsOf(demoPlan({ status: 'approved', openQuestions: '- Which provider?' })).join('\n'), /Open questions doesn't say exactly "None."/)
 })
 
 test('approve: only a draft with no open questions', () => {
@@ -41,6 +43,27 @@ test('approve: only a draft with no open questions', () => {
   assert.match(applyOp(demoPlan({ openQuestions: '- Which provider?' }), { type: 'approve' }).error, /approved only as a draft/)
   assert.match(applyOp(demoPlan({ status: 'building' }), { type: 'approve' }).error, /approved only as a draft/)
   assert.equal(stateOf(demoPlan()).canApprove, true)
+})
+
+test('Open questions is resolved only when it says exactly "None."', () => {
+  const open = ['Which provider should we choose?', '- Which provider?', '1. Which provider?', '<!-- notes -->', '', 'None', 'None. Except one thing']
+  for (const openQuestions of open) {
+    assert.equal(stateOf(demoPlan({ openQuestions })).canApprove, false, JSON.stringify(openQuestions))
+    assert.ok(applyOp(demoPlan({ openQuestions }), { type: 'approve' }).error, JSON.stringify(openQuestions))
+    assert.match(errorsOf(demoPlan({ status: 'approved', openQuestions })).join('\n'), /Open questions/, JSON.stringify(openQuestions))
+  }
+  for (const openQuestions of ['None.', '  None.  ', '<!-- answered on review -->\nNone.']) {
+    assert.equal(stateOf(demoPlan({ openQuestions })).canApprove, true, JSON.stringify(openQuestions))
+    assert.deepEqual(errorsOf(demoPlan({ status: 'approved', openQuestions })), [], JSON.stringify(openQuestions))
+  }
+})
+
+test('the shipped plan template passes check', () => {
+  assert.deepEqual(errorsOf(readFileSync(join(REPO, 'templates', 'plan.md'), 'utf8')), [])
+})
+
+test('edits keep the blank line after the front matter', () => {
+  assert.match(applyOp(demoPlan(), { type: 'approve' }).text, /\n---\n\n# Plan: Demo\n/)
 })
 
 test('checkpoint and step edits change only what they should', () => {

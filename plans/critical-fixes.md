@@ -10,7 +10,7 @@ steps:
   - id: 2
     title: "Plan approval and template"
     summary: "Approve plans only when Open questions is exactly None., and make the shipped template pass the checker"
-    done: false
+    done: true
     checkpoint: false
   - id: 3
     title: "Build workflow commit order"
@@ -106,9 +106,9 @@ Fix the critical and high-impact issues from the lifecycle audit so the playbook
 **Files:** `tools/plan.mjs` (edit), `templates/plan.md` (edit), `rules/planning.md` (edit), `tests/plan.test.mjs` (edit)
 
 **Done when:**
-- [ ] A plan whose Open questions is "Which provider should we choose?" can't be approved, and fails check when its status isn't `draft`
-- [ ] `node tools/plan.mjs check templates/plan.md` reports no errors
-- [ ] The new regression tests pass
+- [x] A plan whose Open questions is "Which provider should we choose?" can't be approved, and fails check when its status isn't `draft`
+- [x] `node tools/plan.mjs check templates/plan.md` reports no errors
+- [x] The new regression tests pass
 
 **Check:** `npm test`, `node tools/plan.mjs check templates/plan.md`
 
@@ -277,3 +277,4 @@ None.
 | Step | Date | Result | Notes |
 |---|---|---|---|
 | 1 | 2026-10-15 | Done | 35 tests in 6 files; CI runs tests on Ubuntu and macOS (Node 20, 22, 24), ShellCheck, the plan check, Gitleaks and Semgrep. Also added `tests/helpers.mjs` (shared fixtures); ShellCheck was already clean, so the shell scripts are unchanged. |
+| 2 | 2026-10-15 | Done | 38 tests. Also fixed viewer edits dropping the blank line after the front matter, and added the template to the CI plan check (`ci.yml`). |
