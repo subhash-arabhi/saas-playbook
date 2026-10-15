@@ -6,7 +6,16 @@ Run by `.agents/workflows/push.md`. Follow every step in order. If a step **bloc
 `scripts/pre-pr.sh` runs the **automated** steps (3–8). It's different for every project because it depends on the stack.
 - **If it doesn't exist, create it on the first "push":** use the project's real test, E2E, lint and build commands, plus Gitleaks, Semgrep and OSV-Scanner (pinned versions). Make it exit non-zero on any blocking failure and print one `PASS` / `BLOCK` / `WARN` / `SKIPPED` line per step. Commit it before running.
 - **Keep it current** when the stack's commands change.
+- **CI-aware:** when `CI=true`, the `.env.local` part of step 5 prints `SKIPPED` (there's no `.env.local` in CI); Gitleaks still runs. Diff-based steps compare against `BASE_REF` when it's set.
 - Steps 1–2 and 9–13 are done by you, the agent, not the script.
+
+## CI
+The script can also run on every pull request in GitHub Actions. That's the user's choice, recorded in `AGENTS.md` → Project-specific → **CI** (a missing line counts as `not chosen`; add it).
+- **When you create `scripts/pre-pr.sh`** and CI is `not chosen`, ask with the question tool: run these checks in GitHub Actions on every PR, or local only? Mark neither as recommended (private repos spend Actions minutes). If the repo's remote isn't on GitHub, don't ask: say CI isn't supported there yet and record `local only`.
+- **On "github-actions":** copy `.agents/templates/ci.yml` to `.github/workflows/pre-pr.yml`, fill in the stack's setup steps (every action pinned by commit SHA, no secrets, read-only permissions), and commit it with the script. Then ask a second question: make this check required on `main`? Only on "yes", and only after the workflow has run once on the PR so the check exists, add it to `main`'s required status checks (`gh api`, keeping the existing protection); otherwise mention the option in the report.
+- **On "local only":** create no workflow. Record the answer; don't ask again.
+- **"Turn CI on" / "turn CI off"** later: add or remove the workflow and update the CI line. Turning it off doesn't change branch protection; if the check is required, say so and ask before removing it from `main`.
+- **Local check still runs.** CI repeats only the script's steps; the agent's steps (1–2, 9–13) and the local run on "push" are unchanged. CI never deploys.
 
 ## Steps
 | # | Step | How | Blocks when |

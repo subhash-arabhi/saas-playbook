@@ -110,3 +110,44 @@ test('the link check also reads HTML images', () => {
     { line: 2, target: 'docs/light.png' },
   ])
 })
+
+function ciProblems(text) {
+  const yaml = text.replace(/^\s*#.*$/gm, '')
+  const problems = []
+  for (const [, ref] of yaml.matchAll(/uses:\s*(\S+)/g)) if (!/@[0-9a-f]{40}$/.test(ref)) problems.push(`not pinned by SHA: ${ref}`)
+  if (!/^permissions:\n[ \t]+contents: read\n(?![ \t]+\S)/m.test(yaml)) problems.push('permissions must be only contents: read')
+  if (/secrets\./.test(yaml)) problems.push('uses secrets')
+  if (/pull_request_target/.test(yaml)) problems.push('uses pull_request_target')
+  if (/\bdeploy\b/i.test(yaml)) problems.push('has a deploy step')
+  if (!/persist-credentials: false/.test(yaml)) problems.push('checkout keeps credentials')
+  if (!/CI=true scripts\/pre-pr\.sh/.test(yaml)) problems.push("doesn't run scripts/pre-pr.sh with CI=true")
+  return problems
+}
+
+test('the project CI template is pinned, read-only and runs only the pre-PR script', () => {
+  assert.deepEqual(ciProblems(readFileSync(join(REPO, 'templates', 'ci.yml'), 'utf8')), [])
+})
+
+test('projects choose CI on the first push, and can switch it later', () => {
+  const agents = readFileSync(join(REPO, 'templates', 'project-AGENTS.md'), 'utf8')
+  assert.match(agents, /^- \*\*CI:\*\* not chosen <!-- not chosen \| github-actions \| local only/m)
+  assert.match(agents, /"Turn CI on" \/ "turn CI off"/)
+  const prePr = readFileSync(join(REPO, 'workflows', 'pre-pr.md'), 'utf8').split('## CI\n')[1] || ''
+  assert.match(prePr, /\.agents\/templates\/ci\.yml/)
+  assert.match(prePr, /ask with the question tool: run these checks in GitHub Actions/)
+  assert.match(prePr, /second question: make this check required on `main`\?/)
+  assert.match(prePr, /Only on "yes"/)
+  assert.match(prePr, /don't ask again/)
+  assert.match(prePr, /CI never deploys/)
+})
+
+test('the CI template check notices tag pins, secrets, extra permissions and deploys', () => {
+  const ok = readFileSync(join(REPO, 'templates', 'ci.yml'), 'utf8')
+  const bad = {
+    'not pinned by SHA: actions/checkout@v4': ok.replace(/actions\/checkout@[0-9a-f]{40}/, 'actions/checkout@v4'),
+    'uses secrets': ok.replace('CI=true scripts/pre-pr.sh', 'CI=true TOKEN=${{ secrets.TOKEN }} scripts/pre-pr.sh'),
+    'permissions must be only contents: read': ok.replace('  contents: read', '  contents: read\n  pull-requests: write'),
+    'has a deploy step': ok + '      - run: infra/deploy.sh\n',
+  }
+  for (const [problem, text] of Object.entries(bad)) assert.ok(ciProblems(text).includes(problem), problem)
+})
