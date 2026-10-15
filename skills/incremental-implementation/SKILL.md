@@ -40,7 +40,7 @@ Run a check again only after code it covers has changed. Re-running on unchanged
 - Three similar lines beat a premature abstraction. Don't abstract before the third use. Don't create utility files for one-time operations.
 - Write the naive, obviously correct version first. Optimize only after tests prove it correct.
 
-**Scope discipline.** Touch only what the step needs (in a plan, its **Files**). If a change elsewhere is clearly needed, make it and note it (in the plan's build log, if there is one). Don't clean up adjacent code, reorder imports in files you aren't changing, remove comments you don't understand, add features not in the step, or modernize syntax in files you only read. Note anything else worth fixing and ask:
+**Scope discipline.** Touch only what the step needs. In a plan, change only the files in the step's **Files**; if another file must change, stop and propose a plan edit that adds it, and continue once the user approves. Without a plan, if a change elsewhere is clearly needed, make it and say so. Don't clean up adjacent code, reorder imports in files you aren't changing, remove comments you don't understand, add features not in the step, or modernize syntax in files you only read. Note anything else worth fixing and ask:
 
 ```text
 NOTICED BUT NOT TOUCHING:

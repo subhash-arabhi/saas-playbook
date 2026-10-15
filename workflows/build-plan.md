@@ -12,7 +12,7 @@ Trigger: **`/build [plans/<name>.md]`**. Follow every step in order.
 ## 2. For each step, in order
 Skip steps with `done: true` in the front matter, so the build can resume.
 1. Read the step's **Do**, **Files**, **Done when** and **Check**. Read the rules for every area it touches (`AGENTS.md` → Areas).
-2. Do exactly what **Do** says. Touch only the listed files; if another must change, note it in the build log.
+2. Do exactly what **Do** says. **Scope:** change only the files in the step's **Files**. If another file must change, stop and propose a plan edit that adds it; continue once the user approves.
 3. Add tests for the behaviour the step adds.
 4. If the step changes UI, check it in a browser at desktop and mobile sizes (`.agents/rules/frontend.md`).
 5. Run the **Check** commands. Fix and re-run until every **Done when** item is true, and:
@@ -20,15 +20,13 @@ Skip steps with `done: true` in the front matter, so the build can resume.
    - all existing tests, lint, format and type checks pass
    - no dead code, debug output or unrelated changes
    - new critical paths log and measure what's needed to tell they work (`observability-and-instrumentation` skill)
-6. Tick the step's **Done when** boxes, set its `done: true` in the front matter, add one line to the **Build log**, and run `plan.mjs check` (it must pass).
-7. Commit the step, including the plan file: `Step N: <title>`.
+6. Update the plan: tick the step's **Done when** boxes, set its `done: true` in the front matter, and add one line to the **Build log** (ending with "checkpoint shown" if the step has `checkpoint: true`). Run `plan.mjs check` (it must pass).
+7. Commit the step's work and the plan file together, in one commit: `Step N: <title>`. Nothing is edited after this commit, so `git status` is clean.
 
 ## 3. Checkpoints
-If the finished step has **`checkpoint: true`** (set by the user):
-1. Commit the step as usual.
-2. Show the user what the step built: what to open at localhost, and what changed. Open the plan (`.agents/rules/planning.md` → plan view).
-3. Add "checkpoint shown" to its Build log line.
-4. Stop, and ask with the question tool (`.agents/rules/asking.md`): continue with the next step, or stop here to review.
+If the finished step has **`checkpoint: true`** (set by the user), after its commit:
+1. Show the user what the step built: what to open at localhost, and what changed. Open the plan (`.agents/rules/planning.md` → plan view).
+2. Stop, and ask with the question tool (`.agents/rules/asking.md`): continue with the next step, or stop here to review.
 
 If the user chooses to continue, carry on as if they ran `/build`; otherwise the next `/build` continues from the next step with `done: false`. Never change `checkpoint` yourself.
 
@@ -38,10 +36,12 @@ Report what happened in chat, then ask with the question tool, offering the real
 - A step is unclear, or needs a decision the plan doesn't cover.
 - A step's **Stop and ask if** condition is hit.
 - The work touches secrets, auth or permissions, payments, deleting data, destructive migrations, or production.
-- Something outside the plan seems needed. Propose a plan edit; don't do it.
+- Something outside the plan seems needed (see **Scope** in section 2).
 
 ## 5. When all steps are done
-1. Check the whole plan works end to end. Update `ARCHITECTURE.md`, `README.md`, `.env.example` and the API contract for everything the plan changed, and bump "Last updated". Commit `Update ARCHITECTURE.md`.
-2. Set `status: done` in the front matter and run `plan.mjs check`.
-3. Summarise: steps finished, commits, files changed, tests added, anything skipped or flagged. Open the plan.
-4. Tell the user it's committed locally. Nothing is pushed until they say "push".
+1. Check the whole plan works end to end.
+2. Update `ARCHITECTURE.md`, `README.md`, `.env.example` and the API contract for everything the plan changed, and bump "Last updated".
+3. Set `status: done` in the front matter and run `plan.mjs check` (it must pass).
+4. Commit the doc updates and the plan file together: `Update ARCHITECTURE.md`. `git status` is now clean.
+5. Summarise: steps finished, commits, files changed, tests added, anything skipped or flagged. Open the plan.
+6. Tell the user it's committed locally. Nothing is pushed until they say "push".

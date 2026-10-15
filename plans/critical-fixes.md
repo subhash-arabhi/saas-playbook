@@ -15,7 +15,7 @@ steps:
   - id: 3
     title: "Build workflow commit order"
     summary: "Commit all plan state with each step so a build never ends with a dirty plan file"
-    done: false
+    done: true
     checkpoint: false
   - id: 4
     title: "Deploy only the reviewed commit"
@@ -121,9 +121,9 @@ Fix the critical and high-impact issues from the lifecycle audit so the playbook
 **Files:** `workflows/build-plan.md` (edit), `skills/incremental-implementation/SKILL.md` (edit)
 
 **Done when:**
-- [ ] Following the workflow on a two-step fixture plan with a checkpoint on step 1 leaves `git status --porcelain` empty at the checkpoint and at the end
-- [ ] The plan file in the last commit matches the reported state (done flags, build log, status)
-- [ ] The scope rule appears once in the workflow and matches the skill
+- [x] Following the workflow on a two-step fixture plan with a checkpoint on step 1 leaves `git status --porcelain` empty at the checkpoint and at the end
+- [x] The plan file in the last commit matches the reported state (done flags, build log, status)
+- [x] The scope rule appears once in the workflow and matches the skill
 
 **Check:** walk a fixture project through `/build` twice (stop at the checkpoint, then finish) and run `git status --porcelain` after each run
 
@@ -278,3 +278,4 @@ None.
 |---|---|---|---|
 | 1 | 2026-10-15 | Done | 35 tests in 6 files; CI runs tests on Ubuntu and macOS (Node 20, 22, 24), ShellCheck, the plan check, Gitleaks and Semgrep. Also added `tests/helpers.mjs` (shared fixtures); ShellCheck was already clean, so the shell scripts are unchanged. |
 | 2 | 2026-10-15 | Done | 38 tests. Also fixed viewer edits dropping the blank line after the front matter, and added the template to the CI plan check (`ci.yml`). |
+| 3 | 2026-10-15 | Done | Walked a two-step fixture through the workflow (checkpoint on step 1): clean worktree at the checkpoint and at the end. From here on, unlisted files need an approved plan edit. |
