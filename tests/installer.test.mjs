@@ -47,6 +47,20 @@ test('a fresh install sets up the project', () => {
   assert.match(read(dest, '.cursor/hooks.json'), /plan-hook\.mjs/)
 })
 
+test('a fresh install sets compaction at 500k tokens, and a reinstall keeps the user’s value', () => {
+  const dest = project()
+  install(dest)
+  const claude = JSON.parse(read(dest, '.claude/settings.json'))
+  assert.equal(claude.autoCompactWindow, 500000)
+  assert.match(JSON.stringify(claude.hooks), /plan-hook\.mjs/)
+  assert.match(read(dest, '.codex/config.toml'), /^model_auto_compact_token_limit = 500000$/m)
+  assert.equal(JSON.parse(read(dest, '.vscode/settings.json'))['github.copilot.chat.advanced.summarizeAgentConversationHistoryThreshold'], 500000)
+  writeFileSync(join(dest, '.claude/settings.json'), JSON.stringify({ ...claude, autoCompactWindow: 400000 }))
+  const out = install(dest)
+  assert.equal(JSON.parse(read(dest, '.claude/settings.json')).autoCompactWindow, 400000)
+  assert.match(out, /Cursor.*\/summarize/)
+})
+
 test('works in a path with spaces', () => {
   const dest = project('with space ')
   install(dest)

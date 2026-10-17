@@ -215,6 +215,8 @@ fi
 
 # 5. Hooks that show a plan in the plan view whenever the agent changes it (Cursor and Claude Code)
 node "$SRC/tools/install-hooks.mjs" "$DEST"
+# Compact agent sessions at about 500k tokens, where the tool allows it
+node "$SRC/tools/install-compaction.mjs" "$DEST"
 
 # 6. Project folders the playbook expects
 mkdir -p "$DEST/plans"
@@ -224,7 +226,7 @@ cat <<'EOF'
 
 Done. Next:
   1. Fill in the 'Project-specific' section of AGENTS.md (product, cloud, project skills).
-  2. Commit AGENTS.md, CLAUDE.md, .claude/, .cursor/hooks.json, plans/ and .agents/ (git skips the playbook's own files
+  2. Commit AGENTS.md, CLAUDE.md, .claude/, .cursor/hooks.json, .codex/config.toml, .vscode/settings.json, plans/ and .agents/ (git skips the playbook's own files
      unless you installed with --commit). If they were committed before, untrack them once:
        git rm -r --cached --quiet .agents && git add .agents
   3. Tell your agent: "Read AGENTS.md and follow it strictly."
