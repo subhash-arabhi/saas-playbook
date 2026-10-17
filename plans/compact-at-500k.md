@@ -1,6 +1,6 @@
 ---
 name: "Compact sessions at 500k tokens"
-status: building
+status: done
 steps:
   - id: 1
     title: "Compaction settings in the installer"
@@ -10,7 +10,7 @@ steps:
   - id: 2
     title: "Docs"
     summary: "README compatibility row and Install table, maintainer AGENTS.md and CHANGELOG"
-    done: false
+    done: true
     checkpoint: false
 ---
 
@@ -53,8 +53,8 @@ In every project that installs the playbook, the agent's session compacts (summa
 **Files:** `README.md` (edit), `AGENTS.md` (edit), `CHANGELOG.md` (edit)
 
 **Done when:**
-- [ ] The README says how each tool was checked, and that Cursor can't be configured
-- [ ] CHANGELOG describes the change
+- [x] The README says how each tool was checked, and that Cursor can't be configured
+- [x] CHANGELOG describes the change
 
 **Check:** `npm test`
 
@@ -65,3 +65,5 @@ None.
 | Step | Date | Result | Notes |
 |---|---|---|---|
 | 1 | 2026-10-17 | Done | 60 tests (5 new). VS Code settings often contain comments; those files are left alone with the exact line to add. The installer's "Commit …" hint now lists `.codex/config.toml` and `.vscode/settings.json`. |
+| 2 | 2026-10-17 | Done | 60 tests. The compatibility row marks the VS Code entry as checked against source code, since its settings reference doesn't list the setting. |
+| End | 2026-10-17 | Done | A real install prints one line per tool, including Cursor's `/summarize` note. |
