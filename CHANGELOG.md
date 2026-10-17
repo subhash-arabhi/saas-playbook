@@ -4,6 +4,7 @@ Each release is a `vX.Y.Z` tag. Its GitHub Release carries the `npm pack` tarbal
 
 ## Unreleased
 
+- Agent sessions compact at about 500k tokens: the installer sets it for Claude Code (`autoCompactWindow`), Codex (`model_auto_compact_token_limit`, trusted projects) and VS Code Copilot, keeping any value already set. Cursor's point can't be configured; `/summarize` compacts sooner.
 - Optional CI for projects: the first push asks whether to run the automated pre-PR checks in GitHub Actions (`templates/ci.yml`: pinned, read-only, no secrets) and whether to require them on `main`. `AGENTS.md` records the choice, and "turn CI on/off" changes it. Deploys still never run from CI.
 - Agents ask questions with the coding tool's question interface (`rules/asking.md`), and plans open in the plan view whenever they change (hooks for Cursor and Claude Code).
 - Plans can be approved only when Open questions says exactly "None."; the plan template passes the checker.

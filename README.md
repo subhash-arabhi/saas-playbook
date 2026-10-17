@@ -80,6 +80,9 @@ The playbook is tested in Cursor. For the other agents, each entry was checked a
 | Command skills run only when asked | Yes, `disable-model-invocation` (docs) | Yes, `disable-model-invocation` (docs) | **No**: Codex ignores `disable-model-invocation`, so only `AGENTS.md`'s "never run unasked" rule holds it back (docs) | Yes, `disable-model-invocation` (docs) |
 | Slash commands | `/push` (tested) | `/push` (docs) | `$push` or the `/skills` menu; the plain word works too (docs) | `/push` (docs) |
 | Plan view opens by itself | Yes, through the installed hook (tested) | Through the installed hook (docs; the hook's output has unit tests) | No hook; run `plan.mjs open` | No hook; run `plan.mjs open` |
+| Compacts at about 500k tokens | **No**: Cursor fixes the point near the model's limit and it can't be set; type `/summarize` to compact sooner (docs, 2026-10-17) | Yes, `autoCompactWindow` in `.claude/settings.json` (docs, 2026-10-17) | Yes, `model_auto_compact_token_limit` in `.codex/config.toml`, once you trust the project (docs, 2026-10-17) | Yes, an advanced setting in `.vscode/settings.json` that VS Code's settings reference doesn't list (source code, 2026-10-17) |
+
+Compaction summarises older history so a long session keeps going. Models with windows under 500k tokens compact earlier, at each tool's own point.
 
 ## Install
 
@@ -101,6 +104,7 @@ It adds:
 | `CLAUDE.md` | One line, `@AGENTS.md`, so Claude Code reads it | Yes |
 | `.claude/skills` → `.agents/skills` | Link for Claude Code's skill discovery | Yes |
 | `.cursor/hooks.json`, `.claude/settings.json` | A hook that shows a plan in the plan view whenever the agent changes it. Added to existing files, keeping your settings | Yes |
+| `.claude/settings.json`, `.codex/config.toml`, `.vscode/settings.json` | Compact agent sessions at about 500k tokens ([compatibility](#agent-compatibility)). A value you already set is kept; a file with comments is left alone, with the line to add | Yes |
 | `.agents/playbook.json` | The installed version, its reinstall command, the playbook's skill list, and every file it installed with its SHA-256 | Yes |
 | `.agents/.gitignore` | Keeps the playbook's own files out of git | Yes |
 | `.agents/` rules, workflows, reviewers, references, templates, tools and skills | The playbook itself | **No**, reinstalled from `playbook.json` |

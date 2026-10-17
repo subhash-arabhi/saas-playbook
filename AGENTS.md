@@ -7,7 +7,7 @@ This file is not the one projects get. The installer copies `templates/project-A
 ## What's where
 - `install.sh`: the installer (bash 3.2 or later, macOS and Linux). `npx github:subhash-arabhi/saas-playbook` runs it.
 - `templates/project-AGENTS.md`: the project's `AGENTS.md`. Keep its placeholders.
-- `tools/`: `plan.mjs` (plan checker, viewer and opener), `plan-hook.mjs` and `install-hooks.mjs` (show plans when they change), `plan-editor/` (the VS Code and Cursor extension).
+- `tools/`: `plan.mjs` (plan checker, viewer and opener), `plan-hook.mjs` and `install-hooks.mjs` (show plans when they change), `install-compaction.mjs` (compact sessions at 500k tokens), `plan-editor/` (the VS Code and Cursor extension).
 - `tests/`: `node:test` suites with no dependencies. `.github/workflows/ci.yml` runs them with ShellCheck, Gitleaks and Semgrep.
 - `plans/`: plans for changing this repo, in the playbook's own format.
 
