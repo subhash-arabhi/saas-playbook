@@ -198,3 +198,15 @@ test('a risky action counts as approved only with an Approved: bullet, and the t
   assert.match(section(template, '## Changes'), /^- \*\*Approved: <risky action>:\*\*/m)
   assert.deepEqual(checkPlan(template).errors, [])
 })
+
+test('walk-through: an approved secret passes the checker, and an unapproved migration has no Approved: bullet', () => {
+  const plan = readFileSync(join(REPO, 'templates', 'plan.md'), 'utf8')
+    .replace('status: draft', 'status: approved')
+    .replace(/- \*\*Approved: <risky action>:\*\*.*/, '- **Approved: new secret:** STRIPE_SECRET_KEY in .env.local and the secret store')
+    .replace(/## Open questions\n[\s\S]*?\n\n/, '## Open questions\nNone.\n\n')
+    .replace(/(\|---\|---\|---\|---\|\n)/, '$1| Plan | 2026-10-20 | Dry run | Dry run: 5 questions, none left. |\n')
+  assert.deepEqual(checkPlan(plan).errors, [])
+  const approved = [...section(plan, '## Changes').matchAll(/^- \*\*Approved: (.+?):\*\*/gm)].map((m) => m[1])
+  assert.deepEqual(approved, ['new secret'])
+  assert.ok(!approved.includes('destructive migration'))
+})

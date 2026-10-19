@@ -15,7 +15,7 @@ steps:
   - id: 3
     title: "Tests, walk-through and docs"
     summary: "Tests for both workflows, a fixture walk-through, README and CHANGELOG"
-    done: false
+    done: true
     checkpoint: false
 ---
 
@@ -74,9 +74,9 @@ Before a plan is approved, the agent works out every question the build could ne
 **Files:** `tests/repo.test.mjs` (edit), `README.md` (edit), `CHANGELOG.md` (edit)
 
 **Done when:**
-- [ ] The tests fail if any part of the dry run, the rounds or the stop list is removed
-- [ ] The walk-through lists every question before the first card, the second dry run catches the new question, the build doesn't stop for the approved secret, logs the extra file, and stops for the migration
-- [ ] README and CHANGELOG describe the change
+- [x] The tests fail if any part of the dry run, the rounds or the stop list is removed
+- [x] The walk-through lists every question before the first card, the second dry run catches the new question, the build doesn't stop for the approved secret, logs the extra file, and stops for the migration
+- [x] README and CHANGELOG describe the change
 
 **Check:** `npm test`, `node tools/plan.mjs check`
 
@@ -89,3 +89,4 @@ None.
 | Plan | 2026-10-20 | Dry run | Dry run: 3 questions (risky actions, surprises, finding every question first), none left. |
 | 1 | 2026-10-20 | Done | 62 tests (2 new, checking the dry-run phrases appear in order). A user's answer to the checkpoint question now counts as the user setting it. Added `tests/repo.test.mjs` to steps 1 and 2 so each step's behaviour is tested in its own commit. |
 | 2 | 2026-10-20 | Done | 64 tests (2 new). Decided: work beyond the plan is logged as "Decided: not built" rather than asked. Also changed: `skills/debugging-and-error-recovery/SKILL.md` (its "no fixed attempt count" contradicted the two-approaches stop). |
+| 3 | 2026-10-20 | Done | 65 tests (1 new walk-through test: an approved secret plan passes the checker, and no Approved: bullet names the migration). Removing any of 11 key phrases (dry run, rounds, repeat, stop list, summary, Always 10) fails a test. Walked a Stripe-checkout fixture by hand through the rules: plan skill 6.2 writes every question before 6.3's first card; an answer adding refunds is caught by the repeat dry run in 6.5; the build doesn't stop for the approved `STRIPE_SECRET_KEY`, logs an unlisted `lib/money.ts` as "Also changed:", and stops for an unapproved column drop under reason 2. The CHANGELOG's old "needs an approved plan edit" line is gone. |

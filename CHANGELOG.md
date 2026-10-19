@@ -4,11 +4,13 @@ Each release is a `vX.Y.Z` tag. Its GitHub Release carries the `npm pack` tarbal
 
 ## Unreleased
 
+- `/plan` asks everything before approval: a dry run of the steps lists every question in Open questions before the first card, asks them in rounds of up to 3, and repeats until a dry run finds none. Risky actions approved then become `Approved:` bullets in Changes.
+- `/build` runs to the end. It decides and logs what the plan didn't cover ("Decided:", "Also changed:"), lists those notes in the final summary, and stops only for a checkpoint, a risky action without an `Approved:` bullet naming it exactly, a step's Stop and ask if, a check failing after two different approaches, or unrelated uncommitted changes.
 - Agent sessions compact at about 500k tokens: the installer sets it for Claude Code (`autoCompactWindow`), Codex (`model_auto_compact_token_limit`, trusted projects) and VS Code Copilot, keeping any value already set. Cursor's point can't be configured; `/summarize` compacts sooner.
 - Optional CI for projects: the first push asks whether to run the automated pre-PR checks in GitHub Actions (`templates/ci.yml`: pinned, read-only, no secrets) and whether to require them on `main`. `AGENTS.md` records the choice, and "turn CI on/off" changes it. Deploys still never run from CI.
 - Agents ask questions with the coding tool's question interface (`rules/asking.md`), and plans open in the plan view whenever they change (hooks for Cursor and Claude Code).
 - Plans can be approved only when Open questions says exactly "None."; the plan template passes the checker.
-- The build workflow commits every plan update with its step; a file outside a step's list needs an approved plan edit.
+- The build workflow commits every plan update with its step.
 - Deploys ship exactly the reviewed commit, stop before the merge when something they need isn't in the PR, open a revert PR when the smoke check fails, and require migrations that work with both versions.
 - The installer records every file it installs with its SHA-256, deletes only those, backs up local edits, stops on unmanaged `.agents/` content or skill-name collisions (`--force` backs up and continues), and stops when a version's content changes.
 - Fresh clones ask before running the remote install.
