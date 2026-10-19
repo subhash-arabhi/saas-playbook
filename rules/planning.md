@@ -32,6 +32,22 @@ Save plans as `plans/<short-name>.md`, using `.agents/templates/plan.md` **exact
 
   The user may edit any section, set checkpoints, and approve. **Re-read the plan file before acting on it**, because the user may have changed it.
 
+## Settle everything before approval
+After approval the build runs to the end without asking, so every question is found and answered first (`.agents/skills/plan/SKILL.md` → step 6).
+- **Dry run first:** walk every step as if building it, list every question in Open questions, then ask. Repeat the dry run after the answers until it finds none.
+- **The dry run covers:**
+  - goal and users
+  - behaviour and edge cases: empty, errors, limits
+  - UI states on desktop and mobile
+  - data and privacy: rows for `ARCHITECTURE.md` → Personal data
+  - outside services and their cost
+  - every risky action the steps need (`AGENTS.md` → Always 10)
+  - what's out of scope
+  - how "done" is checked
+  - whether to pause anywhere: the user may answer with checkpoints; set them as answered
+- **Don't ask** what the code, the plan, `.env.local` or a sensible default answers. Use the default and say so in the step.
+- **Approved risky actions** are Changes bullets: `- **Approved: <action>:** <exactly what>` (e.g. `- **Approved: new secret:** STRIPE_SECRET_KEY in .env.local and the secret store`). The build treats only these as approved, and only for exactly what they name.
+
 ## Steps
 - **Every step's Do follows the rules of the areas it touches** (`AGENTS.md` → Areas).
 - **Each step is one meaningful, testable chunk of work**, usually a whole feature or subsystem end to end (e.g. "Team invites: API, UI and tests"). Agents can handle large steps; don't slice work into tiny layers.
@@ -41,7 +57,7 @@ Save plans as `plans/<short-name>.md`, using `.agents/templates/plan.md` **exact
 - No feature flags. Features go live when the user runs `/deploy`.
 
 ## Checkpoints
-- **The user sets a step's `checkpoint: true`** (by clicking its circle in the viewer, or editing the file) to make the build pause after that step. **Never change `checkpoint` yourself.**
+- **The user sets a step's `checkpoint: true`** (by clicking its circle in the viewer, editing the file, or answering the checkpoint question in the dry run) to make the build pause after that step. **Never change `checkpoint` otherwise.**
 
 ## Building
 On `/build`, follow `.agents/workflows/build-plan.md`.

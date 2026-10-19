@@ -40,12 +40,12 @@ Run a check again only after code it covers has changed. Re-running on unchanged
 - Three similar lines beat a premature abstraction. Don't abstract before the third use. Don't create utility files for one-time operations.
 - Write the naive, obviously correct version first. Optimize only after tests prove it correct.
 
-**Scope discipline.** Touch only what the step needs. In a plan, change only the files in the step's **Files**; if another file must change, stop and propose a plan edit that adds it, and continue once the user approves. Without a plan, if a change elsewhere is clearly needed, make it and say so. Don't clean up adjacent code, reorder imports in files you aren't changing, remove comments you don't understand, add features not in the step, or modernize syntax in files you only read. Note anything else worth fixing and ask:
+**Scope discipline.** Touch only what the step needs. In a plan, change the files in the step's **Files**, plus any other file the step clearly needs, noted in the step's Build log line as "Also changed: <file> (why)" (`.agents/workflows/build-plan.md` → Scope). Without a plan, if a change elsewhere is clearly needed, make it and say so. Don't clean up adjacent code, reorder imports in files you aren't changing, remove comments you don't understand, add features not in the step, or modernize syntax in files you only read. Note anything else worth fixing without stopping: in a plan build, as "Decided: not built: <what>" in the Build log, which the final summary lists; otherwise, in your report:
 
 ```text
 NOTICED BUT NOT TOUCHING:
 - utils/format has an unused import (unrelated to this step)
-→ Add to the plan or a follow-up task, or leave it?
+→ Candidate for a follow-up plan.
 ```
 
 **One thing per step.** Don't mix a new component, a refactor of another and a build config change; make them three steps and three commits. Keep refactors separate from features.

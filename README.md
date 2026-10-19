@@ -35,8 +35,8 @@ npx github:subhash-arabhi/saas-playbook
 | Command | What happens |
 |---|---|
 | `/explore <idea>` | Minimal local prototype to find out if the idea is worth building. Findings go in `EXPLORE.md` |
-| `/plan [what]` | Writes a plan in `plans/`. After exploring, it first records the decision and switches to the build phase |
-| `/build [plan]` | Builds an approved plan step by step, with tests and one commit per step. Run again to resume |
+| `/plan [what]` | Writes a plan in `plans/` and asks everything up front: a dry run lists every question, including each risky action to approve, and repeats until none are left. After exploring, it first records the decision and switches to the build phase |
+| `/build [plan]` | Builds an approved plan to the end, with tests and one commit per step. It decides and logs what the plan didn't cover, and stops only for checkpoints, unapproved risky actions or a check it can't fix. Run again to resume |
 | `/push` | Your sign-off: runs the pre-PR check, pushes and opens the PR |
 | `/deploy` | Merges the PR and deploys to production, then smoke-checks it |
 | `/publish` | Readiness for real users (rare): legal pages, consent, privacy, accessibility, licenses, domain |

@@ -14,7 +14,7 @@ Use whichever is in your tool list. If none is (another tool, a subagent, a head
 
 ## Writing the question
 - **First say in one chat sentence what needs deciding and why.** Show anything the user needs to judge it (what failed, what it costs, the localhost URL) before the question, not inside it.
-- **One decision per question, in one sentence.** Ask related questions together, at most 3 per call; don't spread them over several turns.
+- **One decision per question, in one sentence.** Ask related questions together, at most 3 per call; don't spread them over several turns. The exception is the planning grill (`.agents/skills/plan/SKILL.md` → step 6): it asks every question in consecutive rounds of up to 3, one card after another, until none are left.
 - **2–3 options**, mutually exclusive unless the question allows several answers. Put the recommended option first and end its label with "(Recommended)". Don't add an "Other" option: every tool adds a free-text answer itself.
 - **Short labels.** Put the consequence in the option's description, or in the label when the tool has no description field. Headers, where the tool has them, are 12 characters or fewer.
 - **Risky actions** (`AGENTS.md` → Always 10): name exactly what will happen in the question, and don't mark either option as recommended.
