@@ -1,6 +1,6 @@
 ---
 name: "Grill before build"
-status: building
+status: done
 steps:
   - id: 1
     title: "Find and ask every question before approval"
@@ -90,3 +90,4 @@ None.
 | 1 | 2026-10-20 | Done | 62 tests (2 new, checking the dry-run phrases appear in order). A user's answer to the checkpoint question now counts as the user setting it. Added `tests/repo.test.mjs` to steps 1 and 2 so each step's behaviour is tested in its own commit. |
 | 2 | 2026-10-20 | Done | 64 tests (2 new). Decided: work beyond the plan is logged as "Decided: not built" rather than asked. Also changed: `skills/debugging-and-error-recovery/SKILL.md` (its "no fixed attempt count" contradicted the two-approaches stop). |
 | 3 | 2026-10-20 | Done | 65 tests (1 new walk-through test: an approved secret plan passes the checker, and no Approved: bullet names the migration). Removing any of 11 key phrases (dry run, rounds, repeat, stop list, summary, Always 10) fails a test. Walked a Stripe-checkout fixture by hand through the rules: plan skill 6.2 writes every question before 6.3's first card; an answer adding refunds is caught by the repeat dry run in 6.5; the build doesn't stop for the approved `STRIPE_SECRET_KEY`, logs an unlisted `lib/money.ts` as "Also changed:", and stops for an unapproved column drop under reason 2. The CHANGELOG's old "needs an approved plan edit" line is gone. |
+| End | 2026-10-20 | Done | 3 steps, 65 tests, all plans and the template pass the checker, ShellCheck clean. Built without stopping; one Decided and one Also changed note (step 2). |
