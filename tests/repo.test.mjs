@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process'
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join, dirname, resolve } from 'node:path'
 import { REPO } from './helpers.mjs'
+import { checkPlan } from '../tools/plan.mjs'
 
 const tracked = (pattern) => execFileSync('git', ['ls-files', pattern], { cwd: REPO, encoding: 'utf8' }).trim().split('\n').filter(Boolean)
 
@@ -174,4 +175,26 @@ test('the planning rule has the dry-run checklist and the Approved: rule', () =>
   assert.match(rule, /`- \*\*Approved: <action>:\*\* <exactly what>`/)
   assert.match(rule, /only these as approved, and only for exactly what they name/)
   assert.match(readFileSync(join(REPO, 'rules', 'asking.md'), 'utf8'), /planning grill[\s\S]*consecutive rounds of up to 3/)
+})
+
+test('/build stops only for the five listed reasons, and decides and logs everything else', () => {
+  const build = readFileSync(join(REPO, 'workflows', 'build-plan.md'), 'utf8')
+  const run = section(build, '## 4. Run to the end')
+  const decide = run.split('**Decide and log')[1]?.split('**Stop and ask only when**')[0] || ''
+  for (const item of ['A decision the plan doesn\'t cover', 'An extra file', 'An unclear detail', 'Work beyond the plan']) assert.ok(decide.includes(item), `decide and log: ${item}`)
+  assert.match(decide, /"Decided: <what> \(why\)"/)
+  const stops = (run.split('**Stop and ask only when**')[1] || '').match(/^\d+\. .+$/gm) || []
+  assert.equal(stops.length, 5, 'exactly five stop reasons')
+  for (const [i, reason] of [/checkpoint/, /isn't covered by an `- \*\*Approved: …:\*\*` bullet .* names exactly this action/, /\*\*Stop and ask if\*\*/, /two genuinely different approaches/, /unrelated uncommitted changes/].entries()) assert.match(stops[i], reason)
+  assert.match(section(build, '## 2.'), /"Also changed: <file> \(why\)"/)
+  assert.doesNotMatch(build, /propose a plan edit/)
+  assert.match(section(build, '## 5.'), /list every "Decided:" and "Also changed:" note/)
+  assert.match(readFileSync(join(REPO, 'skills', 'incremental-implementation', 'SKILL.md'), 'utf8'), /"Also changed: <file> \(why\)"/)
+})
+
+test('a risky action counts as approved only with an Approved: bullet, and the template shows one', () => {
+  assert.match(readFileSync(join(REPO, 'templates', 'project-AGENTS.md'), 'utf8'), /Ask before anything risky:\*\*.*A plan's `Approved:` bullet counts as asking, for exactly what it names\./)
+  const template = readFileSync(join(REPO, 'templates', 'plan.md'), 'utf8')
+  assert.match(section(template, '## Changes'), /^- \*\*Approved: <risky action>:\*\*/m)
+  assert.deepEqual(checkPlan(template).errors, [])
 })

@@ -23,11 +23,11 @@ When anything unexpected happens:
 Make one change at a time while debugging; unrelated changes contaminate the fix.
 
 ### When to stop and ask
-When a check still fails after a reasonable attempt, stop and report to the user (no fixed attempt count). Stop when you're going in circles:
+During a plan build, stop once a check still fails after two genuinely different approaches (`.agents/workflows/build-plan.md` → Run to the end); a fix needing an extra file or an uncovered decision is decided and logged there, not asked. Otherwise, stop and report when you're going in circles:
 - The same error returns after different fixes.
 - Attempts produce no new information about the cause.
 - You're changing things you don't understand to see if the error goes away.
-- The fix needs changes outside the task's scope, or a decision the task or plan doesn't cover.
+- The fix needs changes outside the task's scope, or a decision the task doesn't cover.
 
 The report states what fails, what you tried, what each attempt showed, and your best theory.
 

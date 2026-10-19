@@ -10,7 +10,7 @@ steps:
   - id: 2
     title: "Build runs to the end"
     summary: "/build decides and logs small surprises and extra files, and stops only for checkpoints, unapproved risky actions and stuck checks"
-    done: false
+    done: true
     checkpoint: false
   - id: 3
     title: "Tests, walk-through and docs"
@@ -59,9 +59,9 @@ Before a plan is approved, the agent works out every question the build could ne
 **Files:** `workflows/build-plan.md` (edit), `skills/incremental-implementation/SKILL.md` (edit), `templates/project-AGENTS.md` (edit), `templates/plan.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] The build stops only for the five listed reasons, and decides and logs everything else
-- [ ] A risky action counts as approved only with an `Approved:` bullet naming it exactly
-- [ ] The template still passes `plan.mjs check`
+- [x] The build stops only for the five listed reasons, and decides and logs everything else
+- [x] A risky action counts as approved only with an `Approved:` bullet naming it exactly
+- [x] The template still passes `plan.mjs check`
 
 **Check:** `npm test`, `node tools/plan.mjs check templates/plan.md`
 
@@ -88,3 +88,4 @@ None.
 |---|---|---|---|
 | Plan | 2026-10-20 | Dry run | Dry run: 3 questions (risky actions, surprises, finding every question first), none left. |
 | 1 | 2026-10-20 | Done | 62 tests (2 new, checking the dry-run phrases appear in order). A user's answer to the checkpoint question now counts as the user setting it. Added `tests/repo.test.mjs` to steps 1 and 2 so each step's behaviour is tested in its own commit. |
+| 2 | 2026-10-20 | Done | 64 tests (2 new). Decided: work beyond the plan is logged as "Decided: not built" rather than asked. Also changed: `skills/debugging-and-error-recovery/SKILL.md` (its "no fixed attempt count" contradicted the two-approaches stop). |

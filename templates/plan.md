@@ -22,6 +22,7 @@ steps:
 ## Changes
 - **<Short name>:** <what changes, in plain words, at most 2 lines>
 - **<Short name>:** <what changes>
+- **Approved: <risky action>:** <exactly what, approved during the dry run; optional, one per risky action>
 
 ## Steps
 
