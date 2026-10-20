@@ -2,7 +2,7 @@
 
 Instructions for every AI coding agent in this repo. **These rules are mandatory.** Follow them exactly; don't skip, shorten or reorder a step. If a rule conflicts with the user's request or can't be followed, **stop and ask**. Never deviate silently.
 
-**Setup:** if `.agents/rules/` is missing (e.g. a fresh clone), show the user the `install` command from `.agents/playbook.json` (it downloads and runs the pinned playbook version) and ask with the tool's question interface whether to run it, with no option marked recommended. Run it only if they agree, then continue; otherwise stop.
+**Setup:** if `.agents/rules/` is missing (e.g. a fresh clone), show the user the `install` command from `.agents/playbook.json` (it downloads and runs the pinned playbook version) and ask with the tool's question interface whether to run it, with no option marked recommended. Run it only if they agree, then continue; otherwise stop. Git hooks aren't cloned, so if the repo's `commit-msg` hook doesn't run `.agents/tools/strip-attribution.mjs`, run `node .agents/tools/install-attribution.mjs` before committing (it only adds what's missing).
 
 Playbook files are in `.agents/` (rules, workflows, skills, reviewers, references, templates); `.agents/playbook.json` lists the playbook's skills. Project files are at the repo root (`plans/`, `ARCHITECTURE.md`, `DESIGN.md`, `infra/`, `scripts/`). Project skills are in `.agents/skills/` too, listed under "Project-specific".
 

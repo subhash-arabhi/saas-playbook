@@ -217,6 +217,8 @@ fi
 node "$SRC/tools/install-hooks.mjs" "$DEST"
 # Compact agent sessions at about 500k tokens, where the tool allows it
 node "$SRC/tools/install-compaction.mjs" "$DEST"
+# Keep AI-tool attribution out of commits and PRs: tool settings and a commit-msg hook
+node "$SRC/tools/install-attribution.mjs" "$DEST"
 
 # 6. Project folders the playbook expects
 mkdir -p "$DEST/plans"

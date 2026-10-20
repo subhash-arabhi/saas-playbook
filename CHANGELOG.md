@@ -4,6 +4,7 @@ Each release is a `vX.Y.Z` tag. Its GitHub Release carries the `npm pack` tarbal
 
 ## Unreleased
 
+- No AI attribution in projects: the installer turns off attribution in Claude Code, Codex and VS Code Copilot, and installs a `commit-msg` hook (`tools/strip-attribution.mjs`) that strips agent `Co-authored-by` trailers and "Generated with" / "Made with" lines from every commit, keeping human co-authors. The pre-PR check rewords unpushed commits that still carry attribution (never pushed ones) and blocks on it in files; `/push` removes tool footers from the PR description. Cursor's switch is per user, so the installer explains it.
 - `/plan` asks everything before approval: a dry run of the steps lists every question in Open questions before the first card, asks them in rounds of up to 3, and repeats until a dry run finds none. Risky actions approved then become `Approved:` bullets in Changes.
 - `/build` runs to the end. It decides and logs what the plan didn't cover ("Decided:", "Also changed:"), lists those notes in the final summary, and stops only for a checkpoint, a risky action without an `Approved:` bullet naming it exactly, a step's Stop and ask if, a check failing after two different approaches, or unrelated uncommitted changes.
 - Agent sessions compact at about 500k tokens: the installer sets it for Claude Code (`autoCompactWindow`), Codex (`model_auto_compact_token_limit`, trusted projects) and VS Code Copilot, keeping any value already set. Cursor's point can't be configured; `/summarize` compacts sooner.
