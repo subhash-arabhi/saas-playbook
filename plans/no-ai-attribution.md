@@ -1,6 +1,6 @@
 ---
 name: "No AI attribution"
-status: building
+status: done
 steps:
   - id: 1
     title: "Strip attribution from commit messages"
@@ -103,3 +103,4 @@ None.
 | 2 | 2026-10-20 | Done | 73 tests (4 new in `tests/attribution.test.mjs`, 1 extended in `tests/installer.test.mjs`). Decided: the hook is installed only at the repo root, so a project inside another repo never touches the outer repo's hooks. Also changed: `tests/installer.test.mjs` (checks `install.sh` end to end). |
 | 3 | 2026-10-20 | Done | 75 tests (2 new). The rewording test runs the exact `git rebase --exec` command from `pre-pr.md` and checks the code tree is unchanged. Decided: the rewording is in a new "AI attribution" section that runs before the script, because CI can't rewrite commits; the script only checks. Decided: projects whose `scripts/pre-pr.sh` predates this add the check on their next push. Also changed: `tests/attribution.test.mjs` (the rewording test). |
 | 4 | 2026-10-20 | Done | 75 tests. README: a compatibility row and two install-table rows; CHANGELOG entry. The strip tool's `--check` finds nothing in the README, CHANGELOG or templates. |
+| End | 2026-10-20 | Done | 4 steps, 75 tests (12 new), ShellCheck clean, all plans pass the checker. Built without stopping. |
