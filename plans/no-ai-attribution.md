@@ -10,7 +10,7 @@ steps:
   - id: 2
     title: "Install it in every project"
     summary: "The installer turns attribution off in Claude Code, Codex and VS Code, installs the hook, and explains Cursor's per-user switch"
-    done: false
+    done: true
     checkpoint: false
   - id: 3
     title: "Check before every PR"
@@ -61,8 +61,8 @@ Projects that use the playbook never show an AI tool as an author: no "Co-author
 **Files:** `tools/install-attribution.mjs` (new), `install.sh` (edit), `templates/project-AGENTS.md` (edit), `tests/attribution.test.mjs` (edit)
 
 **Done when:**
-- [ ] A fresh install sets all three tools' settings and the hook, and keeps values already set
-- [ ] An existing commit-msg hook is left alone, with the line to add printed
+- [x] A fresh install sets all three tools' settings and the hook, and keeps values already set
+- [x] An existing commit-msg hook is left alone, with the line to add printed
 
 **Check:** `npm test`, `shellcheck install.sh tools/plan-editor/install.sh`
 
@@ -100,3 +100,4 @@ None.
 |---|---|---|---|
 | Plan | 2026-10-20 | Dry run | Dry run: 4 questions, none left. This repo's history is out of scope (your answer); the other three use defaults: reword unpushed commits, print Cursor's switch, leave an existing hook alone. |
 | 1 | 2026-10-20 | Done | 4 tests (new `tests/attribution.test.mjs`), including a real commit through the hook and `--amend`. Decided: the direct-run check compares real paths, because on macOS `/var` is a symlink and the tool silently did nothing there. Decided: not built: `install-compaction.mjs` and `install-hooks.mjs` have the same check; they run from the playbook source, not a project. |
+| 2 | 2026-10-20 | Done | 73 tests (4 new in `tests/attribution.test.mjs`, 1 extended in `tests/installer.test.mjs`). Decided: the hook is installed only at the repo root, so a project inside another repo never touches the outer repo's hooks. Also changed: `tests/installer.test.mjs` (checks `install.sh` end to end). |

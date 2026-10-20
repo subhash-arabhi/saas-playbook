@@ -59,6 +59,11 @@ test('a fresh install sets compaction at 500k tokens, and a reinstall keeps the 
   const out = install(dest)
   assert.equal(JSON.parse(read(dest, '.claude/settings.json')).autoCompactWindow, 400000)
   assert.match(out, /Cursor.*\/summarize/)
+  assert.equal(JSON.parse(read(dest, '.claude/settings.json')).attribution.commit, '')
+  assert.match(read(dest, '.codex/config.toml'), /^commit_attribution = ""$/m)
+  assert.equal(JSON.parse(read(dest, '.vscode/settings.json'))['git.addAICoAuthor'], 'off')
+  assert.ok(existsSync(join(dest, '.agents', 'tools', 'strip-attribution.mjs')))
+  assert.match(out, /Cursor: its attribution switch is per user/)
 })
 
 test('works in a path with spaces', () => {

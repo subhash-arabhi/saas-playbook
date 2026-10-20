@@ -6,6 +6,7 @@ import { join } from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { REPO } from './helpers.mjs'
 import { stripAttribution, findAttribution } from '../tools/strip-attribution.mjs'
+import { installAttribution, HOOK } from '../tools/install-attribution.mjs'
 
 const root = mkdtempSync(join(tmpdir(), 'attribution-'))
 after(() => rmSync(root, { recursive: true, force: true }))
@@ -88,4 +89,52 @@ test('--amend cleans the HEAD commit, and --check reports and fails', () => {
   assert.equal(git(dir, 'log', '-1', '--format=%B').trim(), 'Add b')
   assert.equal(check(git(dir, 'log', '--format=%B')).code, 0)
   assert.equal(readFileSync(join(dir, 'b.txt'), 'utf8'), 'b\n')
+})
+
+
+const project = () => mkdtempSync(join(root, 'p-'))
+const json = (dir, rel) => JSON.parse(readFileSync(join(dir, rel), 'utf8'))
+
+test('install turns attribution off in Claude Code, Codex and VS Code, and installs the hook', () => {
+  const dir = project()
+  git(dir, 'init', '-q')
+  const out = installAttribution(dir).join('\n')
+  assert.deepEqual(json(dir, '.claude/settings.json').attribution, { commit: '', pr: '', sessionUrl: false })
+  assert.equal(readFileSync(join(dir, '.codex/config.toml'), 'utf8'), 'commit_attribution = ""\n')
+  assert.equal(json(dir, '.vscode/settings.json')['git.addAICoAuthor'], 'off')
+  assert.equal(readFileSync(join(dir, '.git/hooks/commit-msg'), 'utf8'), HOOK)
+  assert.match(out, /Cursor.*Git & PRs → Attribution.*attributeCommitsToAgent/)
+})
+
+test('install keeps values already set and other settings, and is safe to repeat', () => {
+  const dir = project()
+  git(dir, 'init', '-q')
+  mkdirSync(join(dir, '.claude'))
+  writeFileSync(join(dir, '.claude/settings.json'), JSON.stringify({ attribution: { commit: 'Mine' }, model: 'x' }))
+  mkdirSync(join(dir, '.codex'))
+  writeFileSync(join(dir, '.codex/config.toml'), 'model_auto_compact_token_limit = 500000\n[features]\nweb = true\n')
+  installAttribution(dir)
+  installAttribution(dir)
+  assert.deepEqual(json(dir, '.claude/settings.json'), { attribution: { commit: 'Mine' }, model: 'x' })
+  assert.equal(readFileSync(join(dir, '.codex/config.toml'), 'utf8'), 'commit_attribution = ""\nmodel_auto_compact_token_limit = 500000\n[features]\nweb = true\n')
+  assert.equal(readFileSync(join(dir, '.git/hooks/commit-msg'), 'utf8'), HOOK)
+})
+
+test('an existing commit-msg hook is left alone, with the line to add printed; no repo means no hook', () => {
+  const dir = project()
+  git(dir, 'init', '-q')
+  writeFileSync(join(dir, '.git/hooks/commit-msg'), '#!/bin/sh\nnpx commitlint --edit "$1"\n')
+  const out = installAttribution(dir).join('\n')
+  assert.equal(readFileSync(join(dir, '.git/hooks/commit-msg'), 'utf8'), '#!/bin/sh\nnpx commitlint --edit "$1"\n')
+  assert.match(out, /already exists.*add this line to it: node \.agents\/tools\/strip-attribution\.mjs "\$1"/)
+  assert.match(installAttribution(project()).join('\n'), /Not a git repository yet/)
+})
+
+test('the installed hook strips Cursor’s trailer from a real commit', () => {
+  const dir = repoWithHook()
+  installAttribution(dir)
+  writeFileSync(join(dir, 'c.txt'), 'c\n')
+  git(dir, 'add', 'c.txt')
+  git(dir, 'commit', '-q', '-m', 'Add c', '-m', 'Made with [Cursor](https://cursor.com)\n\nCo-authored-by: Cursor <cursoragent@cursor.com>')
+  assert.equal(git(dir, 'log', '-1', '--format=%B').trim(), 'Add c')
 })
