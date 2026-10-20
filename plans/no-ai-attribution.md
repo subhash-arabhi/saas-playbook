@@ -20,7 +20,7 @@ steps:
   - id: 4
     title: "Docs"
     summary: "README, CHANGELOG and the rules describe the change"
-    done: false
+    done: true
     checkpoint: false
 ---
 
@@ -88,7 +88,7 @@ Projects that use the playbook never show an AI tool as an author: no "Co-author
 **Files:** `README.md` (edit), `CHANGELOG.md` (edit)
 
 **Done when:**
-- [ ] README and CHANGELOG describe the change
+- [x] README and CHANGELOG describe the change
 
 **Check:** `npm test`, `node tools/plan.mjs check plans/no-ai-attribution.md`
 
@@ -102,3 +102,4 @@ None.
 | 1 | 2026-10-20 | Done | 4 tests (new `tests/attribution.test.mjs`), including a real commit through the hook and `--amend`. Decided: the direct-run check compares real paths, because on macOS `/var` is a symlink and the tool silently did nothing there. Decided: not built: `install-compaction.mjs` and `install-hooks.mjs` have the same check; they run from the playbook source, not a project. |
 | 2 | 2026-10-20 | Done | 73 tests (4 new in `tests/attribution.test.mjs`, 1 extended in `tests/installer.test.mjs`). Decided: the hook is installed only at the repo root, so a project inside another repo never touches the outer repo's hooks. Also changed: `tests/installer.test.mjs` (checks `install.sh` end to end). |
 | 3 | 2026-10-20 | Done | 75 tests (2 new). The rewording test runs the exact `git rebase --exec` command from `pre-pr.md` and checks the code tree is unchanged. Decided: the rewording is in a new "AI attribution" section that runs before the script, because CI can't rewrite commits; the script only checks. Decided: projects whose `scripts/pre-pr.sh` predates this add the check on their next push. Also changed: `tests/attribution.test.mjs` (the rewording test). |
+| 4 | 2026-10-20 | Done | 75 tests. README: a compatibility row and two install-table rows; CHANGELOG entry. The strip tool's `--check` finds nothing in the README, CHANGELOG or templates. |
