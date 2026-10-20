@@ -138,3 +138,18 @@ test('the installed hook strips Cursor’s trailer from a real commit', () => {
   git(dir, 'commit', '-q', '-m', 'Add c', '-m', 'Made with [Cursor](https://cursor.com)\n\nCo-authored-by: Cursor <cursoragent@cursor.com>')
   assert.equal(git(dir, 'log', '-1', '--format=%B').trim(), 'Add c')
 })
+
+test('the pre-PR rewording command cleans unpushed commits without changing the code', () => {
+  const dir = repoWithHook()
+  const env = { ...process.env, GIT_COMMITTER_NAME: 'Dev', GIT_COMMITTER_EMAIL: 'dev@example.com', GIT_AUTHOR_NAME: 'Dev', GIT_AUTHOR_EMAIL: 'dev@example.com' }
+  const run = (cmd) => execFileSync('sh', ['-c', cmd], { cwd: dir, env, encoding: 'utf8' })
+  run('git checkout -q -b main && echo 0 > base.txt && git add -A && git commit -q --no-verify -m Base')
+  run('git checkout -q -b work && echo 1 > one.txt && git add one.txt && git commit -q --no-verify -m "Step 1: One" -m "Co-authored-by: Cursor <cursoragent@cursor.com>"')
+  run('echo 2 > two.txt && git add two.txt && git commit -q --no-verify -m "Step 2: Two" -m "Co-authored-by: Ada <ada@example.com>"')
+  const tree = run('git rev-parse HEAD^{tree}')
+  const prePr = readFileSync(join(REPO, 'workflows', 'pre-pr.md'), 'utf8')
+  const rebase = prePr.match(/`(git rebase --exec '[^']+' )<base>`/)[1]
+  run(`${rebase}main`)
+  assert.equal(run('git log --format=%B main..HEAD').trim(), 'Step 2: Two\n\nCo-authored-by: Ada <ada@example.com>\n\nStep 1: One')
+  assert.equal(run('git rev-parse HEAD^{tree}'), tree)
+})

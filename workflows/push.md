@@ -12,5 +12,5 @@ Trigger: **`/push`** (the user's sign-off). This pushes the working branch to Gi
    - Never capture secrets or real personal data.
    - Commit the images to the `pr-assets` branch under `pr-<branch-name>/`, and push that branch.
 5. **Push the working branch.**
-6. **Open the PR to `main`**, or update the existing one, with a description from `.agents/templates/pr-description.md`: a simple list of changes, plans included, the screenshot table, pre-PR results, and anything needed before deploying.
+6. **Open the PR to `main`**, or update the existing one, with a description from `.agents/templates/pr-description.md`: a simple list of changes, plans included, the screenshot table, pre-PR results, and anything needed before deploying. Then read the description back (`gh pr view --json body -q .body > <tmp>`): some tools append a footer such as "Made with Cursor". If `node .agents/tools/strip-attribution.mjs --check <tmp>` finds one, run `node .agents/tools/strip-attribution.mjs <tmp>`, `gh pr edit --body-file <tmp>`, and check again.
 7. **Report** the PR link and the pre-PR summary. Tell the user that "deploy" will merge and deploy it.

@@ -15,7 +15,7 @@ steps:
   - id: 3
     title: "Check before every PR"
     summary: "The pre-PR check removes attribution from unpushed commits and blocks on it in files; push cleans the PR description"
-    done: false
+    done: true
     checkpoint: false
   - id: 4
     title: "Docs"
@@ -75,8 +75,8 @@ Projects that use the playbook never show an AI tool as an author: no "Co-author
 **Files:** `workflows/pre-pr.md` (edit), `workflows/push.md` (edit), `rules/git.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] The pre-PR check rewords unpushed commits, never pushed ones, and blocks on attribution in files
-- [ ] Push removes a "Made with Cursor" footer from the PR description
+- [x] The pre-PR check rewords unpushed commits, never pushed ones, and blocks on attribution in files
+- [x] Push removes a "Made with Cursor" footer from the PR description
 
 **Check:** `npm test`
 
@@ -101,3 +101,4 @@ None.
 | Plan | 2026-10-20 | Dry run | Dry run: 4 questions, none left. This repo's history is out of scope (your answer); the other three use defaults: reword unpushed commits, print Cursor's switch, leave an existing hook alone. |
 | 1 | 2026-10-20 | Done | 4 tests (new `tests/attribution.test.mjs`), including a real commit through the hook and `--amend`. Decided: the direct-run check compares real paths, because on macOS `/var` is a symlink and the tool silently did nothing there. Decided: not built: `install-compaction.mjs` and `install-hooks.mjs` have the same check; they run from the playbook source, not a project. |
 | 2 | 2026-10-20 | Done | 73 tests (4 new in `tests/attribution.test.mjs`, 1 extended in `tests/installer.test.mjs`). Decided: the hook is installed only at the repo root, so a project inside another repo never touches the outer repo's hooks. Also changed: `tests/installer.test.mjs` (checks `install.sh` end to end). |
+| 3 | 2026-10-20 | Done | 75 tests (2 new). The rewording test runs the exact `git rebase --exec` command from `pre-pr.md` and checks the code tree is unchanged. Decided: the rewording is in a new "AI attribution" section that runs before the script, because CI can't rewrite commits; the script only checks. Decided: projects whose `scripts/pre-pr.sh` predates this add the check on their next push. Also changed: `tests/attribution.test.mjs` (the rewording test). |
