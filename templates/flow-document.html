@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Receipt Desk Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<!--
+  Flow document template (playbook skill: flow-document).
+  1. Replace the JSON in <script id="flow-data"> with the product's flow.json.
+  2. Set <title> to "<Product name> Flow".
+  3. If the project has design tokens (DESIGN.md), replace the :root colour and font tokens below, in all three theme blocks.
+  Nothing else needs editing: the page is drawn from the JSON.
+  The example below is made up to show the format. A project's flow.json uses real examples and measurements.
+-->
+<style>
+/* Layout: one vertical stem (the user's journey) with numbered nodes; each opens into a "how it works" card; branches hang off a dashed stem. */
+:root {
+  --primary: #2450E6; --primary-soft: #EAF0FF; --surface: #F8F9FB; --raised: #FFFFFF; --sunken: #F1F3F6;
+  --ink: #0F1218; --muted: #5A6270; --border: #E3E6EB; --border-strong: #CDD2DA;
+  --ai: #0F9D8A; --ai-soft: #E3F5F2; --ext: #D9730D; --ext-soft: #FDF0E3; --code: #5A6270; --code-soft: #F1F3F6; --user: #2450E6; --user-soft: #EAF0FF;
+  --warn: #A35C00; --warn-soft: #FFF3DE;
+  --sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --primary: #7B97FF; --primary-soft: #18213D; --surface: #0B0D11; --raised: #14171D; --sunken: #0F1115;
+  --ink: #EDEFF3; --muted: #9AA3B2; --border: #252A33; --border-strong: #363D49;
+  --ai: #3CC8B4; --ai-soft: #10262A; --ext: #F59E4B; --ext-soft: #2B1D10; --code: #9AA3B2; --code-soft: #1A1E25; --user: #7B97FF; --user-soft: #18213D;
+  --warn: #F0A43A; --warn-soft: #2B2010; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --primary: #7B97FF; --primary-soft: #18213D; --surface: #0B0D11; --raised: #14171D; --sunken: #0F1115;
+  --ink: #EDEFF3; --muted: #9AA3B2; --border: #252A33; --border-strong: #363D49;
+  --ai: #3CC8B4; --ai-soft: #10262A; --ext: #F59E4B; --ext-soft: #2B1D10; --code: #9AA3B2; --code-soft: #1A1E25; --user: #7B97FF; --user-soft: #18213D;
+  --warn: #F0A43A; --warn-soft: #2B2010; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--surface); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; margin: 0 }
+.page { max-width: 980px; margin: 0 auto; padding-block: 40px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+h1 { font-size: clamp(30px, 5vw, 40px); line-height: 1.1; letter-spacing: -0.03em; font-weight: 600; margin: 0 0 8px; text-wrap: balance }
+h2 { font-size: 22px; letter-spacing: -0.01em; font-weight: 600; margin: 40px 0 16px; text-wrap: balance }
+.lede { color: var(--muted); max-width: 65ch; margin: 0 }
+.eyebrow { font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--primary); margin: 0 0 12px }
+code { font-family: var(--mono); font-size: 0.9em }
+
+.totals { margin: 32px 0 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px }
+.total { background: var(--raised); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: grid; gap: 4px; align-content: start; min-width: 0 }
+.total .what { font-size: 14px; font-weight: 500 }
+.total .nums { font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 600; letter-spacing: -0.01em }
+.total .nums small { font-size: 14px; font-weight: 500; color: var(--muted) }
+.total .note { font-size: 13px; color: var(--muted); line-height: 1.45 }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin: 28px 0 16px }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 13px; color: var(--muted) }
+.legend span { display: inline-flex; gap: 6px; align-items: center }
+.buttons { display: flex; gap: 8px }
+button { font: 500 14px/1 var(--sans); color: var(--primary); background: var(--raised); border: 1px solid var(--border-strong); border-radius: 8px; padding: 10px 14px; cursor: pointer; min-height: 40px }
+button:hover { background: var(--primary-soft) }
+button:focus-visible, summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px }
+
+.tag { font: 500 11px/1 var(--mono); letter-spacing: 0.02em; padding: 4px 6px; border-radius: 4px; white-space: nowrap }
+.tag.AI { color: var(--ai); background: var(--ai-soft) }
+.tag.EXT { color: var(--ext); background: var(--ext-soft) }
+.tag.CODE { color: var(--code); background: var(--code-soft) }
+.tag.USER { color: var(--user); background: var(--user-soft) }
+
+.chip { font: 500 12px/1 var(--mono); font-variant-numeric: tabular-nums; padding: 5px 8px; border-radius: 999px; border: 1px solid var(--border-strong); color: var(--ink); background: var(--raised); white-space: nowrap }
+.chip.est { border-style: dashed; color: var(--muted) }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end }
+
+.tree { list-style: none; margin: 0; padding: 0; position: relative }
+.tree::before { content: ""; position: absolute; left: 17px; top: 18px; bottom: 18px; width: 2px; background: var(--border-strong) }
+.node { position: relative; padding-left: 52px; margin: 0 0 12px }
+.num { position: absolute; left: 0; top: 10px; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--primary); color: var(--raised); font: 600 15px/1 var(--sans); font-variant-numeric: tabular-nums; box-shadow: 0 0 0 4px var(--surface) }
+details { background: var(--raised); border: 1px solid var(--border); border-radius: 12px; min-width: 0 }
+details[open] { border-color: var(--border-strong) }
+summary { list-style: none; cursor: pointer; padding: 14px 16px; display: grid; grid-template-columns: 20px 1fr auto; gap: 4px 12px; align-items: start }
+summary::-webkit-details-marker { display: none }
+.arrow { width: 20px; height: 20px; margin-top: 3px; color: var(--muted); transition: transform 160ms ease }
+details[open] > summary .arrow { transform: rotate(90deg); color: var(--primary) }
+.head { min-width: 0 }
+.title { font-weight: 600; font-size: 17px; letter-spacing: -0.005em }
+.sub { color: var(--muted); font-size: 14px; line-height: 1.45 }
+.job { font: 400 12px/1.4 var(--mono); color: var(--muted); overflow-wrap: anywhere }
+
+.body { padding: 0 16px 18px 48px; display: grid; gap: 16px; min-width: 0 }
+.body p { margin: 0; max-width: 70ch }
+.io { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px }
+.io > div { background: var(--sunken); border-radius: 8px; padding: 10px 12px; min-width: 0 }
+.label { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px }
+.io p { font-size: 14px; line-height: 1.5 }
+pre { margin: 6px 0 0; font: 400 12px/1.5 var(--mono); color: var(--ink); overflow-x: auto; white-space: pre; max-width: 100% }
+ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 2px }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 28px 1fr auto; gap: 4px 10px; align-items: baseline; padding: 8px 0; border-top: 1px solid var(--border); min-width: 0 }
+ol.steps li::before { content: counter(s) "."; font: 500 13px/1.5 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums }
+ol.steps .what { font-size: 14px; line-height: 1.5; min-width: 0 }
+ol.steps .what .tag { margin-right: 6px; vertical-align: 1px }
+.callout { font-size: 14px; line-height: 1.5; background: var(--warn-soft); color: var(--ink); border-radius: 8px; padding: 10px 12px }
+.callout b.lead { color: var(--warn) }
+
+.branches { list-style: none; margin: 0; padding: 0 0 0 20px; border-left: 2px dashed var(--border-strong); display: grid; gap: 10px }
+.branches details { background: var(--surface) }
+.branches .title { font-size: 15px }
+.fork { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px }
+
+footer { margin-top: 40px; color: var(--muted); font-size: 13px; line-height: 1.55; display: grid; gap: 8px; max-width: 75ch }
+footer p { margin: 0 }
+.error { background: var(--warn-soft); border-radius: 8px; padding: 12px 16px; font: 400 13px/1.5 var(--mono) }
+
+@media (max-width: 640px) {
+  summary { grid-template-columns: 20px 1fr }
+  summary .chips { grid-column: 2; justify-content: flex-start }
+  .body { padding-left: 16px }
+  ol.steps li { grid-template-columns: 24px 1fr }
+  ol.steps li .chips { grid-column: 2; justify-content: flex-start }
+  .node { padding-left: 46px }
+  .num { width: 32px; height: 32px; font-size: 14px }
+  .tree::before { left: 15px }
+}
+@media (prefers-reduced-motion: reduce) { .arrow { transition: none } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="arrow" viewBox="0 0 20 20"><path d="M7 4l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<main class="page" id="page">
+  <noscript><p>This page draws its flow with JavaScript. Turn it on to see the steps.</p></noscript>
+</main>
+
+<!-- flow.json goes here (schema: the flow-document skill, section 6). This example is made up. -->
+<script type="application/json" id="flow-data">
+{
+  "product": "Receipt Desk",
+  "asOf": "2026-10-21",
+  "lede": "A made-up product, to show the format: what happens from the moment someone adds a receipt to the expense landing in their accounting app. Open any step to see its input, its output, and each thing the system does, with the time and cost it takes.",
+  "totals": [
+    { "label": "Receipt → expense", "time": "~12 s", "cost": "~$0.004", "measured": false, "note": "Steps 1–2, plus the time someone takes to check it." },
+    { "label": "Send to accounting", "time": "~2 s", "cost": "free", "measured": false, "note": "Step 4, one expense." }
+  ],
+  "nodes": [
+    {
+      "id": "add-receipt",
+      "title": "Add a receipt",
+      "summary": "Take a photo or upload a file.",
+      "trigger": "POST /api/receipts",
+      "time": { "value": "<1 s", "measured": false },
+      "cost": { "value": "free", "measured": false },
+      "about": "The file is stored and its reading job is queued in the same transaction, so it can't be lost. The page then shows the receipt as \"Reading…\" until the job finishes.",
+      "input": { "text": "An image or PDF, up to 10 MB", "example": "receipt.jpg (<size>)" },
+      "output": { "text": "A receipt row and a queued job", "example": "{ \"id\": \"<receipt-id>\", \"status\": \"READING\" }" },
+      "steps": [],
+      "branches": [
+        {
+          "fork": "Other path",
+          "id": "emailed-receipt",
+          "title": "Emailed a receipt instead",
+          "summary": "Forward it to your inbox address; continues at step 2.",
+          "trigger": "inbound-email",
+          "time": { "value": "~3 s", "measured": false },
+          "cost": { "value": "~$0.0001", "measured": false },
+          "about": "Each account has its own inbox address. The first image or PDF attached is saved as a receipt; an email without one gets a short reply saying so.",
+          "input": { "text": "An email with an attachment", "example": "To: <inbox-address>\nAttachment: <file>.pdf" },
+          "output": { "text": "A receipt row, as in step 1" },
+          "steps": [
+            { "kind": "EXT", "text": "The email service posts the message to our webhook", "time": { "value": "~2 s", "measured": false }, "cost": { "value": "~$0.0001", "measured": false } },
+            { "kind": "CODE", "text": "**takeAttachment** keeps the first image or PDF and checks its size and type" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "read-receipt",
+      "title": "Read the receipt",
+      "summary": "The store, date, total and tax are filled in for you.",
+      "trigger": "read-receipt",
+      "time": { "value": "~9 s", "measured": false },
+      "cost": { "value": "~$0.004", "measured": false },
+      "open": true,
+      "about": "Text recognition turns the image into text, then a small model picks out the fields. Our code checks that the lines add up to the total before saving, so a misread total is flagged instead of saved.",
+      "input": { "text": "The stored receipt image" },
+      "output": { "text": "The receipt's fields (JSON)", "example": "{ \"store\": \"<store>\", \"date\": \"<date>\",\n  \"total\": \"<amount>\", \"tax\": \"<amount>\",\n  \"lines\": [{ \"text\": \"<item>\", \"amount\": \"<amount>\" }, …] }" },
+      "steps": [
+        { "kind": "EXT", "text": "A text-recognition service returns the receipt's text and layout", "time": { "value": "~6 s", "measured": false }, "cost": { "value": "~$0.0015", "measured": false } },
+        { "kind": "AI", "text": "**readReceipt** (a small model) picks out store, date, total, tax and lines", "time": { "value": "~3 s", "measured": false }, "cost": { "value": "~$0.002", "measured": false } },
+        { "kind": "CODE", "text": "**checkTotals** flags the receipt if its lines and tax don't add up to the total" }
+      ],
+      "callouts": [{ "label": "Not read:", "text": "handwritten notes on a receipt, because recognition is unreliable on them." }]
+    },
+    {
+      "id": "check-details",
+      "title": "Check and fix the details",
+      "summary": "Confirm the fields, pick a category, and fix anything flagged.",
+      "trigger": "PATCH /api/receipts/:id",
+      "time": { "value": "<1 s", "measured": false },
+      "cost": { "value": "free", "measured": false },
+      "about": "Flagged fields are shown first. The category is suggested from the store's past receipts, so a regular store needs no choice at all.",
+      "input": { "text": "The fields from step 2, then the person's changes" },
+      "output": { "text": "A confirmed expense", "example": "{ \"status\": \"CONFIRMED\", \"category\": \"<category>\" }" },
+      "steps": [
+        { "kind": "CODE", "text": "**suggestCategory** uses the category of this store's last confirmed receipt" },
+        { "kind": "USER", "text": "The person confirms or fixes the fields and the category" }
+      ]
+    },
+    {
+      "id": "send-to-accounting",
+      "title": "Send to accounting",
+      "summary": "Confirmed expenses go to the connected accounting app.",
+      "trigger": "export-expense",
+      "time": { "value": "~2 s", "measured": false },
+      "cost": { "value": "free quota", "measured": false },
+      "about": "Each expense is sent once, with its own key, so a retry never creates a duplicate. The receipt image goes with it as an attachment.",
+      "input": { "text": "A confirmed expense and its image" },
+      "output": { "text": "The expense's id in the accounting app", "example": "{ \"externalId\": \"<id>\", \"status\": \"EXPORTED\" }" },
+      "steps": [
+        { "kind": "EXT", "text": "The accounting app's API creates the expense and attaches the image", "time": { "value": "~2 s", "measured": false }, "cost": { "value": "free quota", "measured": false } },
+        { "kind": "CODE", "text": "**markExported** saves the outside id so it's never sent twice" }
+      ],
+      "branches": [
+        {
+          "fork": "If the accounting app rejects it",
+          "id": "export-rejected",
+          "title": "Fix and send again",
+          "summary": "The reason is shown on the expense; fixing it sends it again.",
+          "trigger": "export-expense (retry)",
+          "about": "A rejection usually means a category or tax code the accounting app doesn't know. The app's own message is shown, and the expense goes back to step 3 with that field flagged.",
+          "input": { "text": "The accounting app's error" },
+          "output": { "text": "The expense, flagged, back at step 3" },
+          "steps": [
+            { "kind": "CODE", "text": "**explainRejection** maps the error to the field it's about" },
+            { "kind": "USER", "text": "The person fixes the field; continues at step 3" }
+          ]
+        }
+      ]
+    }
+  ],
+  "footer": [
+    "**Made-up example.** It shows the format; every number is an illustrative estimate (dashed), not a measurement. A real flow document names its sources here: the logs, the date range and the sample sizes.",
+    "The JSON blocks are trimmed examples of each step's output, not full records."
+  ]
+}
+</script>
+
+<script>
+(() => {
+  const KINDS = { AI: "model call", EXT: "outside service", CODE: "our own checks", USER: "the user" };
+  const page = document.getElementById("page");
+  const el = (tag, cls, text) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  };
+  // Only **bold** and `code`; everything else is text.
+  const rich = (tag, cls, text) => {
+    const e = el(tag, cls);
+    String(text ?? "").split(/(\*\*[^*]+\*\*|`[^`]+`)/g).forEach((part) => {
+      if (/^\*\*[^*]+\*\*$/.test(part)) e.append(el("b", null, part.slice(2, -2)));
+      else if (/^`[^`]+`$/.test(part)) e.append(el("code", null, part.slice(1, -1)));
+      else if (part) e.append(document.createTextNode(part));
+    });
+    return e;
+  };
+  const arrow = () => {
+    const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    s.setAttribute("class", "arrow");
+    s.setAttribute("aria-hidden", "true");
+    const u = document.createElementNS("http://www.w3.org/2000/svg", "use");
+    u.setAttribute("href", "#arrow");
+    s.append(u);
+    return s;
+  };
+
+  let flow;
+  try {
+    flow = JSON.parse(document.getElementById("flow-data").textContent);
+  } catch (e) {
+    page.append(el("p", "error", `flow.json couldn't be read: ${e.message}`));
+    return;
+  }
+  const outside = flow.audience === "outside";
+  const chip = (m) => (m && m.value ? el("span", m.measured === false ? "chip est" : "chip", m.value) : null);
+  const chips = (time, cost) => {
+    const box = el("div", "chips");
+    [chip(time), outside ? null : chip(cost)].forEach((c) => c && box.append(c));
+    return box.childElementCount ? box : null;
+  };
+  const used = new Set();
+
+  function ioBox(label, io) {
+    const box = el("div");
+    box.append(el("div", "label", label));
+    if (io.text) box.append(rich("p", null, io.text));
+    if (io.example) box.append(el("pre", null, io.example));
+    return box;
+  }
+
+  function node(n) {
+    const d = el("details");
+    if (n.id) d.id = n.id;
+    if (n.open) d.open = true;
+    const s = el("summary");
+    const head = el("div", "head");
+    head.append(el("div", "title", n.title));
+    if (n.summary) head.append(rich("div", "sub", n.summary));
+    if (n.trigger && !outside) head.append(el("div", "job", n.trigger));
+    s.append(arrow(), head);
+    const c = chips(n.time, n.cost);
+    if (c) s.append(c);
+    d.append(s);
+
+    const body = el("div", "body");
+    if (n.about) body.append(rich("p", null, n.about));
+    if (n.input || n.output) {
+      const io = el("div", "io");
+      if (n.input) io.append(ioBox("Input", n.input));
+      if (n.output) io.append(ioBox("Output", n.output));
+      body.append(io);
+    }
+    if (n.steps && n.steps.length) {
+      const ol = el("ol", "steps");
+      n.steps.forEach((st) => {
+        const li = el("li");
+        const what = el("div", "what");
+        const kind = KINDS[st.kind] ? st.kind : "CODE";
+        used.add(kind);
+        what.append(el("span", `tag ${kind}`, kind), rich("span", null, st.text));
+        li.append(what);
+        const sc = chips(st.time, st.cost);
+        if (sc) li.append(sc);
+        ol.append(li);
+      });
+      body.append(ol);
+    }
+    (n.callouts || []).forEach((co) => {
+      const p = el("div", "callout");
+      if (co.label) p.append(el("b", "lead", co.label), document.createTextNode(" "));
+      p.append(rich("span", null, co.text));
+      body.append(p);
+    });
+    if (n.branches && n.branches.length) {
+      const ul = el("ul", "branches");
+      n.branches.forEach((b) => {
+        const li = el("li");
+        if (b.fork) li.append(el("div", "fork", b.fork));
+        li.append(node(b));
+        ul.append(li);
+      });
+      body.append(ul);
+    }
+    if (body.childElementCount) d.append(body);
+    return d;
+  }
+
+  function tree(nodes) {
+    const ol = el("ol", "tree");
+    nodes.forEach((n, i) => {
+      const li = el("li", "node");
+      const num = el("span", "num", String(i + 1));
+      num.setAttribute("aria-hidden", "true");
+      li.append(num, node(n));
+      ol.append(li);
+    });
+    return ol;
+  }
+
+  page.append(el("p", "eyebrow", `How it works${flow.asOf ? ` · as built on ${new Date(flow.asOf + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""}`));
+  page.append(el("h1", null, `${flow.product} Flow`));
+  if (flow.lede) page.append(rich("p", "lede", flow.lede));
+
+  if (flow.totals && flow.totals.length) {
+    const t = el("section", "totals");
+    t.setAttribute("aria-label", "Journey totals");
+    flow.totals.forEach((x) => {
+      const card = el("div", "total");
+      card.append(el("div", "what", x.label));
+      const nums = el("div", "nums", x.time || "");
+      if (x.cost && !outside) nums.append(el("small", null, ` · ${x.cost}`));
+      card.append(nums);
+      if (x.note) card.append(rich("div", "note", x.note));
+      t.append(card);
+    });
+    page.append(t);
+  }
+
+  const toolbar = el("div", "toolbar");
+  const legend = el("div", "legend");
+  legend.setAttribute("aria-label", "Legend");
+  const buttons = el("div", "buttons");
+  const openAll = el("button", null, "Open all");
+  const closeAll = el("button", null, "Close all");
+  openAll.type = closeAll.type = "button";
+  buttons.append(openAll, closeAll);
+  toolbar.append(legend, buttons);
+  page.append(toolbar);
+
+  page.append(tree(flow.nodes || []));
+  (flow.trees || []).forEach((t) => {
+    page.append(el("h2", null, t.title));
+    page.append(tree(t.nodes || []));
+  });
+
+  Object.keys(KINDS).filter((k) => used.has(k)).forEach((k) => {
+    const s = el("span");
+    s.append(el("span", `tag ${k}`, k), document.createTextNode(` ${KINDS[k]}`));
+    legend.append(s);
+  });
+  [["chip", "42 s", "measured"], ["chip est", "~30 s", "estimate"]].forEach(([cls, v, label]) => {
+    const s = el("span");
+    s.append(el("span", cls, v), document.createTextNode(` ${label}`));
+    legend.append(s);
+  });
+
+  if (flow.footer && flow.footer.length) {
+    const f = el("footer");
+    flow.footer.forEach((p) => f.append(rich("p", null, p)));
+    page.append(f);
+  }
+
+  const all = () => page.querySelectorAll("details");
+  openAll.addEventListener("click", () => all().forEach((d) => (d.open = true)));
+  closeAll.addEventListener("click", () => all().forEach((d) => (d.open = false)));
+  // #id opens that node and the branches around it.
+  const openHash = () => {
+    const id = location.hash.slice(1);
+    const target = id && document.getElementById(id);
+    if (!target || target.tagName !== "DETAILS") return;
+    for (let d = target; d; d = d.parentElement && d.parentElement.closest("details")) d.open = true;
+    target.scrollIntoView({ block: "start" });
+  };
+  window.addEventListener("hashchange", openHash);
+  openHash();
+})();
+</script>
