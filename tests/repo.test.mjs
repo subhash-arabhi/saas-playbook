@@ -226,3 +226,12 @@ test('pre-PR and push keep AI attribution out of commits, files and PR descripti
   assert.match(readFileSync(join(REPO, 'rules', 'git.md'), 'utf8'), /commit-msg` hook strips them[\s\S]*Never rewrite pushed commits without asking/)
   assert.match(readFileSync(join(REPO, 'templates', 'project-AGENTS.md'), 'utf8'), /\*\*Setup:\*\*.*commit-msg` hook doesn't run `\.agents\/tools\/strip-attribution\.mjs`.*install-attribution\.mjs/)
 })
+
+test('the flow-document skill points to installed paths, saves to the repo and keeps its five rules', () => {
+  const skill = readFileSync(join(REPO, 'skills', 'flow-document', 'SKILL.md'), 'utf8')
+  assert.match(skill, /`\.agents\/templates\/flow-document\.html`/)
+  assert.deepEqual(skill.match(/(?<![.\w/-])(rules|workflows|skills|templates|references|reviewers|tools)\/[\w./-]+/g) || [], [], 'playbook paths need .agents/')
+  assert.match(skill, /\*\*Where it goes:\*\* the repo \(default: `docs\/flow\/index\.html`/)
+  assert.doesNotMatch(skill, /publish/i)
+  for (const rule of [/\*\*Examples are real\.\*\*.*Never invent/, /Never show an estimate as measured/, /\*\*Don't mix eras:\*\*/, /\*\*Waiting counts:\*\*/, /\*\*No private values:\*\*/, /continues at step N/]) assert.match(skill, rule)
+})
