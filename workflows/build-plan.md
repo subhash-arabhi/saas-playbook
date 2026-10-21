@@ -49,7 +49,8 @@ Every question was settled before approval (`.agents/rules/planning.md` → Sett
 ## 5. When all steps are done
 1. Check the whole plan works end to end.
 2. Update `ARCHITECTURE.md`, `README.md`, `.env.example` and the API contract for everything the plan changed, and bump "Last updated".
-3. Set `status: done` in the front matter and run `plan.mjs check` (it must pass).
-4. Commit the doc updates and the plan file together: `Update ARCHITECTURE.md`. `git status` is now clean.
-5. Summarise: steps finished, commits, files changed, tests added, anything skipped or flagged. Then list every "Decided:" and "Also changed:" note from the Build log, by step, so the user can review them in one place. Open the plan.
-6. Tell the user it's committed locally. Nothing is pushed until they say "push".
+3. If the project has a flow document (`docs/flow/flow.json`), update the steps this plan changed (`.agents/skills/flow-document/SKILL.md`) and render it again.
+4. Set `status: done` in the front matter and run `plan.mjs check` (it must pass).
+5. Commit the doc updates, the flow document and the plan file together: `Update ARCHITECTURE.md`. `git status` is now clean.
+6. Summarise: steps finished, commits, files changed, tests added, anything skipped or flagged. Then list every "Decided:" and "Also changed:" note from the Build log, by step, so the user can review them in one place. Open the plan.
+7. Tell the user it's committed locally. Nothing is pushed until they say "push".

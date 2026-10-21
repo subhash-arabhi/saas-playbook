@@ -66,6 +66,18 @@ test('a fresh install sets compaction at 500k tokens, and a reinstall keeps the 
   assert.match(out, /Cursor: its attribution switch is per user/)
 })
 
+test('the flow-document skill and its page template are installed and recorded in playbook.json', () => {
+  const dest = project()
+  install(dest)
+  const s = state(dest)
+  assert.ok(s.skills.includes('flow-document'))
+  const files = JSON.stringify(s.files)
+  for (const path of ['skills/flow-document/SKILL.md', 'templates/flow-document.html']) {
+    assert.ok(existsSync(join(dest, '.agents', path)), path)
+    assert.ok(files.includes(path), `${path} has a checksum in playbook.json`)
+  }
+})
+
 test('works in a path with spaces', () => {
   const dest = project('with space ')
   install(dest)

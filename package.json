@@ -1,6 +1,6 @@
 {
   "name": "saas-playbook",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Rules, workflows and skills that take a SaaS app through its lifecycle with an AI coding agent, from first idea to production.",
   "license": "MIT",
   "files": [

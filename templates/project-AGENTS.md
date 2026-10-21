@@ -39,6 +39,7 @@ Each command is a skill in `.agents/skills/<name>/`; follow it and its workflow 
 | `/push` | The user's sign-off: pre-PR check, push, open or update the PR |
 | `/deploy` | Merges the PR and deploys to production |
 | `/publish` | Readiness for real users (rare) |
+| `/flow-document [journey]` | Writes or updates the product's flow document: the user journey as a tree, each step with how it works, input, output, time and cost |
 
 **"Turn CI on" / "turn CI off"** adds or removes `.github/workflows/pre-pr.yml` and updates the CI line, committed locally like any change (`.agents/workflows/pre-pr.md` → CI).
 
@@ -59,7 +60,7 @@ Before planning, before each build step and before any direct change, list the a
 | Logging, metrics, alerts | `deployment.md` | `observability-and-instrumentation` |
 | Infrastructure, hosting, deploy | `stack.md`, `deployment.md` | |
 | Tests | `testing.md` | |
-| Docs, `.env.example`, private values | `documentation.md`, `repo-structure.md` | |
+| Docs, `.env.example`, private values | `documentation.md`, `repo-structure.md` | `flow-document` |
 | Something fails | | `debugging-and-error-recovery` |
 | Areas named in "Project-specific" | | the project skills listed there |
 

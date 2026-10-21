@@ -226,3 +226,69 @@ test('pre-PR and push keep AI attribution out of commits, files and PR descripti
   assert.match(readFileSync(join(REPO, 'rules', 'git.md'), 'utf8'), /commit-msg` hook strips them[\s\S]*Never rewrite pushed commits without asking/)
   assert.match(readFileSync(join(REPO, 'templates', 'project-AGENTS.md'), 'utf8'), /\*\*Setup:\*\*.*commit-msg` hook doesn't run `\.agents\/tools\/strip-attribution\.mjs`.*install-attribution\.mjs/)
 })
+
+test('the flow-document skill points to installed paths, saves to the repo and keeps its five rules', () => {
+  const skill = readFileSync(join(REPO, 'skills', 'flow-document', 'SKILL.md'), 'utf8')
+  assert.match(skill, /`\.agents\/templates\/flow-document\.html`/)
+  assert.deepEqual(skill.match(/(?<![.\w/-])(rules|workflows|skills|templates|references|reviewers|tools)\/[\w./-]+/g) || [], [], 'playbook paths need .agents/')
+  assert.match(skill, /\*\*Where it goes:\*\* the repo \(default: `docs\/flow\/index\.html`/)
+  assert.doesNotMatch(skill, /publish/i)
+  for (const rule of [/\*\*Examples are real\.\*\*.*Never invent/, /Never show an estimate as measured/, /\*\*Don't mix eras:\*\*/, /\*\*Waiting counts:\*\*/, /\*\*No private values:\*\*/, /continues at step N/]) assert.match(skill, rule)
+})
+
+/** Problems with a flow.json against the flow-document skill's schema (section 6). */
+function flowProblems(flow) {
+  const problems = []
+  const ids = new Set()
+  const walk = (nodes, depth, where) => nodes.forEach((n, i) => {
+    const at = `${where}[${i}]`
+    for (const key of ['id', 'title', 'summary']) if (!n[key]) problems.push(`${at}: no ${key}`)
+    if (n.id && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(n.id)) problems.push(`${at}: id ${n.id} isn't lowercase-hyphenated`)
+    if (ids.has(n.id)) problems.push(`${at}: id ${n.id} is used twice`)
+    ids.add(n.id)
+    for (const st of n.steps || []) if (!['AI', 'EXT', 'CODE', 'USER'].includes(st.kind)) problems.push(`${at}: unknown kind ${st.kind}`)
+    if (n.branches?.length) {
+      if (depth === 2) problems.push(`${at}: branches go at most two levels deep`)
+      else walk(n.branches, depth + 1, `${at}.branches`)
+    }
+  })
+  walk(flow.nodes || [], 0, 'nodes')
+  for (const [t, tree] of (flow.trees || []).entries()) walk(tree.nodes || [], 0, `trees[${t}].nodes`)
+  return problems
+}
+
+test('the flow page template is a valid document whose made-up example follows the schema', () => {
+  const html = readFileSync(join(REPO, 'templates', 'flow-document.html'), 'utf8')
+  assert.match(html, /^<!doctype html>\n<html lang="en">/)
+  assert.doesNotMatch(html, /\b(claude|codex|copilot)\b|\bcursor\b(?!:)/i)
+  const flow = JSON.parse(html.match(/<script type="application\/json" id="flow-data">\n([\s\S]*?)\n<\/script>/)[1])
+  assert.deepEqual(flowProblems(flow), [])
+  assert.equal(flow.nodes.length, 4)
+  assert.equal(flow.nodes.flatMap((n) => n.branches || []).length, 2)
+  assert.match(flow.footer[0], /Made-up example/)
+})
+
+test('the flow schema check notices a third branch level and an unknown kind', () => {
+  const leaf = (id, extra = {}) => ({ id, title: 't', summary: 's', ...extra })
+  const deep = { nodes: [leaf('a', { branches: [leaf('b', { branches: [leaf('c', { branches: [leaf('d')] })] })] })] }
+  assert.deepEqual(flowProblems(deep), ['nodes[0].branches[0].branches[0]: branches go at most two levels deep'])
+  assert.deepEqual(flowProblems({ nodes: [leaf('a', { steps: [{ kind: 'DB' }] })] }), ['nodes[0]: unknown kind DB'])
+})
+
+test('every command and area skill in the project AGENTS.md has a skill folder, including flow-document', () => {
+  const agents = readFileSync(join(REPO, 'templates', 'project-AGENTS.md'), 'utf8')
+  const commands = [...section(agents, '## Commands').matchAll(/^\| `\/([a-z0-9-]+)[^`]*` \|/gm)].map((m) => m[1])
+  assert.ok(commands.includes('flow-document'), 'the /flow-document command')
+  const areas = section(agents, '## Areas (mandatory)')
+  const skills = areas.split('\n').filter((l) => l.startsWith('| ') && !l.startsWith('| Area')).flatMap((l) => [...(l.split('|')[3] || '').matchAll(/`([a-z0-9-]+)`/g)].map((m) => m[1]))
+  assert.match(areas, /^\| Docs, `\.env\.example`, private values \|.*\| `flow-document` \|$/m)
+  for (const name of [...commands, ...skills]) assert.ok(existsSync(join(REPO, 'skills', name, 'SKILL.md')), `${name}: no skills/${name}/SKILL.md`)
+})
+
+test('a finished build updates the flow document when the project has one', () => {
+  const done = section(readFileSync(join(REPO, 'workflows', 'build-plan.md'), 'utf8'), '## 5. When all steps are done')
+  assert.match(done, /^\d\. If the project has a flow document \(`docs\/flow\/flow\.json`\), update the steps this plan changed \(`\.agents\/skills\/flow-document\/SKILL\.md`\) and render it again\.$/m)
+  assert.match(done, /Commit the doc updates, the flow document and the plan file together/)
+  const numbers = (done.match(/^(\d)\. /gm) || []).map((n) => Number(n[0]))
+  assert.deepEqual(numbers, numbers.map((_, i) => i + 1), 'items numbered in order')
+})
