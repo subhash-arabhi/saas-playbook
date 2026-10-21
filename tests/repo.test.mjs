@@ -284,3 +284,11 @@ test('every command and area skill in the project AGENTS.md has a skill folder, 
   assert.match(areas, /^\| Docs, `\.env\.example`, private values \|.*\| `flow-document` \|$/m)
   for (const name of [...commands, ...skills]) assert.ok(existsSync(join(REPO, 'skills', name, 'SKILL.md')), `${name}: no skills/${name}/SKILL.md`)
 })
+
+test('a finished build updates the flow document when the project has one', () => {
+  const done = section(readFileSync(join(REPO, 'workflows', 'build-plan.md'), 'utf8'), '## 5. When all steps are done')
+  assert.match(done, /^\d\. If the project has a flow document \(`docs\/flow\/flow\.json`\), update the steps this plan changed \(`\.agents\/skills\/flow-document\/SKILL\.md`\) and render it again\.$/m)
+  assert.match(done, /Commit the doc updates, the flow document and the plan file together/)
+  const numbers = (done.match(/^(\d)\. /gm) || []).map((n) => Number(n[0]))
+  assert.deepEqual(numbers, numbers.map((_, i) => i + 1), 'items numbered in order')
+})

@@ -20,7 +20,7 @@ steps:
   - id: 4
     title: "Build keeps the flow document current"
     summary: "build-plan.md section 5 updates docs/flow/flow.json and renders it again when a plan changed a journey, tested"
-    done: false
+    done: true
     checkpoint: false
   - id: 5
     title: "Installer check, README and CHANGELOG"
@@ -113,8 +113,8 @@ Projects get a `flow-document` skill. It maps a product's user journeys into a t
 **Files:** `workflows/build-plan.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] Section 5 updates the flow document only when `docs/flow/flow.json` exists
-- [ ] A test fails if the line is removed
+- [x] Section 5 updates the flow document only when `docs/flow/flow.json` exists
+- [x] A test fails if the line is removed
 
 **Check:** `npm test`
 
@@ -157,3 +157,4 @@ None.
 | 1 | 2026-10-21 | Done | 76 tests (1 new). Decided: section 9 is now "Save and keep it current" and section 8 ends "then save it", so the skill never mentions publishing. The new test fails on the handover's original text (two bare `templates/` paths, "published page"). Known: `plan-open.test.mjs` fails in the full parallel run when ports 4600–4609 are busy with local plan viewers; it passes alone and predates this plan. |
 | 2 | 2026-10-21 | Done | 3 new tests (template header, tool names and schema; the schema check catches a third branch level and an unknown kind). The example is "Receipt Desk": 4 steps, 2 branches, placeholders like `<store>` in place of values, every number an estimate. Checked in a browser at 1280 px light and 375 px dark: no sideways scrolling, Open all and Close all work, `#emailed-receipt` and `#export-rejected` open with their parents, and `"audience": "outside"` hides every trigger and cost. Decided: the tool-name test skips the CSS property `cursor:`. |
 | 3 | 2026-10-21 | Done | 1 new test: it reads all 7 commands and every skill in the Areas table, and fails if any has no `skills/<name>/SKILL.md` or if `/flow-document` or its docs entry is removed. |
+| 4 | 2026-10-21 | Done | 1 new test, which also checks section 5 stays numbered in order. Decided: the flow document is its own item 3 rather than a sentence inside the `ARCHITECTURE.md` item, and the commit item names it, so it goes into the same `Update ARCHITECTURE.md` commit. |
