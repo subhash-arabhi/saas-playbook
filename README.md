@@ -41,6 +41,8 @@ npx github:subhash-arabhi/saas-playbook
 | `/deploy` | Merges the PR and deploys to production, then smoke-checks it |
 | `/publish` | Readiness for real users (rare): legal pages, consent, privacy, accessibility, licenses, domain |
 
+**`/flow-document [journey]`** works at any point: it writes or updates the product's flow document in `docs/flow/`, a page showing the user's journey as a tree, each step with how it works, its input and output, and its time and cost. A finished `/build` updates it when the plan changed a journey.
+
 Typing the plain word ("push") works too. Large work outside a plan gets a suggestion to run `/plan`, and the agent asks when it's unsure. Questions come as multiple-choice cards in the agent's own question interface (Cursor, Claude Code, Codex, VS Code), with a recommended option first, not as text in the chat.
 
 **CI is your choice.** The first `/push` asks whether the automated checks should also run in GitHub Actions on every PR, or stay local only. "Turn CI on" or "turn CI off" changes it later. CI only checks; deploys always run from your machine on `/deploy`.
@@ -59,7 +61,7 @@ Plans are plain markdown in `plans/`, shown as an editable view in Cursor and VS
 | Stage | Status | What covers it |
 |---|---|---|
 | Discovery | Covered | `/explore`: a minimal local prototype on the cheapest models; findings and the decision go in `EXPLORE.md` ([`workflows/explore.md`](workflows/explore.md)) |
-| Build | Covered | `/plan` and `/build`: approved plans, one tested commit per step, rules for each area and 12 skills ([`workflows/build-plan.md`](workflows/build-plan.md), [`rules/`](rules/)) |
+| Build | Covered | `/plan` and `/build`: approved plans, one tested commit per step, rules for each area and 13 skills ([`workflows/build-plan.md`](workflows/build-plan.md), [`rules/`](rules/)) |
 | Release | Covered | `/push` runs the pre-PR check and opens the PR; `/deploy` deploys the reviewed commit with a smoke check and rollback; `/publish` covers legal pages, consent, accessibility and the domain ([`workflows/`](workflows/)) |
 | Operations | Covered | Logs, metrics and alerts with a runbook entry each, a budget cap with alerts, backups that count only once a restore is tested ([`rules/deployment.md`](rules/deployment.md), [`rules/system-design.md`](rules/system-design.md)). Incident response is planned |
 | Billing | Planned | Today only a rule: the agent asks before any payments change |
@@ -158,6 +160,7 @@ Each skill follows the playbook's rules when `.agents/rules/` exists, and stands
 | `code-review-and-quality` | Five-axis review: correctness, readability, architecture, security, performance |
 | `code-simplification` | Simpler code with the same behaviour |
 | `web-design-guidelines` | UI audit against interface guidelines and design tokens |
+| `flow-document` | The product's user journey as a clickable tree, each step with how it works, input, output, time and cost (`/flow-document`) |
 
 ## What's inside
 
@@ -166,10 +169,10 @@ Each skill follows the playbook's rules when `.agents/rules/` exists, and stands
 | `templates/project-AGENTS.md` | The project's `AGENTS.md`: phase, the Always rules, commands, and which rules and skills each area needs |
 | `rules/` | The decisions: planning, stack, system design, AI, repo structure, backend, frontend, database, testing, security, documentation, git, deployment |
 | `workflows/` | Exactly what happens on explore, build, push (with the pre-PR check), deploy and publish |
-| `skills/` | The 12 skills above, plus the six command skills |
+| `skills/` | The 13 skills above, plus the six command skills |
 | `reviewers/` | Code reviewer, security auditor, test engineer |
 | `references/` | Security, accessibility and publish checklists; reference design systems |
-| `templates/` | `plan.md`, `ARCHITECTURE.md`, `DESIGN.md`, PR description, and the project's `AGENTS.md` |
+| `templates/` | `plan.md`, `ARCHITECTURE.md`, `DESIGN.md`, PR description, the flow document page, and the project's `AGENTS.md` |
 | `tools/` | Plan checker and viewer (`plan.mjs`), the plan hooks, and the plan editor extension |
 | `AGENTS.md`, `tests/` | For working on the playbook itself: maintainer instructions and its test suite |
 

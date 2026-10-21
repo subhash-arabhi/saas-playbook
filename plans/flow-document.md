@@ -25,7 +25,7 @@ steps:
   - id: 5
     title: "Installer check, README and CHANGELOG"
     summary: "An installer test that flow-document lands in playbook.json, the README skills list and counts, and a CHANGELOG entry"
-    done: false
+    done: true
     checkpoint: false
   - id: 6
     title: "Prepare release v1.1.0"
@@ -127,9 +127,9 @@ Projects get a `flow-document` skill. It maps a product's user journeys into a t
 **Files:** `tests/installer.test.mjs` (edit), `README.md` (edit), `CHANGELOG.md` (edit)
 
 **Done when:**
-- [ ] The installer test passes
-- [ ] README lists the skill and its counts match `skills/`
-- [ ] CHANGELOG has the entry
+- [x] The installer test passes
+- [x] README lists the skill and its counts match `skills/`
+- [x] CHANGELOG has the entry
 
 **Check:** `npm test`, `shellcheck install.sh tools/plan-editor/install.sh`
 
@@ -158,3 +158,4 @@ None.
 | 2 | 2026-10-21 | Done | 3 new tests (template header, tool names and schema; the schema check catches a third branch level and an unknown kind). The example is "Receipt Desk": 4 steps, 2 branches, placeholders like `<store>` in place of values, every number an estimate. Checked in a browser at 1280 px light and 375 px dark: no sideways scrolling, Open all and Close all work, `#emailed-receipt` and `#export-rejected` open with their parents, and `"audience": "outside"` hides every trigger and cost. Decided: the tool-name test skips the CSS property `cursor:`. |
 | 3 | 2026-10-21 | Done | 1 new test: it reads all 7 commands and every skill in the Areas table, and fails if any has no `skills/<name>/SKILL.md` or if `/flow-document` or its docs entry is removed. |
 | 4 | 2026-10-21 | Done | 1 new test, which also checks section 5 stays numbered in order. Decided: the flow document is its own item 3 rather than a sentence inside the `ARCHITECTURE.md` item, and the commit item names it, so it goes into the same `Update ARCHITECTURE.md` commit. |
+| 5 | 2026-10-21 | Done | 81 tests (1 new installer test), ShellCheck clean. The only failure is the known `plan-open.test.mjs` port test in the full parallel run; it passes alone and with the installer tests. Decided: README keeps "Six commands drive the whole lifecycle" and gives `/flow-document` its own line under the commands table, since it isn't a lifecycle stage; the `templates/` row names the flow page. |
