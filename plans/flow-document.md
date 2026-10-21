@@ -30,7 +30,7 @@ steps:
   - id: 6
     title: "Prepare release v1.1.0"
     summary: "Bump package.json to 1.1.0 and turn CHANGELOG's Unreleased section into v1.1.0; the tag waits until this branch is on main"
-    done: false
+    done: true
     checkpoint: false
 ---
 
@@ -142,8 +142,8 @@ Projects get a `flow-document` skill. It maps a product's user journeys into a t
 **Files:** `package.json` (edit), `CHANGELOG.md` (edit)
 
 **Done when:**
-- [ ] `package.json` says 1.1.0 and CHANGELOG has a `## v1.1.0` section with every former Unreleased bullet
-- [ ] The release workflow's notes command finds the section
+- [x] `package.json` says 1.1.0 and CHANGELOG has a `## v1.1.0` section with every former Unreleased bullet
+- [x] The release workflow's notes command finds the section
 
 **Check:** `npm test`, `awk -v v="## v1.1.0" 'index($0, v) == 1 { found = 1; next } /^## / { found = 0 } found' CHANGELOG.md`
 
@@ -159,3 +159,4 @@ None.
 | 3 | 2026-10-21 | Done | 1 new test: it reads all 7 commands and every skill in the Areas table, and fails if any has no `skills/<name>/SKILL.md` or if `/flow-document` or its docs entry is removed. |
 | 4 | 2026-10-21 | Done | 1 new test, which also checks section 5 stays numbered in order. Decided: the flow document is its own item 3 rather than a sentence inside the `ARCHITECTURE.md` item, and the commit item names it, so it goes into the same `Update ARCHITECTURE.md` commit. |
 | 5 | 2026-10-21 | Done | 81 tests (1 new installer test), ShellCheck clean. The only failure is the known `plan-open.test.mjs` port test in the full parallel run; it passes alone and with the installer tests. Decided: README keeps "Six commands drive the whole lifecycle" and gives `/flow-document` its own line under the commands table, since it isn't a lifecycle stage; the `templates/` row names the flow page. |
+| 6 | 2026-10-21 | Done | `package.json` 1.1.0; `## Unreleased` is now `## v1.1.0 (2026-10-21)`. The release workflow's notes command finds the section (17 bullets) and its version check matches `v1.1.0`. Not tagged: the tag goes on `main` after this branch is merged. |

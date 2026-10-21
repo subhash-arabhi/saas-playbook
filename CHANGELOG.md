@@ -2,7 +2,7 @@
 
 Each release is a `vX.Y.Z` tag. Its GitHub Release carries the `npm pack` tarball, its SHA-256, a provenance attestation, and the content checksum installs record in `.agents/playbook.json`. The release notes are the section below with the same version.
 
-## Unreleased
+## v1.1.0 (2026-10-21)
 
 - Flow documents: the `flow-document` skill (`/flow-document [journey]`) maps the product's user journeys into a tree of numbered steps with branches, fills each step with how it works, real input and output, the processing steps in order, and measured or estimated time and cost, and renders `docs/flow/index.html` from `docs/flow/flow.json` with `templates/flow-document.html` (light and dark, phone layout, deep links, an outside-reader mode). The docs area names the skill, and a finished `/build` updates the flow document when the plan changed a journey.
 - No AI attribution in projects: the installer turns off attribution in Claude Code, Codex and VS Code Copilot, and installs a `commit-msg` hook (`tools/strip-attribution.mjs`) that strips agent `Co-authored-by` trailers and "Generated with" / "Made with" lines from every commit, keeping human co-authors. The pre-PR check rewords unpushed commits that still carry attribution (never pushed ones) and blocks on it in files; `/push` removes tool footers from the PR description. Cursor's switch is per user, so the installer explains it.
