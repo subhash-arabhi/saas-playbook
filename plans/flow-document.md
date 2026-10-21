@@ -1,6 +1,6 @@
 ---
 name: "Flow document"
-status: building
+status: done
 steps:
   - id: 1
     title: "Add the flow-document skill"
@@ -160,3 +160,4 @@ None.
 | 4 | 2026-10-21 | Done | 1 new test, which also checks section 5 stays numbered in order. Decided: the flow document is its own item 3 rather than a sentence inside the `ARCHITECTURE.md` item, and the commit item names it, so it goes into the same `Update ARCHITECTURE.md` commit. |
 | 5 | 2026-10-21 | Done | 81 tests (1 new installer test), ShellCheck clean. The only failure is the known `plan-open.test.mjs` port test in the full parallel run; it passes alone and with the installer tests. Decided: README keeps "Six commands drive the whole lifecycle" and gives `/flow-document` its own line under the commands table, since it isn't a lifecycle stage; the `templates/` row names the flow page. |
 | 6 | 2026-10-21 | Done | `package.json` 1.1.0; `## Unreleased` is now `## v1.1.0 (2026-10-21)`. The release workflow's notes command finds the section (17 bullets) and its version check matches `v1.1.0`. Not tagged: the tag goes on `main` after this branch is merged. |
+| End | 2026-10-21 | Done | 6 steps, 81 tests (7 new), ShellCheck clean, every plan passes the checker. Built without stopping: four Decided notes (steps 1, 2, 4, 5), no Also changed. Remaining: push, merge to `main`, then tag `v1.1.0` there. |
