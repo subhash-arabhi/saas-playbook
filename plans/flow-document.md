@@ -15,7 +15,7 @@ steps:
   - id: 3
     title: "/flow-document command and docs area"
     summary: "A /flow-document row in Commands and flow-document in the docs row of Areas in templates/project-AGENTS.md, tested"
-    done: false
+    done: true
     checkpoint: false
   - id: 4
     title: "Build keeps the flow document current"
@@ -99,9 +99,9 @@ Projects get a `flow-document` skill. It maps a product's user journeys into a t
 **Files:** `templates/project-AGENTS.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] `/flow-document` is in the Commands table and resolves to `skills/flow-document/`
-- [ ] The docs row names `flow-document`
-- [ ] A test fails if either is removed, or if the template names a skill that doesn't exist
+- [x] `/flow-document` is in the Commands table and resolves to `skills/flow-document/`
+- [x] The docs row names `flow-document`
+- [x] A test fails if either is removed, or if the template names a skill that doesn't exist
 
 **Check:** `npm test`
 
@@ -156,3 +156,4 @@ None.
 | Plan | 2026-10-21 | Dry run | Dry run: 8 questions (the handover files, how the command maps to the skill, where the page goes, the example data, the build update, release, checkpoints, the branch), none left. Local `main` fast-forwarded to `origin/main` (every work branch was already on it); building on `work/2026-10-21-flow-document`. |
 | 1 | 2026-10-21 | Done | 76 tests (1 new). Decided: section 9 is now "Save and keep it current" and section 8 ends "then save it", so the skill never mentions publishing. The new test fails on the handover's original text (two bare `templates/` paths, "published page"). Known: `plan-open.test.mjs` fails in the full parallel run when ports 4600–4609 are busy with local plan viewers; it passes alone and predates this plan. |
 | 2 | 2026-10-21 | Done | 3 new tests (template header, tool names and schema; the schema check catches a third branch level and an unknown kind). The example is "Receipt Desk": 4 steps, 2 branches, placeholders like `<store>` in place of values, every number an estimate. Checked in a browser at 1280 px light and 375 px dark: no sideways scrolling, Open all and Close all work, `#emailed-receipt` and `#export-rejected` open with their parents, and `"audience": "outside"` hides every trigger and cost. Decided: the tool-name test skips the CSS property `cursor:`. |
+| 3 | 2026-10-21 | Done | 1 new test: it reads all 7 commands and every skill in the Areas table, and fails if any has no `skills/<name>/SKILL.md` or if `/flow-document` or its docs entry is removed. |

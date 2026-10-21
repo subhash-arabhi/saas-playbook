@@ -274,3 +274,13 @@ test('the flow schema check notices a third branch level and an unknown kind', (
   assert.deepEqual(flowProblems(deep), ['nodes[0].branches[0].branches[0]: branches go at most two levels deep'])
   assert.deepEqual(flowProblems({ nodes: [leaf('a', { steps: [{ kind: 'DB' }] })] }), ['nodes[0]: unknown kind DB'])
 })
+
+test('every command and area skill in the project AGENTS.md has a skill folder, including flow-document', () => {
+  const agents = readFileSync(join(REPO, 'templates', 'project-AGENTS.md'), 'utf8')
+  const commands = [...section(agents, '## Commands').matchAll(/^\| `\/([a-z0-9-]+)[^`]*` \|/gm)].map((m) => m[1])
+  assert.ok(commands.includes('flow-document'), 'the /flow-document command')
+  const areas = section(agents, '## Areas (mandatory)')
+  const skills = areas.split('\n').filter((l) => l.startsWith('| ') && !l.startsWith('| Area')).flatMap((l) => [...(l.split('|')[3] || '').matchAll(/`([a-z0-9-]+)`/g)].map((m) => m[1]))
+  assert.match(areas, /^\| Docs, `\.env\.example`, private values \|.*\| `flow-document` \|$/m)
+  for (const name of [...commands, ...skills]) assert.ok(existsSync(join(REPO, 'skills', name, 'SKILL.md')), `${name}: no skills/${name}/SKILL.md`)
+})
