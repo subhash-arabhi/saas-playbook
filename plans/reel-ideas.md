@@ -1,6 +1,6 @@
 ---
 name: "Ideas from agent-skill repos"
-status: building
+status: done
 steps:
   - id: 1
     title: "App-screen rules from Taste v2"
