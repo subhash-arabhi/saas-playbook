@@ -15,7 +15,7 @@ steps:
   - id: 3
     title: "Merge danger and evidence in PRs"
     summary: "The PR description adds Evidence (before and after) and Merge danger (door and blast radius)"
-    done: false
+    done: true
     checkpoint: false
   - id: 4
     title: "Grill in dependency order"
@@ -96,9 +96,9 @@ Six improvements found in Leonxlnx/taste-skill, emilkowalski/skills, mattpocock/
 **Files:** `templates/pr-description.md` (edit), `workflows/push.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] The template has Evidence and Merge danger with one-line guidance each
-- [ ] Push says what counts as a one-way door
-- [ ] The attribution test for PR descriptions still passes
+- [x] The template has Evidence and Merge danger with one-line guidance each
+- [x] Push says what counts as a one-way door
+- [x] The attribution test for PR descriptions still passes
 
 **Check:** `npm test`
 
@@ -158,3 +158,4 @@ None.
 | Plan | 2026-10-23 | Dry run | Dry run: 4 questions (Impeccable checker, /retro, gallery toggle, checkpoints), none left. |
 | 1 | 2026-10-23 | Done | `app-screens.md` is 113 lines; 107 tests (1 new; the source test now covers it). Decided: dropped Taste's "no entrance motion", its violet ban and its near-black primary, since the motion inventory and `DESIGN.md` decide those. Decided: added Taste's third-wave tells (cream with terracotta, serif as "premium") and two marketing tells to the AI-look table, but not its personal bans on monospace labels and thin rules, which app screens need. Also changed: `templates/DESIGN.md` (its KPI card listed a sparkline). `plan-open` fails only in the parallel full run (the known port clash) and passes alone. |
 | 2 | 2026-10-23 | Done | 108 tests (1 new; the source test covers `quality-bar.md`). Decided: the phone fixes are one sub-list under Mobile rather than separate lines at the top level, and the first-line comment says only the worst-case and phone rules are adapted. Decided: `inputmode`, `enterkeyhint`, long-press selection and `theme-color` from `mobile-native` were added too, since they're one line each. |
+| 3 | 2026-10-23 | Done | 109 tests (1 new). Decided: Evidence and Merge danger sit after Changes, and push step 6 got sub-bullets, with the read-back as its own bullet so it isn't lost. Decided: one-way doors also include sent email, charged money and a rotated secret, alongside the plan's migration, deleted data and changed API. |

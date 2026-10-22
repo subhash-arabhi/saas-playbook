@@ -241,6 +241,19 @@ test('pre-PR and push keep AI attribution out of commits, files and PR descripti
   assert.match(readFileSync(join(REPO, 'templates', 'project-AGENTS.md'), 'utf8'), /\*\*Setup:\*\*.*commit-msg` hook doesn't run `\.agents\/tools\/strip-attribution\.mjs`.*install-attribution\.mjs/)
 })
 
+test('PR descriptions carry evidence and the merge danger, and push says what a one-way door is', () => {
+  const template = readFileSync(join(REPO, 'templates', 'pr-description.md'), 'utf8')
+  const evidence = section(template, '## Evidence')
+  assert.match(evidence, /failed before, passes now/)
+  const danger = section(template, '## Merge danger')
+  assert.match(danger, /\*\*Door:\*\* <two-way: .*\| one-way: /)
+  assert.match(danger, /\*\*Blast radius:\*\*/)
+  assert.ok(template.indexOf('## Evidence') > template.indexOf('## Changes') && template.indexOf('## Merge danger') < template.indexOf('## Plans included'), 'order')
+  const push = readFileSync(join(REPO, 'workflows', 'push.md'), 'utf8')
+  assert.match(push, /\*\*Evidence:\*\* .*failed before and passes now/)
+  assert.match(push, /\*\*one-way door\*\* can't[\s\S]*migration that drops or rewrites data[\s\S]*changed public API[\s\S]*\*\*blast radius\*\*/)
+})
+
 test('the flow-document skill points to installed paths, saves to the repo and keeps its five rules', () => {
   const skill = readFileSync(join(REPO, 'skills', 'flow-document', 'SKILL.md'), 'utf8')
   assert.match(skill, /`\.agents\/templates\/flow-document\.html`/)
