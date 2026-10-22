@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { REPO, tempRoot } from './helpers.mjs'
 import { scales, requiredPairs, yamlLines, contrast } from '../tools/design-palette.mjs'
 import { extraTokens, themeCss, shadcnCss, frontGroup, SHADCN } from '../tools/design-tokens.mjs'
-import { coverage, approvals, NO_TABLE } from '../tools/design-coverage.mjs'
+import { coverage, approvals, usedComponents, NO_TABLE } from '../tools/design-coverage.mjs'
 
 const tool = (name) => join(REPO, 'tools', name)
 const template = readFileSync(join(REPO, 'templates', 'DESIGN.md'), 'utf8')
@@ -133,4 +133,19 @@ test('the shadcn bridge sets every shadcn variable from DESIGN.md, light and dar
   const out = spawnSync('node', [tool('design-tokens.mjs'), join(REPO, 'templates', 'DESIGN.md'), '--shadcn'], { encoding: 'utf8' })
   assert.equal(out.status, 0)
   assert.equal(out.stdout, css)
+})
+
+test('coverage finds alias, relative and ~ imports, with extensions and subpaths, and ignores look-alike folders', () => {
+  const root = tempRoot('design-coverage-imports-')
+  mkdirSync(join(root, 'app'), { recursive: true })
+  writeFileSync(join(root, 'app', 'page.tsx'), [
+    "// it's the main page",
+    'import { Button } from "@/components/ui/button"',
+    "import { Menu } from '../components/ui/dropdown-menu.tsx'",
+    "import { Card } from '~/components/ui/card/index'",
+    "import { Tab } from 'components/ui/tabs'",
+    "import { X } from 'mycomponents/ui/fake'",
+    "const label = 'components/uix/other'",
+  ].join('\n'))
+  assert.deepEqual([...usedComponents(root, ['components/ui']).keys()].sort(), ['button', 'card', 'dropdown-menu', 'tabs'])
 })

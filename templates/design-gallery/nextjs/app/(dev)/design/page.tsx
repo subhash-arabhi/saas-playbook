@@ -33,10 +33,16 @@ function Swatch({ name, value }: { name: string; value: string }) {
 
 function Colors({ design }: { design: DesignMd }) {
   const names = Object.keys(design.colors)
-  const scale = (prefix: string, dark: boolean) => names.filter((n) => new RegExp(`^${prefix}-\\d+${dark ? '-dark' : ''}$`).test(n))
-  const options = [...new Set(names.map((n) => n.match(/^accent-\d+(-dark)?-option-(\w+)$/)?.[2]).filter(Boolean))] as string[]
-  const option = (o: string, dark: boolean) => names.filter((n) => new RegExp(`^accent-\\d+${dark ? '-dark' : ''}-option-${o}$`).test(n))
-  const semantic = names.filter((n) => !/^(neutral|accent)-\d+(-dark)?(-option-\w+)?$/.test(n))
+  const step = (n: string) => n.match(/^(neutral|accent)-\d+(-dark)?(?:-option-(\w+))?$/)
+  const pick = (prefix: string, dark: boolean, o?: string) =>
+    names.filter((n) => {
+      const m = step(n)
+      return m !== null && m[1] === prefix && Boolean(m[2]) === dark && m[3] === o
+    })
+  const scale = (prefix: string, dark: boolean) => pick(prefix, dark)
+  const options = [...new Set(names.map((n) => step(n)?.[3]).filter(Boolean))] as string[]
+  const option = (o: string, dark: boolean) => pick('accent', dark, o)
+  const semantic = names.filter((n) => !step(n))
   const row = (key: string, label: string, swatches: string[]) => (
     <div key={key} className="flex flex-col gap-sm">
       <h3 className="text-label-md">{label}</h3>

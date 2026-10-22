@@ -37,17 +37,32 @@ function* walk(dir) {
   }
 }
 
+const QUOTED = /['"]([^'"\n]*)['"]/y
+const COMPONENT = /^([\w-]+)(?:\.\w+)?(?:\/.*)?$/
+
+/** The component a quoted import path names inside `dir`, e.g. '@/components/ui/button' → "button". */
+function componentIn(path, dir) {
+  for (let i = path.lastIndexOf(`${dir}/`); i >= 0; i = i ? path.lastIndexOf(`${dir}/`, i - 1) : -1) {
+    if (i > 0 && !'/@~.'.includes(path[i - 1])) continue
+    const m = path.slice(i + dir.length + 1).match(COMPONENT)
+    if (m) return m[1]
+  }
+  return null
+}
+
 /** Shared component name → files that import it, for imports like '@/components/ui/button' or '../components/ui/button'. */
 export function usedComponents(root, dirs) {
   const used = new Map()
-  const patterns = dirs.map((d) => new RegExp(`['"](?:[^'"\\n]*[/@~.])?${d.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/([\\w-]+)(?:\\.\\w+)?(?:/[^'"\\n]*)?['"]`, 'g'))
   for (const file of walk(root)) {
     const rel = relative(root, file).split(sep).join('/')
     if (dirs.some((d) => rel.startsWith(`${d}/`) || rel.includes(`/${d}/`))) continue
     const text = readFileSync(file, 'utf8')
-    for (const re of patterns) {
-      for (const m of text.matchAll(re)) {
-        const name = m[1]
+    for (let at = 0; at < text.length; at++) {
+      if (text[at] !== '"' && text[at] !== "'") continue
+      QUOTED.lastIndex = at
+      const path = QUOTED.exec(text)?.[1]
+      if (path === undefined) continue
+      for (const name of dirs.map((d) => componentIn(path, d)).filter(Boolean)) {
         if (!used.has(name)) used.set(name, [])
         if (!used.get(name).includes(rel)) used.get(name).push(rel)
       }
