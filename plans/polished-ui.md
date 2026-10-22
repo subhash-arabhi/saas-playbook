@@ -25,7 +25,7 @@ steps:
   - id: 5
     title: "Strict quality bar and motion by default"
     summary: "quality-bar.md, rewritten avoid-ai-look rows, frontend.md, frontend-ui-engineering and design-motion-principles: purposeful motion on every screen"
-    done: false
+    done: true
     checkpoint: false
   - id: 6
     title: "Curated UI templates"
@@ -165,9 +165,9 @@ A project built only with this playbook looks designed by default. Before the bu
 **Files:** `skills/frontend-ui-engineering/references/quality-bar.md` (new), `skills/frontend-ui-engineering/references/baseline-ui.md` (new), `skills/frontend-ui-engineering/references/avoid-ai-look.md` (edit), `rules/frontend.md` (edit), `skills/frontend-ui-engineering/SKILL.md` (edit), `skills/design-motion-principles/SKILL.md` (edit), `licenses/` (new file), `licenses/README.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] No file says motion is "none by default", "on demand only" or "static by default"
-- [ ] The quality bar has the motion inventory and the wait rules
-- [ ] Tests fail if the old restraint wording returns or the inventory is removed
+- [x] No file says motion is "none by default", "on demand only" or "static by default"
+- [x] The quality bar has the motion inventory and the wait rules
+- [x] Tests fail if the old restraint wording returns or the inventory is removed
 
 **Check:** `npm test`
 
@@ -267,3 +267,4 @@ None.
 | 2 | 2026-10-22 | Done | Decided: the template carries a neutral grey and blue example scale in OKLCH instead of placeholders, so it lints as-is and `design-palette.mjs` replaces it. Lint on 0.4.0: 0 errors; the warnings are unreferenced scale steps and the `motion`, `breakpoints` and `iconSize` keys. |
 | 3 | 2026-10-22 | Done | Decided: `on-primary` is white or `neutral-12`, whichever contrasts more, so a light accent still gets readable button text; spring tokens export as `--motion-spring-*` strings for Motion (also `--json`). Also changed: `templates/DESIGN.md` (focus ring uses `accent-9`, since `accent-8` is under 3:1). A palette pasted into the template lints with 0 errors. |
 | 4 | 2026-10-22 | Done | Decided: the gallery reads token values straight from `DESIGN.md` (with `{colors.x}` references resolved), because Tailwind 4 outputs only the variables a class uses, so swatches built on `var(--color-*)` were blank; no route `dynamic` export, since Next.js 16.4 enables Cache Components by default and rejects it. Checked in a scratch Next.js 16.4.2 app: 1440×900 and 390×844, light and dark, no console errors or horizontal scroll, `/design` returns 404 after `next build` and `next start`. |
+| 5 | 2026-10-22 | Done | Decided: `baseline-ui.md` drops the upstream review command (rules apply while building, no review pass) and its "no animation unless requested", "no custom easing" and Tailwind-default rules, which now point at `DESIGN.md`; the avoid-AI-look table bans a static app as well as generic motion. Also changed: `references/motion-cookbook.md` and `references/creation-gotchas.md` in design-motion-principles (restraint-first wording and source comments); `rules/frontend.md` routes new components through the design-change flow. |

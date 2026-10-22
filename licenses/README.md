@@ -6,6 +6,7 @@ Third-party content in this playbook, pinned to the commit it was copied from. E
 |---|---|---|---|
 | Skills: api-and-interface-design, browser-testing-with-devtools, code-review-and-quality, code-simplification, debugging-and-error-recovery, frontend-ui-engineering, incremental-implementation, observability-and-instrumentation, security-and-hardening. Reviewers: code-reviewer, security-auditor, test-engineer. References: security-checklist, accessibility-checklist | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `1401c8b` | `addyosmani-agent-skills.LICENSE` (MIT) |
 | "Avoid the AI look" in frontend-ui-engineering | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) | `717446e` | `leonxlnx-taste-skill.LICENSE` (MIT) |
+| frontend-ui-engineering `references/baseline-ui.md` | [ibelick/ui-skills](https://github.com/ibelick/ui-skills) `skills/baseline-ui` | `55363c3` | `ibelick-ui-skills.LICENSE` (MIT) |
 | web-design-guidelines rules | [vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines) | `434b7f9` | `vercel-web-interface-guidelines.LICENSE` (MIT) |
 | design-motion-principles | [kylezantos/design-motion-principles](https://github.com/kylezantos/design-motion-principles) | `4a9ca87` | `kylezantos-design-motion-principles.LICENSE` (MIT) |
 | playwright-cli | [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli) | `b85c7a7` | `microsoft-playwright-cli.LICENSE` (Apache-2.0) |

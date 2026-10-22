@@ -1,5 +1,5 @@
 # Creation Gotchas
-<!-- Adapted from kylezantos/design-motion-principles@4a9ca87 (MIT, see licenses/). Changes: tool-agnostic wording, design-system tokens, SaaS restraint-first. -->
+<!-- Adapted from kylezantos/design-motion-principles@4a9ca87 (MIT, see licenses/). Changes: tool-agnostic wording, design-system tokens, quiet in the SaaS app, never static. -->
 
 Where the agent typically fails when **writing** motion. Self-check generated code against every item before presenting.
 

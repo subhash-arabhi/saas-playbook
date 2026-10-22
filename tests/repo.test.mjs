@@ -352,10 +352,36 @@ test('the design gallery 404s in production, reads DESIGN.md, and its spec lists
   assert.doesNotMatch(readFileSync(join(dir, 'registry.tsx'), 'utf8') + page, /\w-\[[^\]]+\]/, 'no arbitrary Tailwind values')
 })
 
+test('no installed file says motion is off by default', () => {
+  const files = execFileSync('git', ['ls-files', '-co', '--exclude-standard', 'rules', 'skills', 'workflows', 'templates', 'references', 'reviewers'], { cwd: REPO, encoding: 'utf8' }).trim().split('\n').filter((f) => f.endsWith('.md'))
+  for (const file of files) {
+    const text = readFileSync(join(REPO, file), 'utf8')
+    assert.doesNotMatch(text, /none by default|on[- ]demand only|static by default|restraint[- ]first|restraint in the app/i, file)
+  }
+  const motion = readFileSync(join(REPO, 'skills', 'design-motion-principles', 'SKILL.md'), 'utf8')
+  assert.match(frontMatter(motion).description, /every UI step/)
+  assert.match(motion, /Occasional \(daily: .*\) → subtle, 150–250ms\. Frequent \(hundreds of times a day: .*\) → instant\. Keyboard-initiated .* → never animate\./)
+  assert.match(readFileSync(join(REPO, 'rules', 'frontend.md'), 'utf8'), /\*\*Quiet in the app, expressive on marketing pages, never static\.\*\*/)
+})
+
+test('the quality bar keeps the motion inventory and the wait rules, and the UI skill reads it', () => {
+  const bar = readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'references', 'quality-bar.md'), 'utf8')
+  const inventory = section(bar, '## Motion')
+  for (const moment of ['Press feedback', 'Hover', 'Overlay open and close', 'List add, remove, reorder', 'Route change', 'Content load', 'Toast', 'Marketing reveal']) assert.match(inventory, new RegExp(`^\\| ${moment} \\|`, 'm'), moment)
+  const template = readFileSync(join(REPO, 'templates', 'DESIGN.md'), 'utf8')
+  for (const row of inventory.match(/^\| (?!Moment|---)[^|]+/gm)) assert.ok(template.includes(row), `DESIGN.md template inventory has ${row}`)
+  const waits = section(bar, '## Waits')
+  assert.match(waits, /\*\*Over 1 s:\*\* visible progress/)
+  assert.match(waits, /\*\*Over 10 s:\*\* staged progress.*partial results.*a time estimate.*leave and come back/)
+  const skill = readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'SKILL.md'), 'utf8')
+  for (const ref of ['references/avoid-ai-look.md', 'references/quality-bar.md', 'references/baseline-ui.md']) assert.ok(skill.includes(`\`${ref}\``), ref)
+})
+
 test('adapted design sources name their commit and keep their licence', () => {
   const sources = [
     ['skills/front-end-design/references/direction.md', 'anthropics/skills@41bbe19', 'anthropic-skills-frontend-design.LICENSE', '`41bbe19`'],
     ['skills/front-end-design/references/craft.md', 'Dammyjay93/interface-design@2f9be32', 'dammyjay93-interface-design.LICENSE', '`2f9be32`'],
+    ['skills/frontend-ui-engineering/references/baseline-ui.md', 'ibelick/ui-skills@55363c3', 'ibelick-ui-skills.LICENSE', '`55363c3`'],
   ]
   const index = readFileSync(join(REPO, 'licenses', 'README.md'), 'utf8')
   for (const [file, source, license, commit] of sources) {
