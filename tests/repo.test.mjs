@@ -158,7 +158,7 @@ const section = (text, heading) => (text.split(heading)[1] || '').split(/\n#{1,2
 test('/plan finds every question before asking any, and repeats until none are left', () => {
   const skill = readFileSync(join(REPO, 'skills', 'plan', 'SKILL.md'), 'utf8')
   const grill = skill.split('6. **Grill')[1]?.split('\n7. ')[0] || ''
-  const order = ['Find every question before asking any', 'dry run', 'Write the full list into Open questions', 'Ask them in consecutive rounds', 'Ask about each risky action', 'Repeat the dry run', 'until a dry run finds none', 'Dry run: N questions, none left']
+  const order = ['Find every question before asking any', 'dry run', 'Look up facts, don\'t ask them', 'Only the questions that depend on a fact still being looked up wait', 'Write the full list into Open questions', 'Ask them in consecutive rounds', 'Ask in dependency order', 'only questions whose prerequisites are already answered', 'waits for a later round', 'Ask about each risky action', 'Repeat the dry run', 'until a dry run finds none', 'Dry run: N questions, none left']
   let at = -1
   for (const phrase of order) {
     const i = grill.indexOf(phrase)
