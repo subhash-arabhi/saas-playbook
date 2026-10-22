@@ -15,7 +15,7 @@ steps:
   - id: 3
     title: "Design tools: palette, extra tokens, coverage"
     summary: "tools/design-palette.mjs, tools/design-tokens.mjs and tools/design-coverage.mjs, dependency-free and tested"
-    done: false
+    done: true
     checkpoint: false
   - id: 4
     title: "/front-end-design skill and design gallery"
@@ -130,10 +130,10 @@ A project built only with this playbook looks designed by default. Before the bu
 **Files:** `tools/design-palette.mjs` (new), `tools/design-tokens.mjs` (new), `tools/design-coverage.mjs` (new), `tests/design-tools.test.mjs` (new)
 
 **Done when:**
-- [ ] The palette tool's output lints in a `DESIGN.md` and fails on a pair below AA
-- [ ] The tokens tool writes every extra token as a theme variable
-- [ ] The coverage tool fails on a missing or proposed component, or no table, and passes when all are approved
-- [ ] All three run on Node 20+ with no dependencies
+- [x] The palette tool's output lints in a `DESIGN.md` and fails on a pair below AA
+- [x] The tokens tool writes every extra token as a theme variable
+- [x] The coverage tool fails on a missing or proposed component, or no table, and passes when all are approved
+- [x] All three run on Node 20+ with no dependencies
 
 **Check:** `npm test`
 
@@ -265,3 +265,4 @@ None.
 | Plan | 2026-10-22 | Dry run | Dry run: 14 questions, none left. |
 | 1 | 2026-10-22 | Done | Decided: a minimal `skills/front-end-design/SKILL.md` pointing to the rule, so the area-skill test passes at every commit; step 4 fills it in. Also changed: `skills/front-end-design/SKILL.md` (same reason). `plan-open.test.mjs` fails only in the parallel full run (port in use, as on `main`) and passes alone. |
 | 2 | 2026-10-22 | Done | Decided: the template carries a neutral grey and blue example scale in OKLCH instead of placeholders, so it lints as-is and `design-palette.mjs` replaces it. Lint on 0.4.0: 0 errors; the warnings are unreferenced scale steps and the `motion`, `breakpoints` and `iconSize` keys. |
+| 3 | 2026-10-22 | Done | Decided: `on-primary` is white or `neutral-12`, whichever contrasts more, so a light accent still gets readable button text; spring tokens export as `--motion-spring-*` strings for Motion (also `--json`). Also changed: `templates/DESIGN.md` (focus ring uses `accent-9`, since `accent-8` is under 3:1). A palette pasted into the template lints with 0 errors. |
