@@ -285,6 +285,29 @@ test('every command and area skill in the project AGENTS.md has a skill folder, 
   for (const name of [...commands, ...skills]) assert.ok(existsSync(join(REPO, 'skills', name, 'SKILL.md')), `${name}: no skills/${name}/SKILL.md`)
 })
 
+test('the design-system rule has both layers, both flows and the never list', () => {
+  const rule = readFileSync(join(REPO, 'rules', 'design-system.md'), 'utf8')
+  for (const heading of ['## Two layers, one source of truth', '## New project: `/front-end-design`', '## Later: the design-change flow', '## Never']) assert.ok(rule.includes(heading), heading)
+  const flow = section(rule, '## New project: `/front-end-design`')
+  let at = -1
+  for (const stage of ['Brand', 'Style', 'Palette', 'Type', 'Components, patterns', 'Freeze v1']) {
+    const i = flow.indexOf(stage)
+    assert.ok(i > at, `new-project flow: "${stage}" missing or out of order`)
+    at = i
+  }
+  const change = section(rule, '## Later: the design-change flow')
+  assert.match(change, /\*\*Covered:\*\*.*`approved`\. Build with it\./)
+  assert.match(change, /as `proposed`, with 1–2 options shown in the gallery[\s\S]*Ask the user[\s\S]*`approved`.*then build/)
+  for (const never of ['One-off values', 'Local restyles', 'Building on `proposed`']) assert.ok(section(rule, '## Never').includes(never), never)
+})
+
+test('the project AGENTS.md has /front-end-design, the design-system area and the UI precedence', () => {
+  const agents = readFileSync(join(REPO, 'templates', 'project-AGENTS.md'), 'utf8')
+  assert.match(section(agents, '## Commands'), /^\| `\/front-end-design \[what\]` \|/m)
+  assert.match(section(agents, '## Areas (mandatory)'), /^\| Design system: palette, type, components, patterns, motion, imagery \| `design-system\.md`, `frontend\.md`, `DESIGN\.md` \| `front-end-design`, `design-motion-principles` \|$/m)
+  assert.match(agents, /\*\*Precedence:\*\*.*`DESIGN\.md` decides what things look like.*no restraint rule removes an item from the motion inventory or lowers the quality bar\./)
+})
+
 test('a finished build updates the flow document when the project has one', () => {
   const done = section(readFileSync(join(REPO, 'workflows', 'build-plan.md'), 'utf8'), '## 5. When all steps are done')
   assert.match(done, /^\d\. If the project has a flow document \(`docs\/flow\/flow\.json`\), update the steps this plan changed \(`\.agents\/skills\/flow-document\/SKILL\.md`\) and render it again\.$/m)
