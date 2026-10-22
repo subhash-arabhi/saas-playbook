@@ -1,6 +1,6 @@
 ---
 name: "Polished UI by default"
-status: building
+status: done
 steps:
   - id: 1
     title: "Design-system rule, /front-end-design and precedence"
