@@ -30,7 +30,7 @@ steps:
   - id: 6
     title: "Docs and full check"
     summary: "Sources and licences, README credits, CHANGELOG, a trial on the sample app, a branch review and the full test run"
-    done: false
+    done: true
     checkpoint: false
 ---
 
@@ -142,10 +142,10 @@ Six improvements found in Leonxlnx/taste-skill, emilkowalski/skills, mattpocock/
 **Files:** `licenses/README.md` (edit), `README.md` (edit), `CHANGELOG.md` (edit)
 
 **Done when:**
-- [ ] Every new source has a `licenses/README.md` row with its commit
-- [ ] The CHANGELOG lists all six changes under Unreleased
-- [ ] The sample review lists what the new rules catch, with screenshots
-- [ ] The review has no open Critical or Required finding, and the full suite, plan checks and ShellCheck pass
+- [x] Every new source has a `licenses/README.md` row with its commit
+- [x] The CHANGELOG lists all six changes under Unreleased
+- [x] The sample review lists what the new rules catch, with screenshots
+- [x] The review has no open Critical or Required finding, and the full suite, plan checks and ShellCheck pass
 
 **Check:** `npm test`, `node tools/plan.mjs check plans/reel-ideas.md`, `shellcheck install.sh tools/plan-editor/install.sh`
 
@@ -161,3 +161,4 @@ None.
 | 3 | 2026-10-23 | Done | 109 tests (1 new). Decided: Evidence and Merge danger sit after Changes, and push step 6 got sub-bullets, with the read-back as its own bullet so it isn't lost. Decided: one-way doors also include sent email, charged money and a rotated secret, alongside the plan's migration, deleted data and changed API. |
 | 4 | 2026-10-23 | Done | 109 tests (the existing grill test checks 5 more phrases in order). `rules/asking.md` unchanged: rounds stay up to 3 per card. Decided: the fact lookup also names `.env.local`, which the planning rule already lists as something not to ask about. |
 | 5 | 2026-10-23 | Done | 110 tests (1 new: rule 9's wording, the Always list numbered 1–13, and the explore line). The "Always 10" references in `build-plan.md`, `asking.md` and `planning.md` still point at the risky-actions rule. Decided: the incremental-implementation line says "the step or the request", so it covers builds without a plan too. |
+| 6 | 2026-10-23 | Done | 110 tests (the app-screens test checks 2 more rules). Sample trial on the invoice list and detail (there's no dashboard): the new rules flag the loud saturated "Paid" pill, no product name, a subtitle with no finding or total, no action on the overdue row, a phone table that scrolls away Status and Amount, "Total due" on paid invoices, no tap-highlight, `touch-action` or `theme-color` fixes, and under worst-case data a blank client cell, "· issued", an empty lines table with "Mark as paid" on €0.00, `0.30000000000000004`, and a German compound breaking mid-word. Decided: worst-case data went in by swapping `lib/invoices.ts` for the screenshots and restoring it byte for byte, so the sample's app code is unchanged. Decided: the review's two Required findings were fixed: the phone table rule now gives the scroll fallback's condition in both `app-screens.md` and `quality-bar.md`, and `app-screens.md` says an approved `DESIGN.md` wins and differences go through the design-change flow. Decided: Pocock and Karpathy get "Referenced, not copied" licence rows, since no text was copied. |

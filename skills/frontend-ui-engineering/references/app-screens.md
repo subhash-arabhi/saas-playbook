@@ -2,7 +2,7 @@
 
 # App screens
 
-Dashboards, admin, analytics, settings, inboxes, queues and the detail page of one object: the screens people work in. Read this before building one; `quality-bar.md` still applies, and `DESIGN.md` supplies every value.
+Dashboards, admin, analytics, settings, inboxes, queues and the detail page of one object: the screens people work in. Read this before building one; `quality-bar.md` still applies, and `DESIGN.md` supplies every value. Where an approved `DESIGN.md` item differs from a rule here, `DESIGN.md` wins: build it as approved and raise the difference through the design-change flow (`.agents/rules/design-system.md`), never restyle it silently.
 
 A generated dashboard is the average of every template: a tinted sidebar with a coloured active pill, "Welcome back" with a waving hand, four KPI cards each with an icon in a tinted circle, a green "+12.5%" and a sparkline, a gradient area chart, a zebra table under uppercase headers. Nothing in it is wrong and none of it was decided.
 
@@ -90,7 +90,7 @@ Also `quality-bar.md` → Dark mode and mobile.
 - **Navigation folds** into a top bar with a menu sheet, or a bottom bar of four or five destinations.
 - **KPIs** become a 2-column grid or a label-value list, never four squeezed columns.
 - **At most one row of controls above a chart or list;** the first list row starts in the top 60% of the screen.
-- **Tables become two-line rows below about 640px:** identity and key number on line 1, the other fields on line 2 in grey. Fields move, never disappear.
+- **Tables become two-line rows below about 640px:** identity and key number on line 1, the other fields on line 2 in grey. Fields move, never disappear. A table that must stay a table scrolls inside its own frame with the identity column fixed and the key number in view without scrolling.
 - **Blocks that carry an action move up:** a rail with "Bills due · Pay" becomes a summary row above the list.
 - **List and detail:** one region at a time; back returns to the list at its scroll position.
 

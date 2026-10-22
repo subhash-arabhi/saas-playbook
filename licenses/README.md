@@ -21,6 +21,8 @@ Third-party content in this playbook, pinned to the commit it was copied from. E
 | front-end-design `references/direction.md` | [anthropics/skills](https://github.com/anthropics/skills) `skills/frontend-design` | `41bbe19` | `anthropic-skills-frontend-design.LICENSE` (Apache-2.0) |
 | front-end-design `references/craft.md` | [Dammyjay93/interface-design](https://github.com/Dammyjay93/interface-design) | `2f9be32` | `dammyjay93-interface-design.LICENSE` (MIT) |
 | DESIGN.md format | [google-labs-code/design.md](https://github.com/google-labs-code/design.md) | — | Referenced, not copied |
+| Grill in dependency order (plan skill), Evidence and Merge danger (PR description) | [mattpocock/skills](https://github.com/mattpocock/skills) `grilling`, `pr` | `5beb35b` | Referenced, not copied |
+| Assumptions and traceable changes (project `AGENTS.md` Always 9) | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) | `2c60614` | Referenced, not copied |
 
 Most files were adapted. Each one notes its changes in a comment at the top.
 

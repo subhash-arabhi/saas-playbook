@@ -42,7 +42,7 @@ Only keyboard-initiated actions and changes that happen hundreds of times a day 
 
 ## Dark mode and mobile
 - **Dark mode** uses the `-dark` tokens, not inverted colours. Check contrast in both themes.
-- **Mobile** at 390×844: no horizontal scroll, 44×44 touch targets, navigation reachable one-handed, tables become lists or scroll inside their own container.
+- **Mobile** at 390×844: no horizontal scroll, 44×44 touch targets, navigation reachable one-handed, tables become lists or scroll inside their own container with the identity column fixed and the key number in view.
 - **Feels native on a phone:**
   - Inputs, textareas and selects at 16px or more, so iOS doesn't zoom in; never `maximum-scale=1` or `user-scalable=no`. The right `inputmode`, `type` and `enterkeyhint` on each field.
   - Hover styles only under `@media (hover: hover) and (pointer: fine)` (Tailwind v4's `hover:` already is), so they don't stick after a tap; touch gets `:active` press feedback.

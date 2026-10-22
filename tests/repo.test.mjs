@@ -438,6 +438,8 @@ test('app screens have their measured rules, and the UI skill reads them before 
   for (const lesson of ['The first screen was thin', 'The product was missing', 'Restraint hid meaning', 'There was nothing to do']) assert.ok(findings.includes(`**${lesson}:**`), lesson)
   assert.match(screens, /\*\*Colour says good or bad, not up or down:\*\*/)
   assert.doesNotMatch(screens.split('\n').slice(1).join('\n'), /draw\.mjs|inspect\.mjs|charts\.js|app\.css/)
+  assert.match(screens, /approved `DESIGN\.md` item differs from a rule here, `DESIGN\.md` wins/)
+  for (const file of [screens, readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'references', 'quality-bar.md'), 'utf8')]) assert.match(file, /scroll\w* inside (its|their) own (frame|container) with the identity column fixed and the key number in view/)
   const skill = readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'SKILL.md'), 'utf8')
   assert.match(skill, /Before building an app screen .* also read `references\/app-screens\.md`/)
   assert.match(readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'references', 'avoid-ai-look.md'), 'utf8'), /taste-skill@6010f91[\s\S]*`app-screens\.md`/)
