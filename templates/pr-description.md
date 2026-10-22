@@ -16,6 +16,14 @@
 **Docs**
 - `ARCHITECTURE.md` updated: <what changed in it, or "Last updated only">
 
+## Evidence
+<!-- For each behaviour change: the test that failed before and passes now, or command output. UI changes: see Screenshots. -->
+- <behaviour>: `<test name>` failed before, passes now
+
+## Merge danger
+**Door:** <two-way: reverting the PR undoes it | one-way: <what can't be undone, e.g. "migration 004 drops `projects.legacy_id`">>
+**Blast radius:** <a few words: what breaks and for whom if it's wrong, e.g. "invoice list for every team">
+
 ## Plans included
 - `plans/<name>.md` (<done | steps 1–N of M>)
 

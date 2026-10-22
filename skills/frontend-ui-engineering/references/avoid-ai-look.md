@@ -1,15 +1,16 @@
 # Avoid the AI Look
 
-_Distilled from Leonxlnx/taste-skill@717446e (MIT)._ These are the defaults models reach for. Treat each as banned unless the design system or the user explicitly asks for it.
+_Distilled from Leonxlnx/taste-skill@6010f91 (MIT)._ These are the defaults models reach for. Treat each as banned unless the design system or the user explicitly asks for it. For dashboards, admin, settings and lists, also read `app-screens.md`.
 
 | AI default | Do instead |
 |---|---|
 | Purple/indigo gradients, blue "AI glow", neon outer glows, gradient text on headings | The design system's palette: neutrals plus **one** accent, flat surfaces |
 | Inter + slate-900 everywhere because it's the default | The design system's type stack. Build hierarchy with weight and color, not giant headings |
 | Three equal feature cards in a row; every block wrapped in a card | Layout by priority: one primary block, quieter secondary ones. Cards only when the surface means something (a selectable item, a contained tool); otherwise group with spacing or dividers |
-| Dashboards as a wall of identical KPI cards with shadows | Key numbers in a plain, aligned layout; tabular figures; one clear primary metric |
+| Dashboards as a wall of identical KPI cards with shadows, icon circles and sparklines | One divided container, label over value, the answer figure largest (`app-screens.md` → KPIs) |
 | Centered everything (hero over a dark mesh, centered forms and tables) | Left-aligned content on a grid. In tables, text left, numbers right |
 | Glassmorphism, blur and heavy shadows on everything | Solid surfaces. Subtle, background-tinted shadows only where the design system defines them |
+| The "warm editorial" fix that became a look: cream ground with a terracotta or clay accent, a serif display face as the shortcut to "premium", hairline rules everywhere | The design system's palette and type, chosen from the product's world |
 | Pure `#000` / `#fff`, oversaturated accents | The off-black / off-white and accent from the design system |
 | Mixed radii, warm and cool grays mixed, the accent drifting between screens | One radius scale and one palette, applied everywhere |
 | Emoji as icons, hand-drawn SVG icons, mixed icon sets | One icon library, one stroke width |
@@ -24,4 +25,4 @@ _Distilled from Leonxlnx/taste-skill@717446e (MIT)._ These are the defaults mode
 | Generic motion: infinite-loop micro-animations, the same hover-scale on every card, bouncy everything | The motion inventory in `DESIGN.md`: each moment animated once, with its token and a named purpose (feedback, orientation, continuity) |
 | A static, lifeless app: instant overlays, lists that jump, content that pops in | Press feedback, overlays from their trigger, list items sliding into place, skeletons cross-fading to content |
 
-**On marketing pages** also skip: version labels or "BETA" in the hero, "Scroll to explore" cues, logo walls inside the hero (put them below it), and the same section layout repeated down the page.
+**On marketing pages** also skip: version labels or a "New" / "BETA" pill above the hero headline, a floating blurred pill navigation, "Scroll to explore" cues, logo walls inside the hero (put them below it), and the same section layout repeated down the page.

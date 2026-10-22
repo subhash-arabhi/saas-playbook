@@ -5,8 +5,9 @@ Third-party content in this playbook, pinned to the commit it was copied from. E
 | Content | Source | Commit | License file |
 |---|---|---|---|
 | Skills: api-and-interface-design, browser-testing-with-devtools, code-review-and-quality, code-simplification, debugging-and-error-recovery, frontend-ui-engineering, incremental-implementation, observability-and-instrumentation, security-and-hardening. Reviewers: code-reviewer, security-auditor, test-engineer. References: security-checklist, accessibility-checklist | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `1401c8b` | `addyosmani-agent-skills.LICENSE` (MIT) |
-| "Avoid the AI look" in frontend-ui-engineering | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) | `717446e` | `leonxlnx-taste-skill.LICENSE` (MIT) |
+| "Avoid the AI look" and `references/app-screens.md` in frontend-ui-engineering | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) | `6010f91` | `leonxlnx-taste-skill.LICENSE` (MIT) |
 | frontend-ui-engineering `references/baseline-ui.md` | [ibelick/ui-skills](https://github.com/ibelick/ui-skills) `skills/baseline-ui` | `55363c3` | `ibelick-ui-skills.LICENSE` (MIT) |
+| frontend-ui-engineering `references/quality-bar.md`: worst-case data and phone rules | [emilkowalski/skills](https://github.com/emilkowalski/skills) `skills/break-ui`, `skills/mobile-native` | `2d22863` | `emilkowalski-skills.LICENSE` (MIT) |
 | web-design-guidelines rules | [vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines) | `434b7f9` | `vercel-web-interface-guidelines.LICENSE` (MIT) |
 | design-motion-principles | [kylezantos/design-motion-principles](https://github.com/kylezantos/design-motion-principles) | `4a9ca87` | `kylezantos-design-motion-principles.LICENSE` (MIT) |
 | `references/ui-templates/studio-admin/` | [arhamkhnz/next-shadcn-admin-dashboard](https://github.com/arhamkhnz/next-shadcn-admin-dashboard) | `e832f5b` | `arhamkhnz-next-shadcn-admin-dashboard.LICENSE` (MIT) |
@@ -20,6 +21,8 @@ Third-party content in this playbook, pinned to the commit it was copied from. E
 | front-end-design `references/direction.md` | [anthropics/skills](https://github.com/anthropics/skills) `skills/frontend-design` | `41bbe19` | `anthropic-skills-frontend-design.LICENSE` (Apache-2.0) |
 | front-end-design `references/craft.md` | [Dammyjay93/interface-design](https://github.com/Dammyjay93/interface-design) | `2f9be32` | `dammyjay93-interface-design.LICENSE` (MIT) |
 | DESIGN.md format | [google-labs-code/design.md](https://github.com/google-labs-code/design.md) | — | Referenced, not copied |
+| Grill in dependency order (plan skill), Evidence and Merge danger (PR description) | [mattpocock/skills](https://github.com/mattpocock/skills) `grilling`, `pr` | `5beb35b` | Referenced, not copied |
+| Assumptions and traceable changes (project `AGENTS.md` Always 9) | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) | `2c60614` | Referenced, not copied |
 
 Most files were adapted. Each one notes its changes in a comment at the top.
 

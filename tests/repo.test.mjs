@@ -158,7 +158,7 @@ const section = (text, heading) => (text.split(heading)[1] || '').split(/\n#{1,2
 test('/plan finds every question before asking any, and repeats until none are left', () => {
   const skill = readFileSync(join(REPO, 'skills', 'plan', 'SKILL.md'), 'utf8')
   const grill = skill.split('6. **Grill')[1]?.split('\n7. ')[0] || ''
-  const order = ['Find every question before asking any', 'dry run', 'Write the full list into Open questions', 'Ask them in consecutive rounds', 'Ask about each risky action', 'Repeat the dry run', 'until a dry run finds none', 'Dry run: N questions, none left']
+  const order = ['Find every question before asking any', 'dry run', 'Look up facts, don\'t ask them', 'Only the questions that depend on a fact still being looked up wait', 'Write the full list into Open questions', 'Ask them in consecutive rounds', 'Ask in dependency order', 'only questions whose prerequisites are already answered', 'waits for a later round', 'Ask about each risky action', 'Repeat the dry run', 'until a dry run finds none', 'Dry run: N questions, none left']
   let at = -1
   for (const phrase of order) {
     const i = grill.indexOf(phrase)
@@ -239,6 +239,29 @@ test('pre-PR and push keep AI attribution out of commits, files and PR descripti
   assert.match(push, /read the description back[\s\S]*strip-attribution\.mjs --check[\s\S]*gh pr edit --body-file/)
   assert.match(readFileSync(join(REPO, 'rules', 'git.md'), 'utf8'), /commit-msg` hook strips them[\s\S]*Never rewrite pushed commits without asking/)
   assert.match(readFileSync(join(REPO, 'templates', 'project-AGENTS.md'), 'utf8'), /\*\*Setup:\*\*.*commit-msg` hook doesn't run `\.agents\/tools\/strip-attribution\.mjs`.*install-attribution\.mjs/)
+})
+
+test('PR descriptions carry evidence and the merge danger, and push says what a one-way door is', () => {
+  const template = readFileSync(join(REPO, 'templates', 'pr-description.md'), 'utf8')
+  const evidence = section(template, '## Evidence')
+  assert.match(evidence, /failed before, passes now/)
+  const danger = section(template, '## Merge danger')
+  assert.match(danger, /\*\*Door:\*\* <two-way: .*\| one-way: /)
+  assert.match(danger, /\*\*Blast radius:\*\*/)
+  assert.ok(template.indexOf('## Evidence') > template.indexOf('## Changes') && template.indexOf('## Merge danger') < template.indexOf('## Plans included'), 'order')
+  const push = readFileSync(join(REPO, 'workflows', 'push.md'), 'utf8')
+  assert.match(push, /\*\*Evidence:\*\* .*failed before and passes now/)
+  assert.match(push, /\*\*one-way door\*\* can't[\s\S]*migration that drops or rewrites data[\s\S]*changed public API[\s\S]*\*\*blast radius\*\*/)
+})
+
+test('Always 9 asks for assumptions and traceable changes, and the Always list keeps its numbers', () => {
+  const agents = readFileSync(join(REPO, 'templates', 'project-AGENTS.md'), 'utf8')
+  const always = section(agents, '## Always (build phase)')
+  assert.deepEqual(always.match(/^\d+\. /gm).map((n) => parseInt(n, 10)), Array.from({ length: 13 }, (_, i) => i + 1))
+  const nine = always.split('\n').find((l) => l.startsWith('9. '))
+  assert.match(nine, /\*\*Stay in scope\.\*\* Before a change, state your assumptions; if the request reads two ways, ask\. Every changed line traces to the request\. Note anything else and ask\./)
+  assert.match(agents, /only Always 4 and 9–13 apply/)
+  assert.match(readFileSync(join(REPO, 'skills', 'incremental-implementation', 'SKILL.md'), 'utf8'), /\*\*Scope discipline\.\*\* .*every changed line traces to the step or the request/)
 })
 
 test('the flow-document skill points to installed paths, saves to the repo and keeps its five rules', () => {
@@ -399,6 +422,30 @@ test('the quality bar keeps the motion inventory and the wait rules, and the UI 
   for (const ref of ['references/avoid-ai-look.md', 'references/quality-bar.md', 'references/baseline-ui.md']) assert.ok(skill.includes(`\`${ref}\``), ref)
 })
 
+test('the quality bar takes worst-case data from real limits and has the phone fixes', () => {
+  const bar = readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'references', 'quality-bar.md'), 'utf8')
+  const screen = section(bar, '## Every screen')
+  assert.match(screen, /\*\*Worst-case data, realistic not random\.\*\* .*validation schema, database column or API contract.*"unbounded"/)
+  for (const shortCase of ['one- or two-letter name', 'exactly 0 and 1', 'missing avatar', 'empty list', 'through the fixtures or props', 'form limit shorter than its column']) assert.ok(screen.includes(shortCase), shortCase)
+  const mobile = section(bar, '## Dark mode and mobile')
+  for (const fix of ['16px or more', 'maximum-scale=1', '(hover: hover) and (pointer: fine)', '100dvh', '100svh', 'touch-action: manipulation', '-webkit-tap-highlight-color', 'env(safe-area-inset-*)', 'overscroll-behavior', 'user-select: none', 'theme-color']) assert.ok(mobile.includes(fix), fix)
+})
+
+test('app screens have their measured rules, and the UI skill reads them before building one', () => {
+  const screens = readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'references', 'app-screens.md'), 'utf8')
+  const findings = section(screens, '## What real product screens do')
+  for (const rule of ['Colour goes on data, not chrome', 'KPIs are type, not tiles', 'Surfaces are flat', 'No hero header', 'Charts carry almost no chrome', 'Navigation recedes', 'Tables are rules and alignment', 'Data states are honest']) assert.ok(findings.includes(`**${rule}.**`), rule)
+  for (const lesson of ['The first screen was thin', 'The product was missing', 'Restraint hid meaning', 'There was nothing to do']) assert.ok(findings.includes(`**${lesson}:**`), lesson)
+  assert.match(screens, /\*\*Colour says good or bad, not up or down:\*\*/)
+  assert.doesNotMatch(screens.split('\n').slice(1).join('\n'), /draw\.mjs|inspect\.mjs|charts\.js|app\.css/)
+  assert.match(screens, /approved `DESIGN\.md` item differs from a rule here, `DESIGN\.md` wins/)
+  for (const file of [screens, readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'references', 'quality-bar.md'), 'utf8')]) assert.match(file, /scroll\w* inside (its|their) own (frame|container) with the identity column fixed and the key number in view/)
+  const skill = readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'SKILL.md'), 'utf8')
+  assert.match(skill, /Before building an app screen .* also read `references\/app-screens\.md`/)
+  assert.match(readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'references', 'avoid-ai-look.md'), 'utf8'), /taste-skill@6010f91[\s\S]*`app-screens\.md`/)
+  for (const file of ['skills/front-end-design/references/craft.md', 'templates/DESIGN.md']) assert.doesNotMatch(readFileSync(join(REPO, file), 'utf8'), /value, change, sparkline|inline stat, sparkline/, file)
+})
+
 test('UI templates: every indexed source has its files, source comments and licence, and no ui/ folder', () => {
   const dir = join(REPO, 'references', 'ui-templates')
   const index = readFileSync(join(dir, 'README.md'), 'utf8')
@@ -467,6 +514,8 @@ test('adapted design sources name their commit and keep their licence', () => {
     ['skills/front-end-design/references/direction.md', 'anthropics/skills@41bbe19', 'anthropic-skills-frontend-design.LICENSE', '`41bbe19`'],
     ['skills/front-end-design/references/craft.md', 'Dammyjay93/interface-design@2f9be32', 'dammyjay93-interface-design.LICENSE', '`2f9be32`'],
     ['skills/frontend-ui-engineering/references/baseline-ui.md', 'ibelick/ui-skills@55363c3', 'ibelick-ui-skills.LICENSE', '`55363c3`'],
+    ['skills/frontend-ui-engineering/references/app-screens.md', 'Leonxlnx/taste-skill@6010f91', 'leonxlnx-taste-skill.LICENSE', '`6010f91`'],
+    ['skills/frontend-ui-engineering/references/quality-bar.md', 'emilkowalski/skills@2d22863', 'emilkowalski-skills.LICENSE', '`2d22863`'],
   ]
   const index = readFileSync(join(REPO, 'licenses', 'README.md'), 'utf8')
   for (const [file, source, license, commit] of sources) {

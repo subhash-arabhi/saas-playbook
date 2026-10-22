@@ -3,7 +3,7 @@ name: frontend-ui-engineering
 description: Builds production-quality, responsive user interfaces that follow the project's design system. Use when building or modifying pages, screens or components, implementing layouts, wiring UI to the API, managing UI state, or when the output needs to look and feel like a real product rather than AI-generated.
 ---
 
-<!-- Adapted from addyosmani/agent-skills@1401c8b (MIT, see licenses/), with an "Avoid the AI look" section distilled from Leonxlnx/taste-skill@717446e (MIT). Changes: design-system contract, motion inventory and quality bar (quality-bar.md, baseline-ui.md adapted from ibelick/ui-skills@55363c3, MIT), View Transitions, Tailwind styling, framework-agnostic, full accessibility audit as a separate pass, OpenAPI client, browser checks, trimmed (examples and AI-look table in references/); layered: general guidance here, playbook decisions in .agents/rules/. -->
+<!-- Adapted from addyosmani/agent-skills@1401c8b (MIT, see licenses/), with an "Avoid the AI look" section distilled from Leonxlnx/taste-skill@6010f91 (MIT). Changes: design-system contract, motion inventory and quality bar (quality-bar.md, baseline-ui.md adapted from ibelick/ui-skills@55363c3, MIT, app-screens.md from taste-skill@6010f91), View Transitions, Tailwind styling, framework-agnostic, full accessibility audit as a separate pass, OpenAPI client, browser checks, trimmed (examples and AI-look table in references/); layered: general guidance here, playbook decisions in .agents/rules/. -->
 
 **Project rules first.** If the project has `.agents/rules/` (installed with the SaaS playbook), read `.agents/rules/frontend.md` and `.agents/rules/testing.md` and follow them: they override this skill where they differ. Without them, follow this skill as written.
 
@@ -53,7 +53,7 @@ For pseudocode examples (composition, container, optimistic update, tokens), rea
 
 ## Avoid the AI Look
 
-Before building or finishing any visible UI, read `references/avoid-ai-look.md`, `references/quality-bar.md` and `references/baseline-ui.md`. Avoid every pattern in the first unless the design system or the user asks for it; meet the other two. Re-read every visible string before finishing.
+Before building or finishing any visible UI, read `references/avoid-ai-look.md`, `references/quality-bar.md` and `references/baseline-ui.md`. Avoid every pattern in the first unless the design system or the user asks for it; meet the other two. Before building an app screen (dashboard, admin, analytics, settings, a list or queue, one object's detail page), also read `references/app-screens.md` and meet it. Re-read every visible string before finishing.
 
 ## Don't Break the Basics
 

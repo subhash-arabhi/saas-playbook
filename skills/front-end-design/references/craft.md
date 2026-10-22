@@ -34,7 +34,7 @@ Produce all four, then propose a direction that uses them:
 - **The squint test:** blurred, the hierarchy still reads and nothing jumps out.
 
 ## Infinite expression
-A metric can be a hero number, inline stat, sparkline, gauge, progress bar, delta or trend badge. Same sidebar, same card grid and icon-number-label boxes every time is the AI tell. Ask what the one thing users do here is, and which product solves a similar problem brilliantly.
+A metric can be a hero number, inline stat, gauge, progress bar or delta, or live in the chart that explains it. Same sidebar, same card grid and icon-number-label boxes every time is the AI tell; KPIs carry no sparklines or icon circles (`.agents/skills/frontend-ui-engineering/references/app-screens.md` → KPIs). Ask what the one thing users do here is, and which product solves a similar problem brilliantly.
 
 ## Use what exists
 - **Controls:** native HTML first (`<button>`, `<a>`, `<dialog>`, `<details>`); a headless primitive for anything stateful (the project's shadcn/ui on Base UI); hand-roll only as a last resort, with full keyboard, focus and ARIA behaviour.

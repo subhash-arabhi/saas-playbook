@@ -2,6 +2,23 @@
 
 Each release is a `vX.Y.Z` tag. Its GitHub Release carries the `npm pack` tarball, its SHA-256, a provenance attestation, and the content checksum installs record in `.agents/playbook.json`. The release notes are the section below with the same version.
 
+## Unreleased
+
+- App screens (dashboards, admin, analytics, settings, lists, one object's detail page) have their own rules in `frontend-ui-engineering` → `references/app-screens.md`, distilled from taste-skill's study of 23 real product screens:
+  - colour on data, not chrome;
+  - KPIs as type, with no icon circles or sparklines;
+  - flat surfaces and quiet navigation;
+  - charts with little chrome, and tables built from rules and alignment;
+  - honest zero, empty and error states;
+  - a first screen that shows everything asked for, names the product and puts its main job one click away.
+
+  "Avoid the AI look" moves to taste-skill `6010f91` and adds its newer tells.
+- The quality bar takes worst-case sample data from the real limits (schema, column or API) and covers the short cases (a one-letter name, "1 member", a missing avatar, an empty list), from Emil Kowalski's `break-ui`.
+- The quality bar's mobile rules add the fixes that make a web app feel native on a phone (16px inputs, hover only with a mouse, `dvh` heights, no tap delay or flash, safe areas, contained overscroll, `theme-color`), from Emil Kowalski's `mobile-native`.
+- PR descriptions add **Evidence** (the test that failed before and passes now) and **Merge danger** (whether reverting the PR undoes it, and the blast radius); push says what counts as a one-way door.
+- The `/plan` grill asks in dependency order: a question waits until the ones it depends on are answered, and facts are looked up in parallel instead of asked.
+- Always 9 in the project `AGENTS.md`: state your assumptions before a change, ask when the request reads two ways, and make every changed line trace to the request.
+
 ## v2.0.0 (2026-10-22)
 
 **Upgrading:** in a project with UI, run `/front-end-design` before the next push. The pre-PR check now blocks without an Approvals table in `DESIGN.md`, and `/build` stops before using a component that isn't approved. It keeps what the project already has: existing tokens and components go into `DESIGN.md` and the gallery as `proposed`, offered first, and the one approval at the end covers them.
