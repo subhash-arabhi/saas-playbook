@@ -254,6 +254,16 @@ test('PR descriptions carry evidence and the merge danger, and push says what a 
   assert.match(push, /\*\*one-way door\*\* can't[\s\S]*migration that drops or rewrites data[\s\S]*changed public API[\s\S]*\*\*blast radius\*\*/)
 })
 
+test('Always 9 asks for assumptions and traceable changes, and the Always list keeps its numbers', () => {
+  const agents = readFileSync(join(REPO, 'templates', 'project-AGENTS.md'), 'utf8')
+  const always = section(agents, '## Always (build phase)')
+  assert.deepEqual(always.match(/^\d+\. /gm).map((n) => parseInt(n, 10)), Array.from({ length: 13 }, (_, i) => i + 1))
+  const nine = always.split('\n').find((l) => l.startsWith('9. '))
+  assert.match(nine, /\*\*Stay in scope\.\*\* Before a change, state your assumptions; if the request reads two ways, ask\. Every changed line traces to the request\. Note anything else and ask\./)
+  assert.match(agents, /only Always 4 and 9–13 apply/)
+  assert.match(readFileSync(join(REPO, 'skills', 'incremental-implementation', 'SKILL.md'), 'utf8'), /\*\*Scope discipline\.\*\* .*every changed line traces to the step or the request/)
+})
+
 test('the flow-document skill points to installed paths, saves to the repo and keeps its five rules', () => {
   const skill = readFileSync(join(REPO, 'skills', 'flow-document', 'SKILL.md'), 'utf8')
   assert.match(skill, /`\.agents\/templates\/flow-document\.html`/)

@@ -25,7 +25,7 @@ steps:
   - id: 5
     title: "Assumptions and traceable changes"
     summary: "Always 9 in the project AGENTS.md: state assumptions, ask on two readings, every changed line traces to the request"
-    done: false
+    done: true
     checkpoint: false
   - id: 6
     title: "Docs and full check"
@@ -126,8 +126,8 @@ Six improvements found in Leonxlnx/taste-skill, emilkowalski/skills, mattpocock/
 **Files:** `templates/project-AGENTS.md` (edit), `skills/incremental-implementation/SKILL.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] Always 9 has assumptions, two readings and traceable lines
-- [ ] No rule numbers change, so "Always 4 and 9–13" and "Always 10" references stay right
+- [x] Always 9 has assumptions, two readings and traceable lines
+- [x] No rule numbers change, so "Always 4 and 9–13" and "Always 10" references stay right
 
 **Check:** `npm test`, `rg -n 'Always [0-9]' rules workflows skills templates`
 
@@ -160,3 +160,4 @@ None.
 | 2 | 2026-10-23 | Done | 108 tests (1 new; the source test covers `quality-bar.md`). Decided: the phone fixes are one sub-list under Mobile rather than separate lines at the top level, and the first-line comment says only the worst-case and phone rules are adapted. Decided: `inputmode`, `enterkeyhint`, long-press selection and `theme-color` from `mobile-native` were added too, since they're one line each. |
 | 3 | 2026-10-23 | Done | 109 tests (1 new). Decided: Evidence and Merge danger sit after Changes, and push step 6 got sub-bullets, with the read-back as its own bullet so it isn't lost. Decided: one-way doors also include sent email, charged money and a rotated secret, alongside the plan's migration, deleted data and changed API. |
 | 4 | 2026-10-23 | Done | 109 tests (the existing grill test checks 5 more phrases in order). `rules/asking.md` unchanged: rounds stay up to 3 per card. Decided: the fact lookup also names `.env.local`, which the planning rule already lists as something not to ask about. |
+| 5 | 2026-10-23 | Done | 110 tests (1 new: rule 9's wording, the Always list numbered 1–13, and the explore line). The "Always 10" references in `build-plan.md`, `asking.md` and `planning.md` still point at the risky-actions rule. Decided: the incremental-implementation line says "the step or the request", so it covers builds without a plan too. |
