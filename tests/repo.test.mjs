@@ -177,19 +177,33 @@ test('the planning rule has the dry-run checklist and the Approved: rule', () =>
   assert.match(readFileSync(join(REPO, 'rules', 'asking.md'), 'utf8'), /planning grill[\s\S]*consecutive rounds of up to 3/)
 })
 
-test('/build stops only for the five listed reasons, and decides and logs everything else', () => {
+test('/build stops only for the six listed reasons, and decides and logs everything else', () => {
   const build = readFileSync(join(REPO, 'workflows', 'build-plan.md'), 'utf8')
   const run = section(build, '## 4. Run to the end')
   const decide = run.split('**Decide and log')[1]?.split('**Stop and ask only when**')[0] || ''
   for (const item of ['A decision the plan doesn\'t cover', 'An extra file', 'An unclear detail', 'Work beyond the plan']) assert.ok(decide.includes(item), `decide and log: ${item}`)
   assert.match(decide, /"Decided: <what> \(why\)"/)
   const stops = (run.split('**Stop and ask only when**')[1] || '').match(/^\d+\. .+$/gm) || []
-  assert.equal(stops.length, 5, 'exactly five stop reasons')
-  for (const [i, reason] of [/checkpoint/, /isn't covered by an `- \*\*Approved: …:\*\*` bullet .* names exactly this action/, /\*\*Stop and ask if\*\*/, /two genuinely different approaches/, /unrelated uncommitted changes/].entries()) assert.match(stops[i], reason)
+  assert.equal(stops.length, 6, 'exactly six stop reasons')
+  for (const [i, reason] of [/checkpoint/, /isn't covered by an `- \*\*Approved: …:\*\*` bullet .* names exactly this action/, /\*\*Stop and ask if\*\*/, /two genuinely different approaches/, /unrelated uncommitted changes/, /UI step uses a component or pattern that isn't `approved` in `DESIGN\.md`.*never build on a `proposed` item/].entries()) assert.match(stops[i], reason)
   assert.match(section(build, '## 2.'), /"Also changed: <file> \(why\)"/)
   assert.doesNotMatch(build, /propose a plan edit/)
   assert.match(section(build, '## 5.'), /list every "Decided:" and "Also changed:" note/)
   assert.match(readFileSync(join(REPO, 'skills', 'incremental-implementation', 'SKILL.md'), 'utf8'), /"Also changed: <file> \(why\)"/)
+})
+
+test('a UI plan starts with a Design step at a checkpoint, and the build checks approvals before every UI step', () => {
+  const planning = readFileSync(join(REPO, 'rules', 'planning.md'), 'utf8')
+  assert.match(section(planning, '\n## Steps\n'), /\*\*A plan that touches UI starts with a "Design" step\*\* with `checkpoint: true`\..*as `proposed`.*Its checkpoint is where the user approves them\. The user can switch the checkpoint off\./)
+  assert.match(section(planning, '\n## Steps\n'), /\*\*UI steps' Done when name quality-bar criteria\*\*.*Never "looks right"\./)
+  assert.match(section(planning, '\n## Checkpoints\n'), /\*\*Never change `checkpoint` otherwise,\*\* except to set it on a new plan's Design step\./)
+  const build = readFileSync(join(REPO, 'workflows', 'build-plan.md'), 'utf8')
+  assert.match(section(build, '## 2.'), /\*\*A UI step:\*\* list the components and patterns it uses, and check each is `approved` in the Approvals table of `DESIGN\.md`\. If one isn't, stop/)
+  assert.match(section(build, '## 3.'), /\*\*The Design step\*\* asks instead, with the gallery URL: "Approve" or "Change something"\. Approve marks its items `approved`/)
+  assert.match(readFileSync(join(REPO, 'skills', 'plan', 'SKILL.md'), 'utf8'), /If it touches UI, step 1 is the Design step with `checkpoint: true`/)
+  const template = readFileSync(join(REPO, 'templates', 'plan.md'), 'utf8')
+  assert.match(template, /never "looks right"/)
+  assert.deepEqual(checkPlan(template).errors, [])
 })
 
 test('a risky action counts as approved only with an Approved: bullet, and the template shows one', () => {

@@ -25,6 +25,7 @@ steps:
 - **Approved: <risky action>:** <exactly what, approved during the dry run; optional, one per risky action>
 
 ## Steps
+<!-- A plan that touches UI starts with a "Design" step with checkpoint: true (.agents/rules/planning.md → Steps). -->
 
 ### Step 1: <Short step title>
 **Do:**
@@ -35,9 +36,9 @@ steps:
 
 **Done when:**
 - [ ] <Specific, checkable result>
-- [ ] <Specific, checkable result>
+- [ ] <Specific, checkable result; for UI, a quality-bar criterion (a state, a wait, a motion moment), never "looks right">
 
-**Check:** `<exact command(s)>`, plus checks at localhost (desktop + mobile for UI)
+**Check:** `<exact command(s)>`, plus checks at localhost (desktop + mobile, light + dark for UI)
 
 **Stop and ask if:** <optional>
 

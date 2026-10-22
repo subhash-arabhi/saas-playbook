@@ -15,7 +15,7 @@ metadata:
    - write the first SaaS plan, including the stack
 
    If the Decision is **stop**, write it and don't plan.
-3. **If the phase is `build`:** list the areas the work touches and read their rules and skills (`AGENTS.md` → "Areas → rules and skills"). If a decision blocks writing the plan at all, ask it first (`.agents/rules/asking.md`). Then write a plan for what the user asked, following `.agents/rules/planning.md` and `.agents/templates/plan.md` exactly. Save it as `plans/<short-name>.md` with `status: draft`.
+3. **If the phase is `build`:** list the areas the work touches and read their rules and skills (`AGENTS.md` → "Areas → rules and skills"). If a decision blocks writing the plan at all, ask it first (`.agents/rules/asking.md`). Then write a plan for what the user asked, following `.agents/rules/planning.md` and `.agents/templates/plan.md` exactly. Save it as `plans/<short-name>.md` with `status: draft`. If it touches UI, step 1 is the Design step with `checkpoint: true`, and UI steps' Done when name quality-bar criteria (`.agents/rules/planning.md` → Steps).
 4. Run `node .agents/tools/plan.mjs check plans/<short-name>.md` and fix every error.
 5. **Show the plan** in the plan view (`.agents/rules/planning.md` → plan view).
 6. **Grill: settle everything before approval,** so the build never has to ask (`.agents/rules/planning.md` → Settle everything before approval).
