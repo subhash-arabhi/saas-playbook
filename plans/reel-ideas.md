@@ -1,11 +1,11 @@
 ---
 name: "Ideas from agent-skill repos"
-status: approved
+status: building
 steps:
   - id: 1
     title: "App-screen rules from Taste v2"
     summary: "A new app-screens reference distilled from taste-skill 2.1.4, the AI-look table re-pinned, and the UI skill reads it"
-    done: false
+    done: true
     checkpoint: false
   - id: 2
     title: "Worst-case data and phone fixes"
@@ -63,10 +63,10 @@ Six improvements found in Leonxlnx/taste-skill, emilkowalski/skills, mattpocock/
 **Files:** `skills/frontend-ui-engineering/references/app-screens.md` (new), `skills/frontend-ui-engineering/references/avoid-ai-look.md` (edit), `skills/frontend-ui-engineering/SKILL.md` (edit), `skills/front-end-design/references/craft.md` (edit), `licenses/README.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] `app-screens.md` has the eight findings and both testing lessons, in the playbook's terms (`DESIGN.md` tokens, no Taste scripts)
-- [ ] No file still names `717446e`
-- [ ] `craft.md` and `app-screens.md` agree on KPIs and sparklines
-- [ ] The source test fails if the new file's first-line comment or its licence row is removed
+- [x] `app-screens.md` has the eight findings and both testing lessons, in the playbook's terms (`DESIGN.md` tokens, no Taste scripts)
+- [x] No file still names `717446e`
+- [x] `craft.md` and `app-screens.md` agree on KPIs and sparklines
+- [x] The source test fails if the new file's first-line comment or its licence row is removed
 
 **Check:** `npm test`, `rg -n 717446e .`
 
@@ -156,3 +156,4 @@ None.
 | Step | Date | Result | Notes |
 |---|---|---|---|
 | Plan | 2026-10-23 | Dry run | Dry run: 4 questions (Impeccable checker, /retro, gallery toggle, checkpoints), none left. |
+| 1 | 2026-10-23 | Done | `app-screens.md` is 113 lines; 107 tests (1 new; the source test now covers it). Decided: dropped Taste's "no entrance motion", its violet ban and its near-black primary, since the motion inventory and `DESIGN.md` decide those. Decided: added Taste's third-wave tells (cream with terracotta, serif as "premium") and two marketing tells to the AI-look table, but not its personal bans on monospace labels and thin rules, which app screens need. Also changed: `templates/DESIGN.md` (its KPI card listed a sparkline). `plan-open` fails only in the parallel full run (the known port clash) and passes alone. |

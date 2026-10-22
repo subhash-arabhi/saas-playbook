@@ -232,7 +232,7 @@ components:
 - **Stepper** for multi-step flows
 
 ### Data display
-- **Card**, **stat / KPI card** (value, change, sparkline)
+- **Card**, **stat / KPI** (label, value, change; a divided strip, no sparkline or icon circle)
 - **Table:** header, sorting, selection, row actions, sticky header, empty and loading rows; mobile behaviour
 - **List** and **key-value list**
 - **Badge / tag / status dot**, **avatar** and avatar group

@@ -399,6 +399,19 @@ test('the quality bar keeps the motion inventory and the wait rules, and the UI 
   for (const ref of ['references/avoid-ai-look.md', 'references/quality-bar.md', 'references/baseline-ui.md']) assert.ok(skill.includes(`\`${ref}\``), ref)
 })
 
+test('app screens have their measured rules, and the UI skill reads them before building one', () => {
+  const screens = readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'references', 'app-screens.md'), 'utf8')
+  const findings = section(screens, '## What real product screens do')
+  for (const rule of ['Colour goes on data, not chrome', 'KPIs are type, not tiles', 'Surfaces are flat', 'No hero header', 'Charts carry almost no chrome', 'Navigation recedes', 'Tables are rules and alignment', 'Data states are honest']) assert.ok(findings.includes(`**${rule}.**`), rule)
+  for (const lesson of ['The first screen was thin', 'The product was missing', 'Restraint hid meaning', 'There was nothing to do']) assert.ok(findings.includes(`**${lesson}:**`), lesson)
+  assert.match(screens, /\*\*Colour says good or bad, not up or down:\*\*/)
+  assert.doesNotMatch(screens.split('\n').slice(1).join('\n'), /draw\.mjs|inspect\.mjs|charts\.js|app\.css/)
+  const skill = readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'SKILL.md'), 'utf8')
+  assert.match(skill, /Before building an app screen .* also read `references\/app-screens\.md`/)
+  assert.match(readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'references', 'avoid-ai-look.md'), 'utf8'), /taste-skill@6010f91[\s\S]*`app-screens\.md`/)
+  for (const file of ['skills/front-end-design/references/craft.md', 'templates/DESIGN.md']) assert.doesNotMatch(readFileSync(join(REPO, file), 'utf8'), /value, change, sparkline|inline stat, sparkline/, file)
+})
+
 test('UI templates: every indexed source has its files, source comments and licence, and no ui/ folder', () => {
   const dir = join(REPO, 'references', 'ui-templates')
   const index = readFileSync(join(dir, 'README.md'), 'utf8')
@@ -467,6 +480,7 @@ test('adapted design sources name their commit and keep their licence', () => {
     ['skills/front-end-design/references/direction.md', 'anthropics/skills@41bbe19', 'anthropic-skills-frontend-design.LICENSE', '`41bbe19`'],
     ['skills/front-end-design/references/craft.md', 'Dammyjay93/interface-design@2f9be32', 'dammyjay93-interface-design.LICENSE', '`2f9be32`'],
     ['skills/frontend-ui-engineering/references/baseline-ui.md', 'ibelick/ui-skills@55363c3', 'ibelick-ui-skills.LICENSE', '`55363c3`'],
+    ['skills/frontend-ui-engineering/references/app-screens.md', 'Leonxlnx/taste-skill@6010f91', 'leonxlnx-taste-skill.LICENSE', '`6010f91`'],
   ]
   const index = readFileSync(join(REPO, 'licenses', 'README.md'), 'utf8')
   for (const [file, source, license, commit] of sources) {
