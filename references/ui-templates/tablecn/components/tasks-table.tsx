@@ -1,0 +1,145 @@
+// Source: sadmann7/tablecn@744ffda src/app/components/tasks-table.tsx (MIT). Changes: this comment only. Reference copy, not built: adapt it as .agents/references/ui-templates/README.md says.
+"use client";
+
+import * as React from "react";
+
+import type { Task } from "@/db/schema";
+import type {
+  DataTableQueryKeys,
+  DataTableRowAction,
+} from "@/lib/data-table-types";
+import type { DataMode, Direction, FilterMode } from "@/lib/flag";
+
+import { DataTable } from "@/registry/bases/radix/components/data-table/data-table";
+import { DataTableAdvancedToolbar } from "@/registry/bases/radix/components/data-table/data-table-advanced-toolbar";
+import { DataTableCommandFilterMenu } from "@/registry/bases/radix/components/data-table/data-table-command-filter-menu";
+import { DataTableFilterMenu } from "@/registry/bases/radix/components/data-table/data-table-filter-menu";
+import { DataTableSortMenu } from "@/registry/bases/radix/components/data-table/data-table-sort-menu";
+import { DataTableToolbar } from "@/registry/bases/radix/components/data-table/data-table-toolbar";
+import {
+  useDataTable,
+  UseDataTableProps,
+} from "@/registry/bases/radix/hooks/use-data-table";
+import { DirectionProvider } from "@/registry/bases/radix/ui/direction";
+
+import type {
+  getEstimatedHoursRange,
+  getTaskPriorityCounts,
+  getTasks,
+  getTaskStatusCounts,
+} from "../lib/queries";
+
+import { tasksDefaultSorting } from "../lib/validations";
+import { DeleteTasksDialog } from "./delete-tasks-dialog";
+import { TasksTableActionBar } from "./tasks-table-action-bar";
+import { getTasksTableColumns } from "./tasks-table-columns";
+import { UpdateTaskSheet } from "./update-task-sheet";
+
+interface TasksTableProps {
+  dataMode: DataMode;
+  dir: Direction;
+  filterMode: FilterMode;
+  promises: Promise<
+    [
+      Awaited<ReturnType<typeof getTasks>>,
+      Awaited<ReturnType<typeof getTaskStatusCounts>>,
+      Awaited<ReturnType<typeof getTaskPriorityCounts>>,
+      Awaited<ReturnType<typeof getEstimatedHoursRange>>,
+    ]
+  >;
+  queryKeys?: Partial<DataTableQueryKeys>;
+}
+
+export function TasksTable({
+  dataMode,
+  dir,
+  filterMode,
+  promises,
+  queryKeys,
+}: TasksTableProps) {
+  const enableAdvancedFilter = filterMode !== "plain";
+
+  const [
+    { data, pageCount },
+    statusCounts,
+    priorityCounts,
+    estimatedHoursRange,
+  ] = React.use(promises);
+
+  const [rowAction, setRowAction] =
+    React.useState<DataTableRowAction<Task> | null>(null);
+
+  const countsKey = JSON.stringify([
+    statusCounts,
+    priorityCounts,
+    estimatedHoursRange,
+  ]);
+
+  const columns = React.useMemo(
+    () =>
+      getTasksTableColumns({
+        statusCounts,
+        priorityCounts,
+        estimatedHoursRange,
+        setRowAction,
+      }),
+    [countsKey],
+  );
+
+  const tableProps: Omit<UseDataTableProps<Task>, "mode" | "pageCount"> = {
+    data,
+    columns,
+    initialState: {
+      sorting: tasksDefaultSorting,
+      columnPinning: { start: ["select"], end: ["actions"] },
+    },
+    queryKeys,
+    getRowId: (originalRow) => originalRow.id,
+    shallow: false,
+    clearOnDefault: true,
+    enableRowRangeSelection: true,
+  };
+
+  const { table } = useDataTable(
+    dataMode === "client"
+      ? { ...tableProps, mode: "client" }
+      : { ...tableProps, pageCount },
+  );
+
+  return (
+    <DirectionProvider dir={dir}>
+      <DataTable
+        aria-label="Tasks"
+        table={table}
+        actionBar={<TasksTableActionBar table={table} />}
+      >
+        {enableAdvancedFilter ? (
+          <DataTableAdvancedToolbar table={table}>
+            <DataTableSortMenu table={table} align="start" />
+            {filterMode === "advanced" ? (
+              <DataTableFilterMenu table={table} align="start" />
+            ) : (
+              <DataTableCommandFilterMenu table={table} align="start" />
+            )}
+          </DataTableAdvancedToolbar>
+        ) : (
+          <DataTableToolbar table={table}>
+            <DataTableSortMenu table={table} align="end" />
+          </DataTableToolbar>
+        )}
+      </DataTable>
+      <UpdateTaskSheet
+        open={rowAction?.variant === "update"}
+        onOpenChange={() => setRowAction(null)}
+        task={rowAction?.row.original ?? null}
+      />
+      <DeleteTasksDialog
+        open={rowAction?.variant === "delete"}
+        onOpenChange={() => setRowAction(null)}
+        tasks={rowAction?.row.original ? [rowAction?.row.original] : []}
+        showTrigger={false}
+        onSuccess={() => rowAction?.row.toggleSelected(false)}
+      />
+    </DirectionProvider>
+  );
+}

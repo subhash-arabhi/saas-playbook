@@ -1,0 +1,38 @@
+// Source: cosscom/ui@3d8ca28 apps/ui/registry/default/particles/p-navigation-1.tsx (MIT). Changes: this comment only. Reference copy, not built: adapt it as .agents/references/ui-templates/README.md says.
+"use client";
+
+import { useState } from "react";
+import {
+  SegmentedControl,
+  SegmentedControlItem,
+} from "@/registry/default/ui/segmented-control";
+
+const links = [
+  { href: "#overview", label: "Overview" },
+  { href: "#activity", label: "Activity" },
+  { href: "#settings", label: "Settings" },
+];
+
+export default function Particle() {
+  const [current, setCurrent] = useState("#overview");
+
+  return (
+    <SegmentedControl aria-label="Project sections" render={<nav />}>
+      {links.map((link) => (
+        <SegmentedControlItem
+          key={link.href}
+          render={
+            // biome-ignore lint/a11y/useAnchorContent: SegmentedControlItem supplies the link content through the render prop.
+            <a
+              aria-current={link.href === current ? "page" : undefined}
+              href={link.href}
+              onClick={() => setCurrent(link.href)}
+            />
+          }
+        >
+          {link.label}
+        </SegmentedControlItem>
+      ))}
+    </SegmentedControl>
+  );
+}

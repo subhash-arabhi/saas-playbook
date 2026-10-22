@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { readFileSync, readdirSync, existsSync } from 'node:fs'
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs'
 import { join, dirname, resolve } from 'node:path'
 import { REPO } from './helpers.mjs'
 import { checkPlan } from '../tools/plan.mjs'
@@ -375,6 +375,39 @@ test('the quality bar keeps the motion inventory and the wait rules, and the UI 
   assert.match(waits, /\*\*Over 10 s:\*\* staged progress.*partial results.*a time estimate.*leave and come back/)
   const skill = readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'SKILL.md'), 'utf8')
   for (const ref of ['references/avoid-ai-look.md', 'references/quality-bar.md', 'references/baseline-ui.md']) assert.ok(skill.includes(`\`${ref}\``), ref)
+})
+
+test('UI templates: every indexed source has its files, source comments and licence, and no ui/ folder', () => {
+  const dir = join(REPO, 'references', 'ui-templates')
+  const index = readFileSync(join(dir, 'README.md'), 'utf8')
+  const licenses = readFileSync(join(REPO, 'licenses', 'README.md'), 'utf8')
+  const sources = {
+    'studio-admin': 'arhamkhnz/next-shadcn-admin-dashboard@e832f5b',
+    tablecn: 'sadmann7/tablecn@744ffda',
+    'coss-particles': 'cosscom/ui@3d8ca28',
+    tailark: 'tailark/blocks@8139698',
+    magicui: 'magicuidesign/magicui@efe76fc',
+    themes: 'jnsahaj/tweakcn@a3b47b3',
+  }
+  const indexed = [...index.matchAll(/^\| `([\w-]+)\/[^`]*` \|/gm)].map((m) => m[1])
+  assert.deepEqual(indexed.sort(), Object.keys(sources).sort(), 'index table lists exactly the copied sources')
+  assert.match(index, /npx create-fumadocs-app@\d+\.\d+\.\d+/)
+  let bytes = 0
+  const walk = (d) => readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(join(d, e.name)) : [join(d, e.name)])
+  for (const [folder, source] of Object.entries(sources)) {
+    const files = walk(join(dir, folder))
+    assert.ok(files.length > 0, folder)
+    const [repo, commit] = source.split('@')
+    assert.ok(licenses.split('\n').some((l) => l.includes(`references/ui-templates/${folder}/`) && l.includes(`\`${commit}\``) && l.includes('.LICENSE')), `licenses/README.md row for ${folder}`)
+    assert.ok(index.includes(`[${repo}](https://github.com/${repo})`), `index names ${repo}`)
+    for (const file of files) {
+      const rel = file.slice(dir.length + 1)
+      assert.doesNotMatch(rel, /(^|\/)ui\//, `${rel}: no components/ui copies`)
+      assert.match(readFileSync(file, 'utf8').split('\n')[0], new RegExp(`^(//|/\\*) Source: ${source.replace(/[./]/g, '\\$&')} \\S+ \\((MIT|Apache-2\\.0)\\)\\. Changes: `), rel)
+      bytes += statSync(file).size
+    }
+  }
+  assert.ok(bytes < 2 * 1024 * 1024, `templates are ${bytes} bytes; keep them under 2 MB`)
 })
 
 test('adapted design sources name their commit and keep their licence', () => {

@@ -30,7 +30,7 @@ steps:
   - id: 6
     title: "Curated UI templates"
     summary: "Copy chosen pages and blocks from Studio Admin, tablecn, coss ui, Tailark, Magic UI and tweakcn, pinned with licences, plus an index the agent reads first"
-    done: false
+    done: true
     checkpoint: false
   - id: 7
     title: "Design phase in plans and builds"
@@ -189,9 +189,9 @@ A project built only with this playbook looks designed by default. Before the bu
 **Files:** `references/ui-templates/` (new), `licenses/` (new files), `licenses/README.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] Every index entry has its files, source, commit and licence
-- [ ] No source repeats another's pages, and no template ships its own `components/ui`
-- [ ] The installed package grows by less than 2 MB
+- [x] Every index entry has its files, source, commit and licence
+- [x] No source repeats another's pages, and no template ships its own `components/ui`
+- [x] The installed package grows by less than 2 MB
 
 **Check:** `npm test`, `npm pack --dry-run` size
 
@@ -268,3 +268,4 @@ None.
 | 3 | 2026-10-22 | Done | Decided: `on-primary` is white or `neutral-12`, whichever contrasts more, so a light accent still gets readable button text; spring tokens export as `--motion-spring-*` strings for Motion (also `--json`). Also changed: `templates/DESIGN.md` (focus ring uses `accent-9`, since `accent-8` is under 3:1). A palette pasted into the template lints with 0 errors. |
 | 4 | 2026-10-22 | Done | Decided: the gallery reads token values straight from `DESIGN.md` (with `{colors.x}` references resolved), because Tailwind 4 outputs only the variables a class uses, so swatches built on `var(--color-*)` were blank; no route `dynamic` export, since Next.js 16.4 enables Cache Components by default and rejects it. Checked in a scratch Next.js 16.4.2 app: 1440×900 and 390×844, light and dark, no console errors or horizontal scroll, `/design` returns 404 after `next build` and `next start`. |
 | 5 | 2026-10-22 | Done | Decided: `baseline-ui.md` drops the upstream review command (rules apply while building, no review pass) and its "no animation unless requested", "no custom easing" and Tailwind-default rules, which now point at `DESIGN.md`; the avoid-AI-look table bans a static app as well as generic motion. Also changed: `references/motion-cookbook.md` and `references/creation-gotchas.md` in design-motion-principles (restraint-first wording and source comments); `rules/frontend.md` routes new components through the design-change flow. |
+| 6 | 2026-10-22 | Done | Decided: tablecn and Tailark ship Base UI builds, so those are copied instead of their Radix ones; only Studio Admin needs the Radix-to-Base UI mapping. coss particles (529 files, 2.2 MB) and Tailark variants are capped at three per component or block to fit the budget. The coss licence file quotes its `LICENSING.md` with the standard MIT terms, since the repository names no copyright holder for `apps/ui/`. Verified: 404 files, Gitleaks and Semgrep `p/default` clean; `npm pack --dry-run` grows from 689 KB to 2,247 KB unpacked (+1.52 MB; tarball 238 KB to 514 KB). |
