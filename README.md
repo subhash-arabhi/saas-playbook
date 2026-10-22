@@ -15,12 +15,12 @@ npx github:subhash-arabhi/saas-playbook
 - **Six commands drive the whole lifecycle.** `/explore` → `/plan` → `/build` → `/push` → `/deploy` → `/publish`. The agent never pushes, deploys or publishes on its own.
 - **Explore before you build.** Test the idea with a minimal local prototype, on the cheapest models, before any production work starts.
 - **Plans you can read and edit.** Short plans with collapsible steps in a plan view inside Cursor or VS Code. Click a step's circle to make the build pause there, edit inline, then approve. A checker enforces the format.
-- **A quality gate before every PR.** Simplification, full tests, Playwright E2E, Gitleaks, Semgrep, OSV-Scanner, a UI audit, a code review, a security review, and an LLM red-team when AI code changed. It runs in about 5–10 minutes.
-- **Consistent design.** One `DESIGN.md` (tokens and every component) feeds the Tailwind theme. Every UI change is checked on desktop and mobile.
+- **A quality gate before every PR.** Simplification, full tests, Playwright E2E, Gitleaks, Semgrep, OSV-Scanner, design checks (`DESIGN.md` lint, approved components only, no arbitrary Tailwind values), a UI audit, a code review, a security review, and an LLM red-team when AI code changed. It runs in about 5–10 minutes.
+- **Polished, consistent design.** `/front-end-design` sets up the design system before the first screen: brand, style, palette, type, every component, pattern, marketing section and motion moment, shown in a dev-only gallery that you approve once. Curated free templates (app shell and pages, data tables, components, marketing blocks) give each project a strong starting point to adapt. One `DESIGN.md` feeds the Tailwind theme; every screen meets a strict quality bar and moves with purpose (quiet in the app, expressive on marketing pages), checked on desktop and mobile, light and dark.
 - **Deploys on your command.** Through your cloud's own CLI: infrastructure as code, one resource group per app, a budget cap with alerts at 50% and 75%, a smoke check and rollback on every deploy.
 - **Private by default.** Secrets, cloud account and resource names and URLs live only in `.env.local`, and docs refer to them by key, so the repo is safe to make public.
 - **AI features done right.** Models are researched and lightly tested per task, outputs are validated, and calls have timeouts, retries in one place and per-user cost caps.
-- **Light on context.** About 2,300 tokens are loaded on every request. Rules hold the decisions; skills load only for the work at hand, and their detail sits in references read on demand.
+- **Light on context.** About 3,200 tokens are loaded on every request. Rules hold the decisions; skills load only for the work at hand, and their detail sits in references read on demand.
 
 ## How it works
 
@@ -36,10 +36,12 @@ npx github:subhash-arabhi/saas-playbook
 |---|---|
 | `/explore <idea>` | Minimal local prototype to find out if the idea is worth building. Findings go in `EXPLORE.md` |
 | `/plan [what]` | Writes a plan in `plans/` and asks everything up front: a dry run lists every question, including each risky action to approve, and repeats until none are left. After exploring, it first records the decision and switches to the build phase |
-| `/build [plan]` | Builds an approved plan to the end, with tests and one commit per step. It decides and logs what the plan didn't cover, and stops only for checkpoints, unapproved risky actions or a check it can't fix. Run again to resume |
+| `/build [plan]` | Builds an approved plan to the end, with tests and one commit per step. It decides and logs what the plan didn't cover, and stops only for checkpoints, unapproved risky actions, a check it can't fix, or a UI component that isn't approved yet. Run again to resume |
 | `/push` | Your sign-off: runs the pre-PR check, pushes and opens the PR |
 | `/deploy` | Merges the PR and deploys to production, then smoke-checks it |
 | `/publish` | Readiness for real users (rare): legal pages, consent, privacy, accessibility, licenses, domain |
+
+**`/front-end-design [what]`** sets up the design system before the first UI step, or proposes one new component, pattern or token later. It asks a few questions as cards (brand, style, palette, type), builds everything as `proposed` in `DESIGN.md` and the gallery at `/design`, then asks you once to approve the whole gallery. A plan that touches UI starts with a Design step that pauses for that approval, and the build never uses a component that isn't approved.
 
 **`/flow-document [journey]`** works at any point: it writes or updates the product's flow document in `docs/flow/`, a page showing the user's journey as a tree, each step with how it works, its input and output, and its time and cost. A finished `/build` updates it when the plan changed a journey.
 
@@ -61,7 +63,7 @@ Plans are plain markdown in `plans/`, shown as an editable view in Cursor and VS
 | Stage | Status | What covers it |
 |---|---|---|
 | Discovery | Covered | `/explore`: a minimal local prototype on the cheapest models; findings and the decision go in `EXPLORE.md` ([`workflows/explore.md`](workflows/explore.md)) |
-| Build | Covered | `/plan` and `/build`: approved plans, one tested commit per step, rules for each area and 13 skills ([`workflows/build-plan.md`](workflows/build-plan.md), [`rules/`](rules/)) |
+| Build | Covered | `/plan` and `/build`: approved plans, one tested commit per step, rules for each area and 14 skills ([`workflows/build-plan.md`](workflows/build-plan.md), [`rules/`](rules/)) |
 | Release | Covered | `/push` runs the pre-PR check and opens the PR; `/deploy` deploys the reviewed commit with a smoke check and rollback; `/publish` covers legal pages, consent, accessibility and the domain ([`workflows/`](workflows/)) |
 | Operations | Covered | Logs, metrics and alerts with a runbook entry each, a budget cap with alerts, backups that count only once a restore is tested ([`rules/deployment.md`](rules/deployment.md), [`rules/system-design.md`](rules/system-design.md)). Incident response is planned |
 | Billing | Planned | Today only a rule: the agent asks before any payments change |
@@ -150,8 +152,9 @@ Each skill follows the playbook's rules when `.agents/rules/` exists, and stands
 |---|---|
 | `incremental-implementation` | Builds in thin, tested, committed steps |
 | `api-and-interface-design` | Stable APIs: contracts, errors, pagination, additive changes, idempotency |
-| `frontend-ui-engineering` | Production UI from the design system, every state, desktop and mobile, no "AI look" |
-| `design-motion-principles` | Purposeful motion: CSS first, Motion (formerly Framer Motion) when needed, restrained in apps, expressive on marketing pages |
+| `front-end-design` | The design system before the first UI step: style, palette, type, components, patterns and motion in a dev-only gallery you approve (`/front-end-design`) |
+| `frontend-ui-engineering` | Production UI from the design system to a strict quality bar: every state, waits, motion, desktop and mobile, no "AI look" |
+| `design-motion-principles` | Purposeful motion for every screen from the `DESIGN.md` motion inventory: CSS first, View Transitions, AutoAnimate and Motion (formerly Framer Motion), quiet in apps, expressive on marketing pages, never static |
 | `browser-testing-with-devtools` | Checks pages in a real browser: console, network, layout, performance |
 | `playwright-cli` | Browser automation and Playwright tests (vendored from Microsoft) |
 | `security-and-hardening` | OWASP Top 10 and LLM Top 10, secrets, auth, uploads, supply chain |
@@ -169,11 +172,11 @@ Each skill follows the playbook's rules when `.agents/rules/` exists, and stands
 | `templates/project-AGENTS.md` | The project's `AGENTS.md`: phase, the Always rules, commands, and which rules and skills each area needs |
 | `rules/` | The decisions: planning, stack, system design, AI, repo structure, backend, frontend, database, testing, security, documentation, git, deployment |
 | `workflows/` | Exactly what happens on explore, build, push (with the pre-PR check), deploy and publish |
-| `skills/` | The 13 skills above, plus the six command skills |
+| `skills/` | The 14 skills above, plus the six command skills |
 | `reviewers/` | Code reviewer, security auditor, test engineer |
-| `references/` | Security, accessibility and publish checklists; reference design systems |
-| `templates/` | `plan.md`, `ARCHITECTURE.md`, `DESIGN.md`, PR description, the flow document page, and the project's `AGENTS.md` |
-| `tools/` | Plan checker and viewer (`plan.mjs`), the plan hooks, and the plan editor extension |
+| `references/` | Security, accessibility and publish checklists; reference design systems; curated UI templates |
+| `templates/` | `plan.md`, `ARCHITECTURE.md`, `DESIGN.md`, the design gallery, PR description, the flow document page, and the project's `AGENTS.md` |
+| `tools/` | Plan checker and viewer (`plan.mjs`), the plan hooks, the plan editor extension, and the design tools (palette, theme export, approval coverage) |
 | `AGENTS.md`, `tests/` | For working on the playbook itself: maintainer instructions and its test suite |
 
 The agent creates the per-project files as it goes: `ARCHITECTURE.md`, `DESIGN.md`, `infra/`, `scripts/pre-pr.sh` and `docker-compose.yml`.
@@ -204,8 +207,8 @@ The stack is chosen per project, but the rules expect the cloud to provide:
 
 ## Credits
 
-Several skills, reviewers and checklists are adapted from excellent open-source work: [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli), [vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines), [kylezantos/design-motion-principles](https://github.com/kylezantos/design-motion-principles), [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) and [VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md). The `DESIGN.md` format is from [google-labs-code/design.md](https://github.com/google-labs-code/design.md). Pinned commits and changes are listed in [`licenses/README.md`](licenses/README.md).
+Several skills, reviewers and checklists are adapted from excellent open-source work: [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli), [vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines), [kylezantos/design-motion-principles](https://github.com/kylezantos/design-motion-principles), [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill), [VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md), [anthropics/skills](https://github.com/anthropics/skills) (frontend-design), [Dammyjay93/interface-design](https://github.com/Dammyjay93/interface-design) and [ibelick/ui-skills](https://github.com/ibelick/ui-skills). The UI templates come from [Studio Admin](https://github.com/arhamkhnz/next-shadcn-admin-dashboard), [tablecn](https://github.com/sadmann7/tablecn), [coss ui](https://github.com/cosscom/ui), [Tailark](https://github.com/tailark/blocks), [Magic UI](https://github.com/magicuidesign/magicui) and [tweakcn](https://github.com/jnsahaj/tweakcn), with [Fumadocs](https://github.com/fuma-nama/fumadocs) for docs sites. The `DESIGN.md` format is from [google-labs-code/design.md](https://github.com/google-labs-code/design.md). Pinned commits and changes are listed in [`licenses/README.md`](licenses/README.md).
 
 ## License
 
-[MIT](LICENSE). Third-party content keeps its own license (MIT, or Apache-2.0 for `playwright-cli`); the license files are in [`licenses/`](licenses/).
+[MIT](LICENSE). Third-party content keeps its own license (MIT, or Apache-2.0 for `playwright-cli`, the frontend-design adaptation and the tweakcn presets); the license files are in [`licenses/`](licenses/).

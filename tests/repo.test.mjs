@@ -349,6 +349,7 @@ test('/front-end-design runs brand, style, palette, type, build-out and freeze i
   assert.match(flow, /Ask once, with the gallery URL: "Approve" or "Change something"/)
   assert.match(flow, /design-tokens\.mjs --out <file>/)
   assert.match(skill, /no review passes, critique loops or screenshot rounds/)
+  assert.match(flow, /\*\*The project already has UI:\*\* keep its existing tokens and components\..*Approvals row `proposed`/)
   const change = section(skill, '## Design change')
   assert.match(change, /Never build on a `proposed` item/)
   assert.match(change, /\*\*Ask\*\* which option[\s\S]*\*\*Approve:\*\*.*then build with it/)

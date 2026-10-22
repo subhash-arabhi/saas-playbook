@@ -18,6 +18,7 @@ The user never designs anything. You propose options, build them in the gallery,
 ## New project
 1. **Set up `DESIGN.md` and the gallery.**
    - Copy `.agents/templates/DESIGN.md` to the project root if it's missing.
+   - **The project already has UI:** keep its existing tokens and components. Move them into the template's sections and the gallery, each with an Approvals row `proposed`, and offer them as the first option in steps 2–5. Freeze v1 approves them with everything else.
    - Copy the gallery from `.agents/templates/design-gallery/` (Next.js: `nextjs/app/(dev)/design/` into `app/`; other frameworks: build it from that folder's `README.md`).
    - Add `@custom-variant dark (&:where(.dark, .dark *));` to the global CSS, start the dev server, and give the user the `/design` URL.
 2. **Brand.** Ground it in the subject first (`.agents/skills/front-end-design/references/direction.md`). Ask in one card:

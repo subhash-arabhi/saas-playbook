@@ -45,7 +45,7 @@ steps:
   - id: 9
     title: "Docs and release"
     summary: "README, CHANGELOG, licenses/README.md, version 2.0.0; release tag after merge"
-    done: false
+    done: true
     checkpoint: false
   - id: 10
     title: "Try it in a small sample project"
@@ -235,8 +235,8 @@ A project built only with this playbook looks designed by default. Before the bu
 **Files:** `README.md` (edit), `CHANGELOG.md` (edit), `package.json` (edit)
 
 **Done when:**
-- [ ] README and CHANGELOG describe every change
-- [ ] The release workflow's notes command finds the new section
+- [x] README and CHANGELOG describe every change
+- [x] The release workflow's notes command finds the new section
 
 **Check:** `npm test`, `shellcheck install.sh tools/plan-editor/install.sh`, `node tools/plan.mjs check plans/polished-ui.md`
 
@@ -271,3 +271,4 @@ None.
 | 6 | 2026-10-22 | Done | Decided: tablecn and Tailark ship Base UI builds, so those are copied instead of their Radix ones; only Studio Admin needs the Radix-to-Base UI mapping. coss particles (529 files, 2.2 MB) and Tailark variants are capped at three per component or block to fit the budget. The coss licence file quotes its `LICENSING.md` with the standard MIT terms, since the repository names no copyright holder for `apps/ui/`. Verified: 404 files, Gitleaks and Semgrep `p/default` clean; `npm pack --dry-run` grows from 689 KB to 2,247 KB unpacked (+1.52 MB; tarball 238 KB to 514 KB). |
 | 7 | 2026-10-22 | Done | Decided: the Design step's checkpoint asks "Approve" or "Change something" with the gallery URL instead of continue or stop, and an approval is its own `Approve design` commit; the approvals check is a listed read of the Approvals table, not a script, because the components aren't in the code yet. The README `/build` row is updated in step 9 with the other docs. |
 | 8 | 2026-10-22 | Done | Decided: the three checks are pre-PR rows 9–11 (after the other script rows), so the agent rows move to 12–16; "has UI" means a `DESIGN.md` or a frontend package. The ESLint pattern `^(.*:)?-?[a-z][\w-]*-\[.+\]$` blocks arbitrary values but allows arbitrary variants and `w-(--var)`; checked with `eslint-plugin-better-tailwindcss` 4.10.0 in the scratch Next.js app (2 errors on a probe file, the gallery clean). |
+| 9 | 2026-10-22 | Done | Decided: the "Light on context" figure is re-measured as the project `AGENTS.md` plus every skill's name and description at about 4 characters per token: about 3,150 now, against 2,900 for v1.1.0 on the same measure (the old 2,300 was from the first release), so the README says about 3,200. Also changed: `skills/front-end-design/SKILL.md` (a project that already has UI keeps its tokens and components as `proposed`, which the upgrade note relies on) and its test. The release workflow's `awk` finds the `## v2.0.0` section. Not tagged: tagging waits for the user. |
