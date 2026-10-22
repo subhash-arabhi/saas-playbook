@@ -1,11 +1,11 @@
 # Motion Cookbook
-<!-- Adapted from kylezantos/design-motion-principles@4a9ca87 (MIT, see licenses/). Changes: principle-first with labeled CSS / Motion for React examples, design-system tokens, Create mode only. -->
+<!-- Adapted from kylezantos/design-motion-principles@4a9ca87 (MIT, see licenses/). Changes: principle-first with labeled CSS / Motion for React examples, design-system tokens, Create mode only, quiet in the app and never static. -->
 
 The single source of motion **recipes**: implementation patterns and code. Read it in every Create run. Lens philosophy and decision frameworks live in the per-designer files; the code lives here.
 
 **How to read it.** Each recipe states the **principle** first. The code blocks are **examples**: plain CSS, and Motion for React (formerly Framer Motion) where the pattern is easier in a JS library. Frameworks vary by project, so translate examples to the project's stack. Replace literal durations and easings with the design system's motion tokens when they exist (e.g. `var(--duration-base)`, `var(--ease-out)`); otherwise use the defaults in `../SKILL.md`.
 
-**Restraint first.** For SaaS app UI, pass the frequency gate before using any recipe here. Several sections (§7 `@property` art, §8 3D, §14 scroll-driven) are mainly for marketing pages.
+**Quiet in the app.** For SaaS app UI, pass the frequency gate before using any recipe here; every moment in the `DESIGN.md` motion inventory still gets one. Several sections (§7 `@property` art, §8 3D, §14 scroll-driven) are mainly for marketing pages.
 
 ---
 

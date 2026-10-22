@@ -1,0 +1,36 @@
+// Source: cosscom/ui@3d8ca28 apps/ui/registry/default/particles/p-date-picker-1.tsx (MIT). Changes: this comment only. Reference copy, not built: adapt it as .agents/references/ui-templates/README.md says.
+"use client";
+
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/registry/default/ui/button";
+import { Calendar } from "@/registry/default/ui/calendar";
+import {
+  Popover,
+  PopoverPopup,
+  PopoverTrigger,
+} from "@/registry/default/ui/popover";
+
+export default function Particle() {
+  const [date, setDate] = useState<Date | undefined>();
+
+  return (
+    <Popover>
+      <PopoverTrigger
+        render={<Button className="w-full justify-start" variant="outline" />}
+      >
+        <CalendarIcon aria-hidden="true" />
+        {date ? format(date, "PPP") : "Pick a date"}
+      </PopoverTrigger>
+      <PopoverPopup>
+        <Calendar
+          defaultMonth={date}
+          mode="single"
+          onSelect={setDate}
+          selected={date}
+        />
+      </PopoverPopup>
+    </Popover>
+  );
+}

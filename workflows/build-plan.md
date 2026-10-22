@@ -12,6 +12,7 @@ Trigger: **`/build [plans/<name>.md]`**. Follow every step in order.
 ## 2. For each step, in order
 Skip steps with `done: true` in the front matter, so the build can resume.
 1. Read the step's **Do**, **Files**, **Done when** and **Check**. Read the rules for every area it touches (`AGENTS.md` → Areas).
+   - **A UI step:** list the components and patterns it uses, and check each is `approved` in the Approvals table of `DESIGN.md`. If one isn't, stop (section 4).
 2. Do exactly what **Do** says. **Scope:** change only the files in the step's **Files**, plus any other file the step clearly needs to work. Note each extra file in the step's Build log line: "Also changed: <file> (why)". Don't widen the step beyond its **Do**.
 3. Add tests for the behaviour the step adds.
 4. If the step changes UI, check it in a browser at desktop and mobile sizes (`.agents/rules/frontend.md`).
@@ -27,6 +28,7 @@ Skip steps with `done: true` in the front matter, so the build can resume.
 If the finished step has **`checkpoint: true`** (set by the user), after its commit:
 1. Show the user what the step built: what to open at localhost, and what changed. Open the plan (`.agents/rules/planning.md` → plan view).
 2. Stop, and ask with the question tool (`.agents/rules/asking.md`): continue with the next step, or stop here to review.
+   - **The Design step** asks instead, with the gallery URL: "Approve" or "Change something". Approve marks its items `approved` in the Approvals table, commits that with the plan as `Approve design`, and continues. A change is made in `DESIGN.md` and the gallery, then the same question is asked again.
 
 If the user chooses to continue, carry on as if they ran `/build`; otherwise the next `/build` continues from the next step with `done: false`. Never change `checkpoint` yourself.
 
@@ -45,6 +47,7 @@ Every question was settled before approval (`.agents/rules/planning.md` → Sett
 3. A step's **Stop and ask if** condition is hit.
 4. A check still fails after two genuinely different approaches. Report what fails, what you tried and your best theory.
 5. There are unrelated uncommitted changes (section 1).
+6. A UI step uses a component or pattern that isn't `approved` in `DESIGN.md` (section 2). Offer to run the design-change flow for it now (`.agents/rules/design-system.md`); never build on a `proposed` item.
 
 ## 5. When all steps are done
 1. Check the whole plan works end to end.

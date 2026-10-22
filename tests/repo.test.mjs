@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { readFileSync, readdirSync, existsSync } from 'node:fs'
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs'
 import { join, dirname, resolve } from 'node:path'
 import { REPO } from './helpers.mjs'
 import { checkPlan } from '../tools/plan.mjs'
@@ -177,19 +177,33 @@ test('the planning rule has the dry-run checklist and the Approved: rule', () =>
   assert.match(readFileSync(join(REPO, 'rules', 'asking.md'), 'utf8'), /planning grill[\s\S]*consecutive rounds of up to 3/)
 })
 
-test('/build stops only for the five listed reasons, and decides and logs everything else', () => {
+test('/build stops only for the six listed reasons, and decides and logs everything else', () => {
   const build = readFileSync(join(REPO, 'workflows', 'build-plan.md'), 'utf8')
   const run = section(build, '## 4. Run to the end')
   const decide = run.split('**Decide and log')[1]?.split('**Stop and ask only when**')[0] || ''
   for (const item of ['A decision the plan doesn\'t cover', 'An extra file', 'An unclear detail', 'Work beyond the plan']) assert.ok(decide.includes(item), `decide and log: ${item}`)
   assert.match(decide, /"Decided: <what> \(why\)"/)
   const stops = (run.split('**Stop and ask only when**')[1] || '').match(/^\d+\. .+$/gm) || []
-  assert.equal(stops.length, 5, 'exactly five stop reasons')
-  for (const [i, reason] of [/checkpoint/, /isn't covered by an `- \*\*Approved: …:\*\*` bullet .* names exactly this action/, /\*\*Stop and ask if\*\*/, /two genuinely different approaches/, /unrelated uncommitted changes/].entries()) assert.match(stops[i], reason)
+  assert.equal(stops.length, 6, 'exactly six stop reasons')
+  for (const [i, reason] of [/checkpoint/, /isn't covered by an `- \*\*Approved: …:\*\*` bullet .* names exactly this action/, /\*\*Stop and ask if\*\*/, /two genuinely different approaches/, /unrelated uncommitted changes/, /UI step uses a component or pattern that isn't `approved` in `DESIGN\.md`.*never build on a `proposed` item/].entries()) assert.match(stops[i], reason)
   assert.match(section(build, '## 2.'), /"Also changed: <file> \(why\)"/)
   assert.doesNotMatch(build, /propose a plan edit/)
   assert.match(section(build, '## 5.'), /list every "Decided:" and "Also changed:" note/)
   assert.match(readFileSync(join(REPO, 'skills', 'incremental-implementation', 'SKILL.md'), 'utf8'), /"Also changed: <file> \(why\)"/)
+})
+
+test('a UI plan starts with a Design step at a checkpoint, and the build checks approvals before every UI step', () => {
+  const planning = readFileSync(join(REPO, 'rules', 'planning.md'), 'utf8')
+  assert.match(section(planning, '\n## Steps\n'), /\*\*A plan that touches UI starts with a "Design" step\*\* with `checkpoint: true`\..*as `proposed`.*Its checkpoint is where the user approves them\. The user can switch the checkpoint off\./)
+  assert.match(section(planning, '\n## Steps\n'), /\*\*UI steps' Done when name quality-bar criteria\*\*.*Never "looks right"\./)
+  assert.match(section(planning, '\n## Checkpoints\n'), /\*\*Never change `checkpoint` otherwise,\*\* except to set it on a new plan's Design step\./)
+  const build = readFileSync(join(REPO, 'workflows', 'build-plan.md'), 'utf8')
+  assert.match(section(build, '## 2.'), /\*\*A UI step:\*\* list the components and patterns it uses, and check each is `approved` in the Approvals table of `DESIGN\.md`\. If one isn't, stop/)
+  assert.match(section(build, '## 3.'), /\*\*The Design step\*\* asks instead, with the gallery URL: "Approve" or "Change something"\. Approve marks its items `approved`/)
+  assert.match(readFileSync(join(REPO, 'skills', 'plan', 'SKILL.md'), 'utf8'), /If it touches UI, step 1 is the Design step with `checkpoint: true`/)
+  const template = readFileSync(join(REPO, 'templates', 'plan.md'), 'utf8')
+  assert.match(template, /never "looks right"/)
+  assert.deepEqual(checkPlan(template).errors, [])
 })
 
 test('a risky action counts as approved only with an Approved: bullet, and the template shows one', () => {
@@ -283,6 +297,184 @@ test('every command and area skill in the project AGENTS.md has a skill folder, 
   const skills = areas.split('\n').filter((l) => l.startsWith('| ') && !l.startsWith('| Area')).flatMap((l) => [...(l.split('|')[3] || '').matchAll(/`([a-z0-9-]+)`/g)].map((m) => m[1]))
   assert.match(areas, /^\| Docs, `\.env\.example`, private values \|.*\| `flow-document` \|$/m)
   for (const name of [...commands, ...skills]) assert.ok(existsSync(join(REPO, 'skills', name, 'SKILL.md')), `${name}: no skills/${name}/SKILL.md`)
+})
+
+test('the design-system rule has both layers, both flows and the never list', () => {
+  const rule = readFileSync(join(REPO, 'rules', 'design-system.md'), 'utf8')
+  for (const heading of ['## Two layers, one source of truth', '## New project: `/front-end-design`', '## Later: the design-change flow', '## Never']) assert.ok(rule.includes(heading), heading)
+  const flow = section(rule, '## New project: `/front-end-design`')
+  let at = -1
+  for (const stage of ['Brand', 'Style', 'Palette', 'Type', 'Components, patterns', 'Freeze v1']) {
+    const i = flow.indexOf(stage)
+    assert.ok(i > at, `new-project flow: "${stage}" missing or out of order`)
+    at = i
+  }
+  const change = section(rule, '## Later: the design-change flow')
+  assert.match(change, /\*\*Covered:\*\*.*`approved`\. Build with it\./)
+  assert.match(change, /as `proposed`, with 1–2 options shown in the gallery[\s\S]*Ask the user[\s\S]*`approved`.*then build/)
+  for (const never of ['One-off values', 'Local restyles', 'Building on `proposed`']) assert.ok(section(rule, '## Never').includes(never), never)
+})
+
+test('the project AGENTS.md has /front-end-design, the design-system area and the UI precedence', () => {
+  const agents = readFileSync(join(REPO, 'templates', 'project-AGENTS.md'), 'utf8')
+  assert.match(section(agents, '## Commands'), /^\| `\/front-end-design \[what\]` \|/m)
+  assert.match(section(agents, '## Areas (mandatory)'), /^\| Design system: palette, type, components, patterns, motion, imagery \| `design-system\.md`, `frontend\.md`, `DESIGN\.md` \| `front-end-design`, `design-motion-principles` \|$/m)
+  assert.match(agents, /\*\*Precedence:\*\*.*`DESIGN\.md` decides what things look like.*no restraint rule removes an item from the motion inventory or lowers the quality bar\./)
+})
+
+test('the DESIGN.md template has every section, 7 component groups, 12-step scales and the Approvals table', () => {
+  const design = readFileSync(join(REPO, 'templates', 'DESIGN.md'), 'utf8')
+  const sections = ['Overview', 'Brand & personality', 'Colors', 'Typography', 'Layout', 'Elevation & Depth', 'Shapes', 'Iconography', 'Imagery & illustration', 'Components', 'Patterns', 'Marketing sections', 'Data visualisation', 'Motion inventory', 'Loading choreography', 'Voice & microcopy', "Do's and Don'ts", 'Approvals & changelog']
+  assert.deepEqual(design.match(/^## .+$/gm).map((h) => h.slice(3)), sections)
+  const components = section(design, '## Components')
+  assert.deepEqual(components.match(/^### .+$/gm).map((h) => h.slice(4)), ['Actions', 'Inputs & forms', 'Navigation', 'Data display', 'Feedback', 'Overlays', 'Layout & content'])
+  const families = components.match(/\*\*[^*]+\*\*/g) || []
+  assert.ok(families.length >= 35, `about 40 component families, found ${families.length}`)
+  for (const scale of ['neutral', 'accent']) for (const theme of ['', '-dark']) for (let step = 1; step <= 12; step++) assert.match(design, new RegExp(`^  ${scale}-${step}${theme}: "oklch\\(`, 'm'), `${scale}-${step}${theme}`)
+  for (const key of ['motion', 'zIndex', 'breakpoints', 'iconSize']) assert.match(design, new RegExp(`^${key}:\\n`, 'm'), key)
+  assert.match(section(design, '## Approvals & changelog'), /^\| Item \| Version \| Status \| Date \|$/m)
+  assert.match(design, /^description: "<One sentence on who it's for and what they do with it\. The look is decided by \/front-end-design, not here\.>"$/m)
+})
+
+test('/front-end-design runs brand, style, palette, type, build-out and freeze in order, with no review passes', () => {
+  const skill = readFileSync(join(REPO, 'skills', 'front-end-design', 'SKILL.md'), 'utf8')
+  const flow = section(skill, '## New project')
+  let at = -1
+  for (const stage of ['Set up `DESIGN.md` and the gallery', '**Brand.**', '**Style.**', '**Palette.**', '**Type.**', '**Components, patterns, marketing and motion.**', '**Freeze v1.**']) {
+    const i = flow.indexOf(stage)
+    assert.ok(i > at, `new-project flow: "${stage}" missing or out of order`)
+    at = i
+  }
+  assert.match(flow, /design-palette\.mjs --hue <h>`.*Drop any that exits 1/)
+  assert.match(flow, /Ask once, with the gallery URL: "Approve" or "Change something"/)
+  assert.match(flow.split('2. **Brand.**')[0], /Export the theme \(below\) and import its files in the global CSS/)
+  assert.match(flow, /the patterns \(list, detail.*\) with the messy fixtures, adapted from the shell and page layouts chosen in step 3/)
+  assert.match(flow, /Name a component after its file \(`components\/ui\/input\.tsx` is "Input"\), so the pre-PR design coverage check finds it/)
+  assert.match(flow, /Self-host each family with Fontsource[\s\S]*Not `next\/font`/)
+  const exporting = section(skill, '## Export the theme')
+  assert.match(exporting, /After setup and after every change to `DESIGN\.md`/)
+  assert.match(exporting, /export --format css-tailwind[\s\S]*design-tokens\.mjs --out[\s\S]*design-tokens\.mjs --shadcn --out/)
+  assert.match(exporting, /instead of what `shadcn init` wrote: its `:root` and `\.dark` blocks, the `--font-\*` lines in its `@theme inline`, and the layout's `next\/font` fonts/)
+  assert.match(skill, /no review passes, critique loops or screenshot rounds/)
+  assert.match(flow, /\*\*The project already has UI:\*\* keep its existing tokens and components\..*Approvals row `proposed`/)
+  const change = section(skill, '## Design change')
+  assert.match(change, /Never build on a `proposed` item/)
+  assert.match(change, /\*\*Ask\*\* which option[\s\S]*\*\*Approve:\*\*.*then build with it/)
+  assert.deepEqual(skill.match(/(?<![.\w/-])(rules|workflows|skills|templates|references|reviewers|tools)\/[\w./-]+/g) || [], [], 'playbook paths need .agents/')
+})
+
+test('the design gallery 404s in production, reads DESIGN.md, and its spec lists every section', () => {
+  const dir = join(REPO, 'templates', 'design-gallery', 'nextjs', 'app', '(dev)', 'design')
+  const page = readFileSync(join(dir, 'page.tsx'), 'utf8')
+  const body = page.split('export default function DesignGallery() {')[1]
+  assert.match(body.trim(), /^if \(process\.env\.NODE_ENV === 'production'\) notFound\(\)\n\s*const design = readDesignMd\(\)/)
+  for (const file of ['page.tsx', 'design-md.ts', 'registry.tsx', 'fixtures.ts', 'gallery-client.tsx']) assert.ok(existsSync(join(dir, file)), file)
+  const spec = readFileSync(join(REPO, 'templates', 'design-gallery', 'README.md'), 'utf8')
+  for (const item of ['**Colours:**', '**Typography:**', '**Spacing, radius and motion tokens:**', '**Components:**', '**Patterns and marketing sections:**', '**Motion inventory:**', 'messy on purpose', '**Never in production.**']) assert.ok(spec.includes(item), item)
+  assert.doesNotMatch(readFileSync(join(dir, 'registry.tsx'), 'utf8') + page, /\w-\[[^\]]+\]/, 'no arbitrary Tailwind values')
+})
+
+test('no installed file says motion is off by default', () => {
+  const files = execFileSync('git', ['ls-files', '-co', '--exclude-standard', 'rules', 'skills', 'workflows', 'templates', 'references', 'reviewers'], { cwd: REPO, encoding: 'utf8' }).trim().split('\n').filter((f) => f.endsWith('.md'))
+  for (const file of files) {
+    const text = readFileSync(join(REPO, file), 'utf8')
+    assert.doesNotMatch(text, /none by default|on[- ]demand only|static by default|restraint[- ]first|restraint in the app/i, file)
+  }
+  const motion = readFileSync(join(REPO, 'skills', 'design-motion-principles', 'SKILL.md'), 'utf8')
+  assert.match(frontMatter(motion).description, /every UI step/)
+  assert.match(motion, /Occasional \(daily: .*\) → subtle, 150–250ms\. Frequent \(hundreds of times a day: .*\) → instant\. Keyboard-initiated .* → never animate\./)
+  assert.match(readFileSync(join(REPO, 'rules', 'frontend.md'), 'utf8'), /\*\*Quiet in the app, expressive on marketing pages, never static\.\*\*/)
+})
+
+test('the quality bar keeps the motion inventory and the wait rules, and the UI skill reads it', () => {
+  const bar = readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'references', 'quality-bar.md'), 'utf8')
+  const inventory = section(bar, '## Motion')
+  for (const moment of ['Press feedback', 'Hover', 'Overlay open and close', 'List add, remove, reorder', 'Route change', 'Content load', 'Toast', 'Marketing reveal']) assert.match(inventory, new RegExp(`^\\| ${moment} \\|`, 'm'), moment)
+  const template = readFileSync(join(REPO, 'templates', 'DESIGN.md'), 'utf8')
+  for (const row of inventory.match(/^\| (?!Moment|---)[^|]+/gm)) assert.ok(template.includes(row), `DESIGN.md template inventory has ${row}`)
+  const waits = section(bar, '## Waits')
+  assert.match(waits, /\*\*Over 1 s:\*\* visible progress/)
+  assert.match(waits, /\*\*Over 10 s:\*\* staged progress.*partial results.*a time estimate.*leave and come back/)
+  const skill = readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'SKILL.md'), 'utf8')
+  for (const ref of ['references/avoid-ai-look.md', 'references/quality-bar.md', 'references/baseline-ui.md']) assert.ok(skill.includes(`\`${ref}\``), ref)
+})
+
+test('UI templates: every indexed source has its files, source comments and licence, and no ui/ folder', () => {
+  const dir = join(REPO, 'references', 'ui-templates')
+  const index = readFileSync(join(dir, 'README.md'), 'utf8')
+  const licenses = readFileSync(join(REPO, 'licenses', 'README.md'), 'utf8')
+  const sources = {
+    'studio-admin': 'arhamkhnz/next-shadcn-admin-dashboard@e832f5b',
+    tablecn: 'sadmann7/tablecn@744ffda',
+    'coss-particles': 'cosscom/ui@3d8ca28',
+    tailark: 'tailark/blocks@8139698',
+    magicui: 'magicuidesign/magicui@efe76fc',
+    themes: 'jnsahaj/tweakcn@a3b47b3',
+  }
+  const indexed = [...index.matchAll(/^\| `([\w-]+)\/[^`]*` \|/gm)].map((m) => m[1])
+  assert.deepEqual(indexed.sort(), Object.keys(sources).sort(), 'index table lists exactly the copied sources')
+  assert.match(index, /npx create-fumadocs-app@\d+\.\d+\.\d+/)
+  let bytes = 0
+  const walk = (d) => readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(join(d, e.name)) : [join(d, e.name)])
+  for (const [folder, source] of Object.entries(sources)) {
+    const files = walk(join(dir, folder))
+    assert.ok(files.length > 0, folder)
+    const [repo, commit] = source.split('@')
+    assert.ok(licenses.split('\n').some((l) => l.includes(`references/ui-templates/${folder}/`) && l.includes(`\`${commit}\``) && l.includes('.LICENSE')), `licenses/README.md row for ${folder}`)
+    assert.ok(index.includes(`[${repo}](https://github.com/${repo})`), `index names ${repo}`)
+    for (const file of files) {
+      const rel = file.slice(dir.length + 1)
+      assert.doesNotMatch(rel, /(^|\/)ui\//, `${rel}: no components/ui copies`)
+      assert.match(readFileSync(file, 'utf8').split('\n')[0], new RegExp(`^(//|/\\*) Source: ${source.replace(/[./]/g, '\\$&')} \\S+ \\((MIT|Apache-2\\.0)\\)\\. Changes: `), rel)
+      bytes += statSync(file).size
+    }
+  }
+  assert.ok(bytes < 2 * 1024 * 1024, `templates are ${bytes} bytes; keep them under 2 MB`)
+})
+
+test('pre-PR runs three blocking design scripts for UI projects, and adds no reviewer or screenshot step', () => {
+  const prePr = readFileSync(join(REPO, 'workflows', 'pre-pr.md'), 'utf8')
+  const rows = prePr.split('\n').filter((l) => /^\| \d+ \|/.test(l))
+  assert.deepEqual(rows.map((l) => Number(l.split('|')[1])), Array.from({ length: 16 }, (_, i) => i + 1), 'rows numbered 1–16')
+  const row = (n) => rows[n - 1].split('|').map((c) => c.trim())
+  assert.match(row(9)[2], /only if the project has UI/)
+  assert.match(row(9)[3], /^Script: `npx @google\/design\.md@<pinned> lint DESIGN\.md`$/)
+  assert.match(row(9)[4], /^Any error/)
+  assert.match(row(10)[3], /^Script: `node \.agents\/tools\/design-coverage\.mjs`/)
+  assert.match(row(10)[4], /isn't `approved`, or no Approvals table \("run \/front-end-design"\)/)
+  assert.match(row(11)[3], /^Script: ESLint with `eslint-plugin-better-tailwindcss`/)
+  assert.match(row(11)[4], /^Any `no-restricted-classes` error$/)
+  assert.match(prePr, /`scripts\/pre-pr\.sh` runs the \*\*automated\*\* steps \(3–11\)/)
+  assert.match(prePr, /Steps 1–2 and 12–16 are done by you/)
+  assert.match(prePr, /otherwise steps 9–11 print `SKIPPED`/)
+  assert.match(row(12)[4], /Never \(warnings\)/)
+  for (const n of [9, 10, 11]) assert.doesNotMatch(rows[n - 1], /reviewer|screenshot|You:/)
+  assert.deepEqual(rows.filter((l) => /\| You:/.test(l)).length, 7, 'agent steps unchanged: 1, 2, 12–16')
+  assert.ok(readFileSync(join(REPO, 'tools', 'design-coverage.mjs'), 'utf8').includes("'No Approvals table: run /front-end-design'"))
+})
+
+test('the frontend rule\'s ESLint pattern blocks arbitrary values and allows variants and CSS-variable shorthands', () => {
+  const frontend = readFileSync(join(REPO, 'rules', 'frontend.md'), 'utf8')
+  const pattern = new RegExp(JSON.parse(`"${frontend.match(/pattern: "((?:[^"\\]|\\.)*)"/)[1]}"`))
+  for (const cls of ['p-[13px]', 'md:bg-[#1f2937]', '-mt-[3px]', 'hover:text-[15px]', 'max-h-[calc(100dvh-4rem)]']) assert.match(cls, pattern, cls)
+  for (const cls of ['p-4', '[&>svg]:size-4', 'w-(--anchor-width)', 'md:grid-cols-2', 'data-[state=open]:opacity-100']) assert.doesNotMatch(cls, pattern, cls)
+  assert.match(frontend, /"better-tailwindcss\/no-restricted-classes": \["error"/)
+  assert.match(frontend, /files: \["\*\*\/\*\.\{ts,tsx\}"\],\n\s+ignores: \["components\/ui\/\*\*"\],/, 'shadcn\'s generated files are left out')
+})
+
+test('adapted design sources name their commit and keep their licence', () => {
+  const sources = [
+    ['skills/front-end-design/references/direction.md', 'anthropics/skills@41bbe19', 'anthropic-skills-frontend-design.LICENSE', '`41bbe19`'],
+    ['skills/front-end-design/references/craft.md', 'Dammyjay93/interface-design@2f9be32', 'dammyjay93-interface-design.LICENSE', '`2f9be32`'],
+    ['skills/frontend-ui-engineering/references/baseline-ui.md', 'ibelick/ui-skills@55363c3', 'ibelick-ui-skills.LICENSE', '`55363c3`'],
+  ]
+  const index = readFileSync(join(REPO, 'licenses', 'README.md'), 'utf8')
+  for (const [file, source, license, commit] of sources) {
+    const text = readFileSync(join(REPO, file), 'utf8')
+    assert.match(text.split('\n')[0], new RegExp(`^<!-- Adapted from ${source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} .*Changes: .+ -->$`), file)
+    assert.ok(existsSync(join(REPO, 'licenses', license)), license)
+    assert.ok(index.split('\n').some((l) => l.includes(license) && l.includes(commit)), `licenses/README.md row for ${license}`)
+  }
 })
 
 test('a finished build updates the flow document when the project has one', () => {

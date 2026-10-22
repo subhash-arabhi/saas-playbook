@@ -1,0 +1,173 @@
+// Source: sadmann7/tablecn@744ffda src/app/components/tasks-table-action-bar.tsx (MIT). Changes: this comment only. Reference copy, not built: adapt it as .agents/references/ui-templates/README.md says.
+"use client";
+
+import { Subscribe, type Table } from "@tanstack/react-table";
+import { ArrowUp, CheckCircle2, Download, Trash2, X } from "lucide-react";
+import * as React from "react";
+import { toast } from "sonner";
+
+import type { DataTableFeatures } from "@/lib/data-table-features";
+
+import { ActionBarTooltipItem } from "@/components/action-bar-tooltip-item";
+import { type Task, tasks } from "@/db/schema";
+import { getVisibleSelectedRows } from "@/lib/data-table-utils";
+import { exportTableToCSV } from "@/lib/export";
+import {
+  ActionBar,
+  ActionBarClose,
+  ActionBarGroup,
+  ActionBarSelection,
+  ActionBarSeparator,
+} from "@/registry/bases/radix/ui/action-bar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/registry/bases/radix/ui/dropdown-menu";
+
+import { deleteTasks, updateTasks } from "../lib/actions";
+
+interface TasksTableActionBarProps {
+  table: Table<DataTableFeatures, Task>;
+}
+
+export function TasksTableActionBar({ table }: TasksTableActionBarProps) {
+  return (
+    <Subscribe source={table.atoms.rowSelection}>
+      {() => <TasksTableActionBarContent table={table} />}
+    </Subscribe>
+  );
+}
+
+function TasksTableActionBarContent({ table }: TasksTableActionBarProps) {
+  const selectedRowIds = getVisibleSelectedRows(table).map((row) => row.id);
+
+  const deselectRows = React.useCallback(
+    (rowIds: string[]) => {
+      table.setRowSelection((prev) => {
+        const next = { ...prev };
+        for (const rowId of rowIds) delete next[rowId];
+        return next;
+      });
+    },
+    [table],
+  );
+
+  const onOpenChange = React.useCallback(
+    (open: boolean) => {
+      if (!open) deselectRows(selectedRowIds);
+    },
+    [deselectRows, selectedRowIds],
+  );
+
+  const onTaskUpdate = React.useCallback(
+    async (
+      field: "status" | "priority",
+      value: Task["status"] | Task["priority"],
+    ) => {
+      const { error } = await updateTasks({
+        ids: selectedRowIds,
+        [field]: value,
+      });
+
+      if (error) {
+        toast.error(error);
+        return;
+      }
+      toast.success("Tasks updated");
+    },
+    [selectedRowIds],
+  );
+
+  const onTaskExport = React.useCallback(
+    (event: Event) => {
+      event.preventDefault();
+      exportTableToCSV(table, {
+        excludeColumns: ["select", "actions"],
+        onlySelected: true,
+      });
+    },
+    [table],
+  );
+
+  const [isDeletePending, startDeleteTransition] = React.useTransition();
+
+  const onTaskDelete = React.useCallback(
+    (event: Event) => {
+      event.preventDefault();
+      startDeleteTransition(async () => {
+        const { error } = await deleteTasks({
+          ids: selectedRowIds,
+        });
+
+        if (error) {
+          toast.error(error);
+          return;
+        }
+        deselectRows(selectedRowIds);
+      });
+    },
+    [selectedRowIds, deselectRows],
+  );
+
+  return (
+    <ActionBar open={selectedRowIds.length > 0} onOpenChange={onOpenChange}>
+      <ActionBarSelection>
+        <span className="font-medium">{selectedRowIds.length}</span>
+        <span>selected</span>
+        <ActionBarSeparator />
+        <ActionBarClose>
+          <X />
+        </ActionBarClose>
+      </ActionBarSelection>
+      <ActionBarSeparator />
+      <ActionBarGroup>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <ActionBarTooltipItem label="Status" icon={<CheckCircle2 />} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {tasks.status.enumValues.map((status) => (
+              <DropdownMenuItem
+                key={status}
+                className="capitalize"
+                onClick={() => onTaskUpdate("status", status)}
+              >
+                {status}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <ActionBarTooltipItem label="Priority" icon={<ArrowUp />} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {tasks.priority.enumValues.map((priority) => (
+              <DropdownMenuItem
+                key={priority}
+                className="capitalize"
+                onClick={() => onTaskUpdate("priority", priority)}
+              >
+                {priority}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <ActionBarTooltipItem
+          label="Export"
+          icon={<Download />}
+          onSelect={onTaskExport}
+        />
+        <ActionBarTooltipItem
+          variant="destructive"
+          label="Delete"
+          icon={<Trash2 />}
+          disabled={isDeletePending}
+          onSelect={onTaskDelete}
+        />
+      </ActionBarGroup>
+    </ActionBar>
+  );
+}

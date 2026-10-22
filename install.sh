@@ -185,11 +185,25 @@ else
   echo "✓ Playbook v$VERSION installed in .agents/ (committed with the project)"
 fi
 
-# 2. AGENTS.md at the project root (never overwritten: it holds the project-specific section)
+# 2. AGENTS.md at the project root (never overwritten: it holds the project-specific section).
+# Blocks other tools manage (<!-- BEGIN:name --> … <!-- END:name -->, e.g. create-next-app's) are kept after the playbook's text.
 TEMPLATE="$SRC/templates/project-AGENTS.md"
+BLOCK_BEGIN='^<!-- BEGIN:[A-Za-z0-9_-]+ -->$'
+BLOCK_END='^<!-- END:[A-Za-z0-9_-]+ -->$'
+outside_blocks() { awk -v b="$BLOCK_BEGIN" -v e="$BLOCK_END" '$0 ~ b { skip = 1 } !skip { print } $0 ~ e { skip = 0 }' "$1"; }
+managed_blocks() { awk -v b="$BLOCK_BEGIN" -v e="$BLOCK_END" '$0 ~ b { keep = 1 } keep { print } $0 ~ e { keep = 0 }' "$1"; }
+agents_with_blocks() {
+  cat "$TEMPLATE"
+  if [[ -n "$(managed_blocks "$DEST/AGENTS.md")" ]]; then printf '\n'; managed_blocks "$DEST/AGENTS.md"; fi
+}
 if [[ ! -f "$DEST/AGENTS.md" ]]; then
   cp "$TEMPLATE" "$DEST/AGENTS.md"
   echo "✓ AGENTS.md created. Fill in its 'Project-specific' section."
+elif [[ -z "$(outside_blocks "$DEST/AGENTS.md" | tr -d '[:space:]')" ]]; then
+  agents_with_blocks > "$DEST/AGENTS.md.tmp" && mv "$DEST/AGENTS.md.tmp" "$DEST/AGENTS.md"
+  echo "✓ AGENTS.md created, keeping the blocks another tool manages at the end. Fill in its 'Project-specific' section."
+elif cmp -s <(outside_blocks "$DEST/AGENTS.md" | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}') <(sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$TEMPLATE"); then
+  :
 elif ! cmp -s "$TEMPLATE" "$DEST/AGENTS.md"; then
   cp "$TEMPLATE" "$DEST/AGENTS.playbook.md"
   echo "! AGENTS.md already exists. The latest playbook version is in AGENTS.playbook.md."

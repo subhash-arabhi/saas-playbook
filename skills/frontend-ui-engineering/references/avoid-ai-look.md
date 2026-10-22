@@ -6,7 +6,7 @@ _Distilled from Leonxlnx/taste-skill@717446e (MIT)._ These are the defaults mode
 |---|---|
 | Purple/indigo gradients, blue "AI glow", neon outer glows, gradient text on headings | The design system's palette: neutrals plus **one** accent, flat surfaces |
 | Inter + slate-900 everywhere because it's the default | The design system's type stack. Build hierarchy with weight and color, not giant headings |
-| Three equal feature cards in a row; every block wrapped in a card | Layout by priority. Cards only when elevation means something; otherwise group with spacing or dividers |
+| Three equal feature cards in a row; every block wrapped in a card | Layout by priority: one primary block, quieter secondary ones. Cards only when the surface means something (a selectable item, a contained tool); otherwise group with spacing or dividers |
 | Dashboards as a wall of identical KPI cards with shadows | Key numbers in a plain, aligned layout; tabular figures; one clear primary metric |
 | Centered everything (hero over a dark mesh, centered forms and tables) | Left-aligned content on a grid. In tables, text left, numbers right |
 | Glassmorphism, blur and heavy shadows on everything | Solid surfaces. Subtle, background-tinted shadows only where the design system defines them |
@@ -20,7 +20,8 @@ _Distilled from Leonxlnx/taste-skill@717446e (MIT)._ These are the defaults mode
 | Small uppercase "eyebrow" labels above every section, section numbers ("01 / Features"), status dots on every row | Headings alone. Dots and badges only for real state (e.g. a failed job) |
 | Placeholder text as the field label | Label above the input, help text under it, error text below it |
 | Spinners for content | Skeletons shaped like the final layout |
-| Fake product screenshots built from styled divs | A real screenshot, a real component, or nothing |
-| Infinite-loop micro-animations, motion on everything | Static by default. Motion only when it explains something |
+| Fake product screenshots built from styled divs | A real screenshot or the real component rendered with sample data. Approved illustrations and empty-state art from `DESIGN.md` are fine |
+| Generic motion: infinite-loop micro-animations, the same hover-scale on every card, bouncy everything | The motion inventory in `DESIGN.md`: each moment animated once, with its token and a named purpose (feedback, orientation, continuity) |
+| A static, lifeless app: instant overlays, lists that jump, content that pops in | Press feedback, overlays from their trigger, list items sliding into place, skeletons cross-fading to content |
 
 **On marketing pages** also skip: version labels or "BETA" in the hero, "Scroll to explore" cues, logo walls inside the hero (put them below it), and the same section layout repeated down the page.

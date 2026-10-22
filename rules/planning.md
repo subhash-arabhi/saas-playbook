@@ -54,10 +54,12 @@ After approval the build runs to the end without asking, so every question is fo
 - Aim for **about 5–12 steps per plan**.
 - **Split a step** if it mixes unrelated areas, or its **Done when** needs more than 5 items.
 - Every step leaves the app working, with its checks passing.
+- **A plan that touches UI starts with a "Design" step** with `checkpoint: true`. It adds every new screen, component and pattern the plan needs to `DESIGN.md` and the gallery as `proposed` (`.agents/rules/design-system.md`; `/front-end-design` first if the project has no Approvals table). Its checkpoint is where the user approves them. The user can switch the checkpoint off.
+- **UI steps' Done when name quality-bar criteria** (`.agents/skills/frontend-ui-engineering/references/quality-bar.md`): states, waits, motion inventory moments, dark mode, mobile. Never "looks right".
 - No feature flags. Features go live when the user runs `/deploy`.
 
 ## Checkpoints
-- **The user sets a step's `checkpoint: true`** (by clicking its circle in the viewer, editing the file, or answering the checkpoint question in the dry run) to make the build pause after that step. **Never change `checkpoint` otherwise.**
+- **The user sets a step's `checkpoint: true`** (by clicking its circle in the viewer, editing the file, or answering the checkpoint question in the dry run) to make the build pause after that step. **Never change `checkpoint` otherwise,** except to set it on a new plan's Design step.
 
 ## Building
 On `/build`, follow `.agents/workflows/build-plan.md`.

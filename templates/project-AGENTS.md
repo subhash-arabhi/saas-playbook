@@ -6,7 +6,7 @@ Instructions for every AI coding agent in this repo. **These rules are mandatory
 
 Playbook files are in `.agents/` (rules, workflows, skills, reviewers, references, templates); `.agents/playbook.json` lists the playbook's skills. Project files are at the repo root (`plans/`, `ARCHITECTURE.md`, `DESIGN.md`, `infra/`, `scripts/`). Project skills are in `.agents/skills/` too, listed under "Project-specific".
 
-**Precedence:** the user's instruction in this conversation → "Project-specific" below → `.agents/rules/` → skills.
+**Precedence:** the user's instruction in this conversation → "Project-specific" below → `.agents/rules/` → skills. For UI, `DESIGN.md` decides what things look like and skills decide how to build them well; no restraint rule removes an item from the motion inventory or lowers the quality bar.
 
 ## Phase
 Check **`Phase`** in "Project-specific" first. If it isn't set, ask.
@@ -39,6 +39,7 @@ Each command is a skill in `.agents/skills/<name>/`; follow it and its workflow 
 | `/push` | The user's sign-off: pre-PR check, push, open or update the PR |
 | `/deploy` | Merges the PR and deploys to production |
 | `/publish` | Readiness for real users (rare) |
+| `/front-end-design [what]` | Sets up the design system before the first UI step: style, palette, type, components, patterns and motion, approved in the gallery. With `[what]`, proposes and approves one new piece |
 | `/flow-document [journey]` | Writes or updates the product's flow document: the user journey as a tree, each step with how it works, input, output, time and cost |
 
 **"Turn CI on" / "turn CI off"** adds or removes `.github/workflows/pre-pr.yml` and updates the CI line, committed locally like any change (`.agents/workflows/pre-pr.md` → CI).
@@ -52,6 +53,7 @@ Before planning, before each build step and before any direct change, list the a
 |---|---|---|
 | Any multi-file change or plan step | `planning.md`, `git.md` | `incremental-implementation` |
 | UI: pages, components, styling | `frontend.md`, `DESIGN.md` | `frontend-ui-engineering`; checking it in a browser: `browser-testing-with-devtools`, `playwright-cli`; motion: `design-motion-principles` |
+| Design system: palette, type, components, patterns, motion, imagery | `design-system.md`, `frontend.md`, `DESIGN.md` | `front-end-design`, `design-motion-principles` |
 | API and server logic | `backend.md` | `api-and-interface-design` |
 | System design: new modules, jobs, outside services, data model, scaling | `system-design.md`, `stack.md` | |
 | Database, migrations, sign-in, sessions | `database.md`, `security.md` | `security-and-hardening` |

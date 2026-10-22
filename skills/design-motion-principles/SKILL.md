@@ -1,9 +1,9 @@
 ---
 name: design-motion-principles
-description: Adds purposeful motion to UI while building it. On-demand only. Use when a component actually needs motion or animation (transitions, hover/press feedback, enter/exit, micro-interactions, drawers, toasts, icon swaps), or when the user asks whether some motion is right. Restraint-first for SaaS apps and dashboards; fuller expression for marketing pages. Always ships prefers-reduced-motion handling.
+description: Adds purposeful motion to every UI step, following the motion inventory in DESIGN.md. Use when building or changing any screen or component (press and hover feedback, overlays, lists, route changes, content loading, toasts, marketing reveals), or when the user asks whether some motion is right. Quiet in SaaS apps and dashboards, expressive on marketing pages, never static. Always ships prefers-reduced-motion handling.
 ---
 
-<!-- Adapted from kylezantos/design-motion-principles@4a9ca87 (MIT, see licenses/). Changes: on-demand Create mode only (HTML audit report removed), SaaS restraint-first default, design-system motion tokens, tool-agnostic, trimmed; layered: general guidance here, playbook decisions in .agents/rules/. -->
+<!-- Adapted from kylezantos/design-motion-principles@4a9ca87 (MIT, see licenses/). Changes: Create mode for every UI step against the DESIGN.md motion inventory (HTML audit report removed), quiet-in-the-app default with no static screens, occasional events at 150–250ms, design-system motion tokens, tool-agnostic, trimmed; layered: general guidance here, playbook decisions in .agents/rules/. -->
 
 **Project rules first.** If the project has `.agents/rules/` (installed with the SaaS playbook), read `.agents/rules/frontend.md` and follow it: it overrides this skill where they differ. Without it, follow this skill as written.
 
@@ -13,12 +13,12 @@ Build UI motion that has a purpose, feels fast, and gets out of the way.
 
 ## When It Runs
 
-- **On demand only:** when something appears, disappears, changes state or gives feedback, and an instant change would feel broken. Not a default step of every UI change, pre-PR or release. Most SaaS UI changes need no new motion.
+- **Every UI step:** check the screen against the motion inventory in `DESIGN.md` (press, hover, overlays, lists, route changes, content load, toasts, marketing reveals) and fill every moment it has. Quiet in the app, expressive on marketing pages, never static.
 - **On request** ("does this motion feel right?"): the Quick Inline Review below.
 - **Scope:** web/app UI motion (CSS, JS animation libraries, motion tokens). The frequency gate also applies to Lottie, Rive or video; the recipes may not. Examples are CSS and Motion for React; translate to the project's stack.
 - **Tools, lightest first:** CSS (transitions, scroll-driven animations, View Transitions); then a component animation library such as Motion (formerly Framer Motion) for exits, layout changes, gestures and springs; then a timeline library such as GSAP only for long choreography. Use what the project already has.
 
-## Lenses: Restraint First
+## Lenses: Quiet in the App
 
 Lenses in `references/`: **Emil Kowalski** (`emil-kowalski.md`, should this animate at all?), **Jakub Krehel** (`jakub-krehel.md`, subtle and polished enough?), **Jhey Tompkins** (`jhey-tompkins.md`, playful, expressive). They distill each designer's published work; the weighting is this skill's, not endorsed by them.
 
@@ -34,8 +34,8 @@ If the design system or the user states a different brand personality (e.g. play
 
 ## Core Principles
 
-1. **Frequency gate (decide first).** Rare (monthly: onboarding, first success) → expressive welcome. Occasional (daily: modal, toast) → subtle and fast. Frequent (100s/day: table rows, tabs, list filters) → none or instant. Keyboard-initiated (shortcuts, command palette) → never animate.
-2. **Named purpose.** Every animation is **feedback** (my action registered), **orientation** (where it came from / went) or **continuity** (same thing, changed). If you can't name one, don't add it.
+1. **Frequency gate (decide first).** Rare (monthly: onboarding, first success) → expressive welcome. Occasional (daily: modal, toast, list change, route change) → subtle, 150–250ms. Frequent (hundreds of times a day: typing, table row hover, tabs in a busy tool) → instant. Keyboard-initiated (shortcuts, command palette) → never animate. Nothing else is left static.
+2. **Named purpose.** Every animation is **feedback** (my action registered), **orientation** (where it came from / went) or **continuity** (same thing, changed). The inventory's moments all have one; anything outside it needs one too.
 3. **Unnoticed.** If users would say "nice animation!" on a routine interaction, it's too prominent (except deliberate delight on marketing or onboarding).
 4. **Reduced motion is mandatory.** Every animation ships `prefers-reduced-motion` handling in the same change. See `references/accessibility.md`.
 5. **Cheap properties only:** `transform`, `opacity`, `filter`, `clip-path`. Never `width`, `height`, `top`, `left`, `margin`, `padding`.
@@ -46,7 +46,7 @@ If the design system or the user states a different brand personality (e.g. play
 - **None exist:** use the defaults below and ask: "The design system has no motion tokens; I used the skill defaults. Want me to add them to it?" Add them (in the file's token layout) only if they agree.
 - **Existing code already animates:** match its values unless they are what's being fixed.
 
-**Skill defaults** (restraint-first, SaaS UI):
+**Skill defaults** (quiet, SaaS UI):
 
 | Token (suggested name) | Value | Use |
 |---|---|---|

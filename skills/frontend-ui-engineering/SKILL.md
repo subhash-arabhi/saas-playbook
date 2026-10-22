@@ -3,7 +3,7 @@ name: frontend-ui-engineering
 description: Builds production-quality, responsive user interfaces that follow the project's design system. Use when building or modifying pages, screens or components, implementing layouts, wiring UI to the API, managing UI state, or when the output needs to look and feel like a real product rather than AI-generated.
 ---
 
-<!-- Adapted from addyosmani/agent-skills@1401c8b (MIT, see licenses/), with an "Avoid the AI look" section distilled from Leonxlnx/taste-skill@717446e (MIT). Changes: design-system contract, Tailwind styling, framework-agnostic, full accessibility audit as a separate pass, OpenAPI client, browser checks, trimmed (examples and AI-look table in references/); layered: general guidance here, playbook decisions in .agents/rules/. -->
+<!-- Adapted from addyosmani/agent-skills@1401c8b (MIT, see licenses/), with an "Avoid the AI look" section distilled from Leonxlnx/taste-skill@717446e (MIT). Changes: design-system contract, motion inventory and quality bar (quality-bar.md, baseline-ui.md adapted from ibelick/ui-skills@55363c3, MIT), View Transitions, Tailwind styling, framework-agnostic, full accessibility audit as a separate pass, OpenAPI client, browser checks, trimmed (examples and AI-look table in references/); layered: general guidance here, playbook decisions in .agents/rules/. -->
 
 **Project rules first.** If the project has `.agents/rules/` (installed with the SaaS playbook), read `.agents/rules/frontend.md` and `.agents/rules/testing.md` and follow them: they override this skill where they differ. Without them, follow this skill as written.
 
@@ -17,7 +17,7 @@ The app has one design system, usually one root file (e.g. `DESIGN.md`): light a
 
 1. **Read the design system first**, every time, before touching UI.
 2. **Use only its tokens and components.** No hard-coded colors, font sizes, font families, spacing or radii. Reuse the shared component for every button, input, card and so on; never restyle one locally.
-3. **Need a new component, variant or state?** Add it to the design system **first** (tokens, states, desktop and mobile behaviour), then build it as a shared component.
+3. **Need a new component, variant or state?** Add it to the design system **first** (tokens, states, desktop and mobile behaviour), through the project's design-change flow if it has one (`/front-end-design`), then build it as a shared component.
 4. **Missing a token?** Add it to the design system with a one-line rationale, re-export, then use it. Never invent a one-off value in a component.
 5. **Styling is Tailwind CSS.** Tokens reach the code by export, not by hand-copying: for a `DESIGN.md`, `npx @google/design.md@<pinned-version> export --format css-tailwind` writes Tailwind's `@theme`. Use only theme classes, never arbitrary values (`p-[13px]`, `bg-[#…]`) or inline styles. The project pins the version.
 6. **No design system yet?** Write one before building UI. Start from one or two real SaaS brands' design systems and customize them: your own brand color, type, voice and name. Never ship a near-copy of another brand.
@@ -53,7 +53,7 @@ For pseudocode examples (composition, container, optimistic update, tokens), rea
 
 ## Avoid the AI Look
 
-Before building or finishing any visible UI, read `references/avoid-ai-look.md` and avoid every pattern in it unless the design system or the user asks for it. Re-read every visible string before finishing.
+Before building or finishing any visible UI, read `references/avoid-ai-look.md`, `references/quality-bar.md` and `references/baseline-ui.md`. Avoid every pattern in the first unless the design system or the user asks for it; meet the other two. Re-read every visible string before finishing.
 
 ## Don't Break the Basics
 
@@ -78,7 +78,11 @@ The full WCAG 2.2 AA audit is a separate pass before release. During builds:
 - **Loading:** skeletons matching the final layout (`aria-busy` on the region). No layout shift when data arrives.
 - **Empty:** say what's missing and offer the next action ("No invoices yet" + "Create invoice").
 - **Error:** inline for forms and sections; toast only for short-lived feedback. Offer a retry when it helps.
-- **Motion:** none by default. When a change needs it, follow the `design-motion-principles` skill (if installed). Animate only `transform` and `opacity`; respect `prefers-reduced-motion`.
+- **Motion:** every screen follows the motion inventory in the design system (press, hover, overlays, lists, route changes, content load, toasts), with the `design-motion-principles` skill (if installed). Animate only `transform` and `opacity`; respect `prefers-reduced-motion`.
+
+## View Transitions
+
+For route changes and shared elements, use the View Transitions API: React's `<ViewTransition>` component or `document.startViewTransition`. Name shared elements with `view-transition-name`, keep durations on the design system's page token, and fall back to an instant change where it's unsupported. For details, Vercel's [`react-view-transitions`](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-view-transitions) skill.
 
 ## Checking the UI
 

@@ -109,6 +109,25 @@ test('an update keeps project skills and the project AGENTS.md', () => {
   assert.match(out, /AGENTS\.playbook\.md/)
 })
 
+test('an AGENTS.md holding only another tool\'s managed block (create-next-app) gets the playbook text, with the block kept at the end', () => {
+  const dest = project()
+  const block = '<!-- BEGIN:nextjs-agent-rules -->\n\n## This is NOT the Next.js you know\n\nRead the docs.\n\n<!-- END:nextjs-agent-rules -->\n'
+  writeFileSync(join(dest, 'AGENTS.md'), block)
+  const out = install(dest)
+  const template = read(REPO, 'templates/project-AGENTS.md')
+  assert.equal(read(dest, 'AGENTS.md'), `${template}\n${block}`)
+  assert.equal(existsSync(join(dest, 'AGENTS.playbook.md')), false)
+  assert.match(out, /keeping the blocks another tool manages/)
+  const again = install(dest)
+  assert.equal(read(dest, 'AGENTS.md'), `${template}\n${block}`, 'a reinstall leaves it alone')
+  assert.equal(existsSync(join(dest, 'AGENTS.playbook.md')), false)
+  assert.doesNotMatch(again, /AGENTS\.playbook\.md|keeping the blocks/)
+  writeFileSync(join(dest, 'AGENTS.md'), `${template.replace('## Project-specific', '## Project-specific\n- Product: invoices')}\n${block}`)
+  install(dest)
+  assert.match(read(dest, 'AGENTS.md'), /- Product: invoices/, 'an edited AGENTS.md is never overwritten')
+  assert.equal(read(dest, 'AGENTS.playbook.md'), template)
+})
+
 test('an update removes skills the playbook no longer ships', () => {
   const dest = project()
   install(dest)

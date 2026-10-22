@@ -1,0 +1,20 @@
+# Trial projects the playbook is installed into while testing it (e.g. plans/polished-ui.md step 10)
+/sample/
+
+# Dependencies and package builds
+node_modules/
+*.tgz
+*.vsix
+
+# Test and tool output
+coverage/
+test-results/
+playwright-report/
+*.log
+
+# Local secrets and OS/editor files
+.env
+.env.*
+.DS_Store
+*.swp
+.idea/

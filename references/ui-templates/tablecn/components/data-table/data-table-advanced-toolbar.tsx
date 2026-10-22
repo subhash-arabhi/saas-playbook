@@ -1,0 +1,40 @@
+// Source: sadmann7/tablecn@744ffda src/registry/bases/base/components/data-table/data-table-advanced-toolbar.tsx (MIT). Changes: this comment only. Reference copy, not built: adapt it as .agents/references/ui-templates/README.md says.
+"use client";
+
+import type { ReactTable, RowData } from "@tanstack/react-table";
+import type * as React from "react";
+
+import { cn } from "cn";
+
+import type { DataTableFeatures } from "@/lib/data-table-features";
+
+import { DataTableViewOptions } from "@/registry/bases/base/components/data-table/data-table-view-options";
+
+interface DataTableAdvancedToolbarProps<
+  TData extends RowData,
+> extends React.ComponentProps<"div"> {
+  table: ReactTable<DataTableFeatures, TData, unknown>;
+}
+
+export function DataTableAdvancedToolbar<TData extends RowData>({
+  table,
+  children,
+  className,
+  ...props
+}: DataTableAdvancedToolbarProps<TData>) {
+  return (
+    <div
+      data-slot="data-table-advanced-toolbar"
+      className={cn(
+        "flex w-full items-start justify-between gap-2 p-1",
+        className,
+      )}
+      {...props}
+    >
+      <div className="flex flex-1 flex-wrap items-center gap-2">{children}</div>
+      <div className="flex items-center gap-2">
+        <DataTableViewOptions table={table} align="end" />
+      </div>
+    </div>
+  );
+}
