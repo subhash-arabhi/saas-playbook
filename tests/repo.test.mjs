@@ -308,6 +308,20 @@ test('the project AGENTS.md has /front-end-design, the design-system area and th
   assert.match(agents, /\*\*Precedence:\*\*.*`DESIGN\.md` decides what things look like.*no restraint rule removes an item from the motion inventory or lowers the quality bar\./)
 })
 
+test('the DESIGN.md template has every section, 7 component groups, 12-step scales and the Approvals table', () => {
+  const design = readFileSync(join(REPO, 'templates', 'DESIGN.md'), 'utf8')
+  const sections = ['Overview', 'Brand & personality', 'Colors', 'Typography', 'Layout', 'Elevation & Depth', 'Shapes', 'Iconography', 'Imagery & illustration', 'Components', 'Patterns', 'Marketing sections', 'Data visualisation', 'Motion inventory', 'Loading choreography', 'Voice & microcopy', "Do's and Don'ts", 'Approvals & changelog']
+  assert.deepEqual(design.match(/^## .+$/gm).map((h) => h.slice(3)), sections)
+  const components = section(design, '## Components')
+  assert.deepEqual(components.match(/^### .+$/gm).map((h) => h.slice(4)), ['Actions', 'Inputs & forms', 'Navigation', 'Data display', 'Feedback', 'Overlays', 'Layout & content'])
+  const families = components.match(/\*\*[^*]+\*\*/g) || []
+  assert.ok(families.length >= 35, `about 40 component families, found ${families.length}`)
+  for (const scale of ['neutral', 'accent']) for (const theme of ['', '-dark']) for (let step = 1; step <= 12; step++) assert.match(design, new RegExp(`^  ${scale}-${step}${theme}: "oklch\\(`, 'm'), `${scale}-${step}${theme}`)
+  for (const key of ['motion', 'zIndex', 'breakpoints', 'iconSize']) assert.match(design, new RegExp(`^${key}:\\n`, 'm'), key)
+  assert.match(section(design, '## Approvals & changelog'), /^\| Item \| Version \| Status \| Date \|$/m)
+  assert.match(design, /^description: "<One sentence on who it's for and what they do with it\. The look is decided by \/front-end-design, not here\.>"$/m)
+})
+
 test('a finished build updates the flow document when the project has one', () => {
   const done = section(readFileSync(join(REPO, 'workflows', 'build-plan.md'), 'utf8'), '## 5. When all steps are done')
   assert.match(done, /^\d\. If the project has a flow document \(`docs\/flow\/flow\.json`\), update the steps this plan changed \(`\.agents\/skills\/flow-document\/SKILL\.md`\) and render it again\.$/m)

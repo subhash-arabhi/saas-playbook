@@ -10,7 +10,7 @@ steps:
   - id: 2
     title: "Expanded DESIGN.md template"
     summary: "Brand and signature element, 12-step OKLCH scales, motion and layout tokens, about 40 component families in 7 groups, patterns, imagery, Approvals table"
-    done: false
+    done: true
     checkpoint: false
   - id: 3
     title: "Design tools: palette, extra tokens, coverage"
@@ -114,9 +114,9 @@ A project built only with this playbook looks designed by default. Before the bu
 **Files:** `templates/DESIGN.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] The template has every section above and about 40 component families in 7 groups
-- [ ] A filled copy lints with zero errors on `@google/design.md` 0.4.0
-- [ ] Tests fail if a section, a group or the Approvals table is removed
+- [x] The template has every section above and about 40 component families in 7 groups
+- [x] A filled copy lints with zero errors on `@google/design.md` 0.4.0
+- [x] Tests fail if a section, a group or the Approvals table is removed
 
 **Check:** `npm test`, the lint command above
 
@@ -264,3 +264,4 @@ None.
 |---|---|---|---|
 | Plan | 2026-10-22 | Dry run | Dry run: 14 questions, none left. |
 | 1 | 2026-10-22 | Done | Decided: a minimal `skills/front-end-design/SKILL.md` pointing to the rule, so the area-skill test passes at every commit; step 4 fills it in. Also changed: `skills/front-end-design/SKILL.md` (same reason). `plan-open.test.mjs` fails only in the parallel full run (port in use, as on `main`) and passes alone. |
+| 2 | 2026-10-22 | Done | Decided: the template carries a neutral grey and blue example scale in OKLCH instead of placeholders, so it lints as-is and `design-palette.mjs` replaces it. Lint on 0.4.0: 0 errors; the warnings are unreferenced scale steps and the `motion`, `breakpoints` and `iconSize` keys. |
