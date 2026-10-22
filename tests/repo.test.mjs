@@ -347,7 +347,14 @@ test('/front-end-design runs brand, style, palette, type, build-out and freeze i
   }
   assert.match(flow, /design-palette\.mjs --hue <h>`.*Drop any that exits 1/)
   assert.match(flow, /Ask once, with the gallery URL: "Approve" or "Change something"/)
-  assert.match(flow, /design-tokens\.mjs --out <file>/)
+  assert.match(flow.split('2. **Brand.**')[0], /Export the theme \(below\) and import its files in the global CSS/)
+  assert.match(flow, /the patterns \(list, detail.*\) with the messy fixtures, adapted from the shell and page layouts chosen in step 3/)
+  assert.match(flow, /Name a component after its file \(`components\/ui\/input\.tsx` is "Input"\), so the pre-PR design coverage check finds it/)
+  assert.match(flow, /Self-host each family with Fontsource[\s\S]*Not `next\/font`/)
+  const exporting = section(skill, '## Export the theme')
+  assert.match(exporting, /After setup and after every change to `DESIGN\.md`/)
+  assert.match(exporting, /export --format css-tailwind[\s\S]*design-tokens\.mjs --out[\s\S]*design-tokens\.mjs --shadcn --out/)
+  assert.match(exporting, /instead of what `shadcn init` wrote: its `:root` and `\.dark` blocks, the `--font-\*` lines in its `@theme inline`, and the layout's `next\/font` fonts/)
   assert.match(skill, /no review passes, critique loops or screenshot rounds/)
   assert.match(flow, /\*\*The project already has UI:\*\* keep its existing tokens and components\..*Approvals row `proposed`/)
   const change = section(skill, '## Design change')
@@ -452,6 +459,7 @@ test('the frontend rule\'s ESLint pattern blocks arbitrary values and allows var
   for (const cls of ['p-[13px]', 'md:bg-[#1f2937]', '-mt-[3px]', 'hover:text-[15px]', 'max-h-[calc(100dvh-4rem)]']) assert.match(cls, pattern, cls)
   for (const cls of ['p-4', '[&>svg]:size-4', 'w-(--anchor-width)', 'md:grid-cols-2', 'data-[state=open]:opacity-100']) assert.doesNotMatch(cls, pattern, cls)
   assert.match(frontend, /"better-tailwindcss\/no-restricted-classes": \["error"/)
+  assert.match(frontend, /files: \["\*\*\/\*\.\{ts,tsx\}"\],\n\s+ignores: \["components\/ui\/\*\*"\],/, 'shadcn\'s generated files are left out')
 })
 
 test('adapted design sources name their commit and keep their licence', () => {

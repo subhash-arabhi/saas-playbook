@@ -50,7 +50,7 @@ steps:
   - id: 10
     title: "Try it in a small sample project"
     summary: "Install the playbook in a tiny Next.js app in sample/, run /front-end-design, build a list and a detail page, and report what works and what doesn't"
-    done: false
+    done: true
     checkpoint: false
 ---
 
@@ -250,9 +250,9 @@ A project built only with this playbook looks designed by default. Before the bu
 **Files:** `sample/` (not committed), `plans/polished-ui.md` (edit), playbook files only for small fixes (logged as "Also changed:")
 
 **Done when:**
-- [ ] Every item in Do 3 has a works / doesn't line in the Build log
-- [ ] Small problems are fixed with tests; larger ones are in a follow-up plan in `plans/`
-- [ ] `sample/` isn't tracked by git
+- [x] Every item in Do 3 has a works / doesn't line in the Build log
+- [x] Small problems are fixed with tests; larger ones are in a follow-up plan in `plans/`
+- [x] `sample/` isn't tracked by git
 
 **Check:** `npm test`, `git status --short` shows nothing from `sample/`
 
@@ -272,3 +272,4 @@ None.
 | 7 | 2026-10-22 | Done | Decided: the Design step's checkpoint asks "Approve" or "Change something" with the gallery URL instead of continue or stop, and an approval is its own `Approve design` commit; the approvals check is a listed read of the Approvals table, not a script, because the components aren't in the code yet. The README `/build` row is updated in step 9 with the other docs. |
 | 8 | 2026-10-22 | Done | Decided: the three checks are pre-PR rows 9–11 (after the other script rows), so the agent rows move to 12–16; "has UI" means a `DESIGN.md` or a frontend package. The ESLint pattern `^(.*:)?-?[a-z][\w-]*-\[.+\]$` blocks arbitrary values but allows arbitrary variants and `w-(--var)`; checked with `eslint-plugin-better-tailwindcss` 4.10.0 in the scratch Next.js app (2 errors on a probe file, the gallery clean). |
 | 9 | 2026-10-22 | Done | Decided: the "Light on context" figure is re-measured as the project `AGENTS.md` plus every skill's name and description at about 4 characters per token: about 3,150 now, against 2,900 for v1.1.0 on the same measure (the old 2,300 was from the first release), so the README says about 3,200. Also changed: `skills/front-end-design/SKILL.md` (a project that already has UI keeps its tokens and components as `proposed`, which the upgrade note relies on) and its test. The release workflow's `awk` finds the `## v2.0.0` section. Not tagged: tagging waits for the user. |
+| 10 | 2026-10-22 | Done | Works: the sample plan starts with a Design step with checkpoint: true, but only because the agent wrote it; plan.mjs check doesn't enforce it (follow-up). Doesn't, fixed: a template picked and adapted, since step 6 pointed only marketing sections at the templates; it now names the shell, page layouts and tablecn/ for patterns. Works after fixes: the gallery, built from the real shadcn components with palette options side by side; fixed: the theme was exported only at freeze, fonts never applied (next/font renames families, so Fontsource now), and shadcn's font variables still pointed at Geist. Works: approvals before use; all 11 items were approved in v1 before /build, and the Design step confirmed them. Partly: the motion inventory; press, hover and content load apply to a list and a detail page, the rest wait for overlays, toasts and route changes. Works after fixes: pre-PR checks 9 to 11 run and block (a p-[13px] class and an unapproved separator both fail); fixed: coverage missed "Text input" against input.tsx, and ESLint failed on shadcn's own components/ui files. Doesn't: dark mode needs a dark: twin on every DESIGN.md colour class, and nothing catches a missing one (follow-up). Tokens: the design phase reads about 51 KB (about 13k tokens) before any output. Larger problems: plans/design-follow-ups.md. Decided: Fontsource instead of next/font; components/ui left out of the ESLint rule; Approvals rows named after component files. Also changed: install.sh (an AGENTS.md holding only another tool's managed blocks), tools/design-tokens.mjs (quoted hex values, references, --shadcn with fonts), skills/front-end-design/SKILL.md, rules/frontend.md, the gallery's page.tsx and registry.tsx, tests. |

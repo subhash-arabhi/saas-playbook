@@ -19,8 +19,10 @@ The user never designs anything. You propose options, build them in the gallery,
 1. **Set up `DESIGN.md` and the gallery.**
    - Copy `.agents/templates/DESIGN.md` to the project root if it's missing.
    - **The project already has UI:** keep its existing tokens and components. Move them into the template's sections and the gallery, each with an Approvals row `proposed`, and offer them as the first option in steps 2–5. Freeze v1 approves them with everything else.
+   - **React:** if `components.json` is missing, set up shadcn/ui on Base UI: `npx shadcn@<pinned> init -d` (the `base-nova` style). Add components with `npx shadcn@<pinned> add <name>` as the build needs them.
    - Copy the gallery from `.agents/templates/design-gallery/` (Next.js: `nextjs/app/(dev)/design/` into `app/`; other frameworks: build it from that folder's `README.md`).
-   - Add `@custom-variant dark (&:where(.dark, .dark *));` to the global CSS, start the dev server, and give the user the `/design` URL.
+   - Make sure the global CSS has a `dark` custom variant for the `.dark` class (`shadcn init` adds one; otherwise add `@custom-variant dark (&:where(.dark, .dark *));`).
+   - Export the theme (below) and import its files in the global CSS, so the gallery shows `DESIGN.md`'s values from the start. Start the dev server and give the user the `/design` URL.
 2. **Brand.** Ground it in the subject first (`.agents/skills/front-end-design/references/direction.md`). Ask in one card:
    - who it's for and the job (your proposal, confirmed);
    - 3 adjectives (2–3 sets to choose from);
@@ -37,18 +39,26 @@ The user never designs anything. You propose options, build them in the gallery,
    - Pick 3 hues from the theme and the brand's colour world, and run `node .agents/tools/design-palette.mjs --hue <h>` for each. Drop any that exits 1.
    - Show the three side by side in the gallery's colour section (temporary `-option-a/b/c` tokens), and ask which.
    - Write the chosen scales into `DESIGN.md` and remove the options.
-5. **Type.** Propose 2–3 pairings chosen for this product (not the usual families), shown in the gallery's typography section, and ask which. Write the typography tokens and the font loading.
+5. **Type.** Propose 2–3 pairings chosen for this product (not the usual families), shown in the gallery's typography section, and ask which. Write the typography tokens and the font loading:
+   - Self-host each family with Fontsource (`npm i @fontsource-variable/<family>@<pinned>`), imported in the global CSS before the theme.
+   - Write the family name the package declares (for example `Newsreader Variable`) in the tokens. Not `next/font`: it renames families, so the exported theme wouldn't find them.
 6. **Components, patterns, marketing and motion.** Build them all, as `proposed`, without asking in between:
    - every component family the product needs, in every state, from the project's shadcn/ui components on Base UI, themed only from `DESIGN.md`;
-   - the patterns (list, detail, form, settings, dashboard, auth, onboarding) with the messy fixtures;
+   - the patterns (list, detail, form, settings, dashboard, auth, onboarding) with the messy fixtures, adapted from the shell and page layouts chosen in step 3 (a list's table from `tablecn/`);
    - the marketing sections, if the product has a marketing site, adapted from the chosen templates;
    - every row of the motion inventory, playing with replay.
 
-   Add each to the gallery registry and to the Approvals table as `proposed`.
+   Add each to the gallery registry and to the Approvals table as `proposed`. Name a component after its file (`components/ui/input.tsx` is "Input"), so the pre-PR design coverage check finds it.
 7. **Freeze v1.**
    - Ask once, with the gallery URL: "Approve" or "Change something". A change: fix it in the gallery and ask again.
    - On approve: mark every row `approved` with version `v1` and today's date.
-   - Export the theme (`npx @google/design.md@<pinned> export --format css-tailwind`, then `node .agents/tools/design-tokens.mjs --out <file>`) and run `npx @google/design.md@<pinned> lint DESIGN.md`. It must show 0 errors.
+   - Export the theme again and run `npx @google/design.md@<pinned> lint DESIGN.md`. It must show 0 errors.
+
+## Export the theme
+After setup and after every change to `DESIGN.md`:
+- `npx @google/design.md@<pinned> export --format css-tailwind DESIGN.md > <theme file>`, then `node .agents/tools/design-tokens.mjs --out <tokens file>` (motion, breakpoints, icon sizes and the `-dark` colours).
+- With shadcn/ui, also `node .agents/tools/design-tokens.mjs --shadcn --out <shadcn file>`, so every shadcn component takes its colours, radius and fonts from `DESIGN.md`. Import it instead of what `shadcn init` wrote: its `:root` and `.dark` blocks, the `--font-*` lines in its `@theme inline`, and the layout's `next/font` fonts.
+- Restart the dev server when the global CSS imports change.
 
 ## Design change
 For one new component, variant, pattern, section or token:

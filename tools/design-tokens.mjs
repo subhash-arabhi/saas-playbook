@@ -3,11 +3,19 @@
 // Tailwind v4 @theme block. Import the file after the design.md export in the global CSS.
 //   node .agents/tools/design-tokens.mjs [DESIGN.md] [--out <file>]    default: DESIGN.md, print to stdout
 //   node .agents/tools/design-tokens.mjs [DESIGN.md] --json            the same tokens as JSON (for Motion springs in JS)
+//   node .agents/tools/design-tokens.mjs [DESIGN.md] --shadcn [--out <file>]
+//     shadcn/ui's :root and .dark variables from DESIGN.md's colours; they replace the ones `shadcn init` wrote.
 import { readFileSync, writeFileSync, realpathSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 export const GROUPS = ['motion', 'zIndex', 'breakpoints', 'iconSize']
+
+/** A YAML scalar: the quoted string, or the bare value without a trailing ` # comment`. */
+const scalar = (raw) => {
+  const quoted = raw.match(/^(["'])(.*?)\1(?:\s+#.*)?\s*$/)
+  return quoted ? quoted[2] : raw.replace(/\s+#.*$/, '').trim()
+}
 
 /** The extra token groups from a DESIGN.md's front matter: { motion: { name: value }, … }. Missing groups are empty. */
 export function extraTokens(text) {
@@ -21,8 +29,8 @@ export function extraTokens(text) {
       group = top && GROUPS.includes(top[1]) ? top[1] : null
       continue
     }
-    const kv = group && line.match(/^ {2}([\w-]+):\s*(.+?)\s*(?:#.*)?$/)
-    if (kv) out[group][kv[1]] = kv[2].replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1')
+    const kv = group && line.match(/^ {2}([\w-]+):\s*(.+)$/)
+    if (kv) out[group][kv[1]] = scalar(kv[2])
   }
   return out
 }
@@ -46,8 +54,73 @@ export function themeCss(tokens) {
   return `${lines.join('\n')}\n`
 }
 
+/** A flat front-matter group (colors, rounded, …) as { name: value }, with {group.name} references resolved. */
+export function frontGroup(text, group) {
+  const front = text.match(/^---\n([\s\S]*?)\n---\n/)
+  if (!front) throw new Error('DESIGN.md has no front matter')
+  const out = {}
+  let inside = false
+  for (const line of front[1].split('\n')) {
+    if (/^\S/.test(line)) {
+      inside = line.startsWith(`${group}:`)
+      continue
+    }
+    const kv = inside && line.match(/^ {2}([\w-]+):\s*(.+)$/)
+    if (kv) out[kv[1]] = scalar(kv[2])
+  }
+  const resolve = (value, seen = []) => value.replace(/\{(\w+)\.([\w-]+)\}/g, (ref, g, name) => {
+    if (g !== group || !(name in out) || seen.includes(name)) throw new Error(`unresolved reference ${ref}`)
+    return resolve(out[name], [...seen, name])
+  })
+  return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, resolve(v)]))
+}
+
+/** shadcn/ui's theme variable → the DESIGN.md colour it takes. Dark uses `<colour>-dark`. */
+export const SHADCN = {
+  background: 'background', foreground: 'ink',
+  card: 'surface-raised', 'card-foreground': 'ink',
+  popover: 'surface-raised', 'popover-foreground': 'ink',
+  primary: 'primary', 'primary-foreground': 'on-primary',
+  secondary: 'neutral-3', 'secondary-foreground': 'ink',
+  muted: 'neutral-3', 'muted-foreground': 'ink-muted',
+  accent: 'neutral-3', 'accent-foreground': 'ink',
+  destructive: 'error', border: 'border', input: 'border', ring: 'focus',
+  'chart-1': 'chart-1', 'chart-2': 'chart-2', 'chart-3': 'chart-3', 'chart-4': 'chart-4', 'chart-5': 'chart-5',
+  sidebar: 'surface', 'sidebar-foreground': 'ink',
+  'sidebar-primary': 'primary', 'sidebar-primary-foreground': 'on-primary',
+  'sidebar-accent': 'neutral-3', 'sidebar-accent-foreground': 'ink',
+  'sidebar-border': 'border', 'sidebar-ring': 'focus',
+}
+
+/** shadcn/ui's font utility → the DESIGN.md typography token whose family it takes, and its fallback. */
+export const SHADCN_FONTS = {
+  sans: ['body-md', 'ui-sans-serif, system-ui, sans-serif'],
+  heading: ['headline-lg', ''],
+  mono: ['mono', 'ui-monospace, monospace'],
+}
+
+/** shadcn/ui's :root and .dark variables and font utilities, every value taken from DESIGN.md's colors, rounded.md and typography. */
+export function shadcnCss(text) {
+  const colors = frontGroup(text, 'colors')
+  const rounded = frontGroup(text, 'rounded')
+  const typography = frontGroup(text, 'typography')
+  const fonts = Object.entries(SHADCN_FONTS).map(([v, [token, fallback]]) => {
+    const family = typography[token]?.match(/fontFamily:\s*(?:"([^"]+)"|'([^']+)'|([^,}]+))/)
+    if (!family) throw new Error(`DESIGN.md has no typography.${token}.fontFamily`)
+    return `  --font-${v}: "${(family[1] || family[2] || family[3]).trim()}"${fallback ? `, ${fallback}` : ''};`
+  })
+  const pick = (name, dark) => {
+    const value = dark ? colors[`${name}-dark`] ?? (name.startsWith('chart-') ? colors[name] : undefined) : colors[name]
+    if (value === undefined) throw new Error(`DESIGN.md has no colors.${dark ? `${name}-dark` : name}`)
+    return value
+  }
+  const block = (selector, dark) => [`${selector} {`, ...Object.entries(SHADCN).map(([v, c]) => `  --${v}: ${pick(c, dark)};`), ...(dark || !rounded.md ? [] : [`  --radius: ${rounded.md};`]), '}']
+  return `${['/* Generated by .agents/tools/design-tokens.mjs --shadcn from DESIGN.md. Do not edit. */', ...block(':root', false), '', ...block('.dark', true), '', '@theme inline {', ...fonts, '}'].join('\n')}\n`
+}
+
 function main(args) {
   const json = args.includes('--json')
+  const shadcn = args.includes('--shadcn')
   const outAt = args.indexOf('--out')
   const out = outAt >= 0 ? args[outAt + 1] : null
   if (outAt >= 0 && !out) {
@@ -55,14 +128,18 @@ function main(args) {
     return 2
   }
   const file = args.find((a, i) => !a.startsWith('--') && (outAt < 0 || i !== outAt + 1)) || 'DESIGN.md'
-  let tokens
+  let text
   try {
-    tokens = extraTokens(readFileSync(file, 'utf8'))
+    const source = readFileSync(file, 'utf8')
+    if (shadcn) text = shadcnCss(source)
+    else {
+      const tokens = extraTokens(source)
+      text = json ? `${JSON.stringify(tokens, null, 2)}\n` : themeCss(tokens)
+    }
   } catch (e) {
     console.error(`${file}: ${e.message}`)
     return 1
   }
-  const text = json ? `${JSON.stringify(tokens, null, 2)}\n` : themeCss(tokens)
   if (out) writeFileSync(out, text)
   else process.stdout.write(text)
   return 0

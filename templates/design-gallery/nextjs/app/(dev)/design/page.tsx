@@ -34,17 +34,19 @@ function Swatch({ name, value }: { name: string; value: string }) {
 function Colors({ design }: { design: DesignMd }) {
   const names = Object.keys(design.colors)
   const scale = (prefix: string, dark: boolean) => names.filter((n) => new RegExp(`^${prefix}-\\d+${dark ? '-dark' : ''}$`).test(n))
-  const semantic = names.filter((n) => !/^(neutral|accent)-\d+(-dark)?$/.test(n))
+  const options = [...new Set(names.map((n) => n.match(/^accent-\d+(-dark)?-option-(\w+)$/)?.[2]).filter(Boolean))] as string[]
+  const option = (o: string, dark: boolean) => names.filter((n) => new RegExp(`^accent-\\d+${dark ? '-dark' : ''}-option-${o}$`).test(n))
+  const semantic = names.filter((n) => !/^(neutral|accent)-\d+(-dark)?(-option-\w+)?$/.test(n))
+  const row = (key: string, label: string, swatches: string[]) => (
+    <div key={key} className="flex flex-col gap-sm">
+      <h3 className="text-label-md">{label}</h3>
+      <div className="grid grid-cols-6 gap-sm md:grid-cols-12">{swatches.map((n) => <Swatch key={n} name={n} value={design.colors[n]} />)}</div>
+    </div>
+  )
   return (
     <Section id="colors" title="Colours">
-      {['neutral', 'accent'].flatMap((prefix) =>
-        [false, true].map((dark) => (
-          <div key={`${prefix}${dark}`} className="flex flex-col gap-sm">
-            <h3 className="text-label-md">{`${prefix}, ${dark ? 'dark' : 'light'}`}</h3>
-            <div className="grid grid-cols-6 gap-sm md:grid-cols-12">{scale(prefix, dark).map((n) => <Swatch key={n} name={n} value={design.colors[n]} />)}</div>
-          </div>
-        )),
-      )}
+      {['neutral', 'accent'].flatMap((prefix) => [false, true].map((dark) => row(`${prefix}${dark}`, `${prefix}, ${dark ? 'dark' : 'light'}`, scale(prefix, dark))))}
+      {options.flatMap((o) => [false, true].map((dark) => row(`option-${o}${dark}`, `accent option ${o}, ${dark ? 'dark' : 'light'}`, option(o, dark))))}
       <h3 className="text-label-md">Semantic and charts</h3>
       <div className="grid grid-cols-3 gap-sm md:grid-cols-6">{semantic.map((n) => <Swatch key={n} name={n} value={design.colors[n]} />)}</div>
     </Section>

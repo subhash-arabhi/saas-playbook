@@ -32,7 +32,7 @@ export const demos: Demo[] = [
     ],
   },
   {
-    name: 'Text input',
+    name: 'Input',
     kind: 'component',
     group: 'Inputs & forms',
     states: [

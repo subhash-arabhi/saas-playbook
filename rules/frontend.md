@@ -6,12 +6,13 @@ Stack: the frontend framework is chosen per project (`.agents/rules/stack.md`). 
 - **Every frontend uses Tailwind CSS (v4, pinned).** No other styling system: no CSS-in-JS, no component library's default theme, no hand-written CSS beyond the generated tokens file and a small global base.
 - **Tailwind's theme comes from `DESIGN.md`:** `npx @google/design.md@<pinned> export --format css-tailwind` writes the `@theme` block. Never edit the generated file by hand.
 - **Use only theme classes** (`bg-primary`, `text-ink-muted`, `p-md`, `rounded-lg`). **Never** arbitrary values (`bg-[#1f2937]`, `p-[13px]`, `text-[15px]`) or inline `style` for design values.
-- **ESLint enforces it** with `eslint-plugin-better-tailwindcss` (pinned), added with the first UI step. Arbitrary variants (`[&>svg]:size-4`) and CSS-variable shorthands (`w-(--anchor-width)`) stay allowed:
+- **ESLint enforces it** with `eslint-plugin-better-tailwindcss` (pinned), added with the first UI step. Arbitrary variants (`[&>svg]:size-4`) and CSS-variable shorthands (`w-(--anchor-width)`) stay allowed. shadcn/ui's own files in `components/ui/` are left out: they come from `shadcn add` and take `DESIGN.md`'s values through the `--shadcn` export.
   ```js
   import betterTailwind from "eslint-plugin-better-tailwindcss";
   // in the flat config array:
   {
     files: ["**/*.{ts,tsx}"],
+    ignores: ["components/ui/**"],
     plugins: { "better-tailwindcss": betterTailwind },
     settings: { "better-tailwindcss": { entryPoint: "app/globals.css" } }, // the file that imports Tailwind
     rules: {
@@ -21,7 +22,7 @@ Stack: the frontend framework is chosen per project (`.agents/rules/stack.md`). 
     },
   },
   ```
-- **Dark theme:** use Tailwind's `dark:` variant with the `-dark` tokens from `DESIGN.md`.
+- **Dark theme:** use Tailwind's `dark:` variant with the `-dark` tokens from `DESIGN.md`. With shadcn/ui, `node .agents/tools/design-tokens.mjs --shadcn` writes shadcn's `:root` and `.dark` variables and its fonts from `DESIGN.md`, so its components switch theme by themselves; never edit those variables by hand.
 - **Repeated class lists become a shared component** (the components listed in `DESIGN.md`), not copy-pasted strings.
 - **Mobile first:** base classes are for 390×844, then `md:` / `lg:` / `xl:` for larger screens.
 

@@ -5,7 +5,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { REPO, tempRoot } from './helpers.mjs'
 import { scales, requiredPairs, yamlLines, contrast } from '../tools/design-palette.mjs'
-import { extraTokens, themeCss } from '../tools/design-tokens.mjs'
+import { extraTokens, themeCss, shadcnCss, frontGroup, SHADCN } from '../tools/design-tokens.mjs'
 import { coverage, approvals, NO_TABLE } from '../tools/design-coverage.mjs'
 
 const tool = (name) => join(REPO, 'tools', name)
@@ -109,4 +109,28 @@ test('coverage reads the template table and honours --dirs', () => {
   const root = project([['Card', 'approved']], { 'app/page.tsx': "import { Card } from '@/ui/card'\n" })
   assert.equal(spawnSync('node', [tool('design-coverage.mjs'), '--dirs', 'ui'], { cwd: root, encoding: 'utf8' }).status, 0)
   assert.equal(coverage(root, ['ui']).used.size, 1)
+})
+
+test('the shadcn bridge sets every shadcn variable from DESIGN.md, light and dark', () => {
+  const css = shadcnCss(template)
+  const colors = frontGroup(template, 'colors')
+  const [light, dark] = css.split('\n.dark {')
+  for (const name of Object.keys(SHADCN)) {
+    assert.match(light, new RegExp(`^  --${name}: [^;{}]+;$`, 'm'), `:root --${name}`)
+    assert.match(dark, new RegExp(`^  --${name}: [^;{}]+;$`, 'm'), `.dark --${name}`)
+  }
+  assert.ok(light.includes(`--foreground: ${colors['neutral-12']};`), 'references resolve to the scale step')
+  assert.ok(dark.includes(`--background: ${colors['neutral-1-dark']};`))
+  assert.ok(light.includes('--primary-foreground: #ffffff;'), 'quoted hex values stay whole')
+  assert.match(light, /--radius: 8px;/)
+  assert.throws(() => shadcnCss(template.replace(/^ {2}ink-dark:.*\n/m, '')), /no colors\.ink-dark/)
+  const fonts = css.split('@theme inline {')[1]
+  assert.match(fonts, /^ {2}--font-sans: "<Text font>", ui-sans-serif, system-ui, sans-serif;$/m)
+  assert.match(fonts, /^ {2}--font-heading: "<Display font>";$/m)
+  assert.match(fonts, /^ {2}--font-mono: "<Mono font>", ui-monospace, monospace;$/m)
+  const named = shadcnCss(template.replaceAll('<Text font>', '"Public Sans Variable"'))
+  assert.match(named, /--font-sans: "Public Sans Variable", ui-sans-serif/)
+  const out = spawnSync('node', [tool('design-tokens.mjs'), join(REPO, 'templates', 'DESIGN.md'), '--shadcn'], { encoding: 'utf8' })
+  assert.equal(out.status, 0)
+  assert.equal(out.stdout, css)
 })
