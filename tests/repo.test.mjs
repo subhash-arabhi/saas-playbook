@@ -399,6 +399,15 @@ test('the quality bar keeps the motion inventory and the wait rules, and the UI 
   for (const ref of ['references/avoid-ai-look.md', 'references/quality-bar.md', 'references/baseline-ui.md']) assert.ok(skill.includes(`\`${ref}\``), ref)
 })
 
+test('the quality bar takes worst-case data from real limits and has the phone fixes', () => {
+  const bar = readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'references', 'quality-bar.md'), 'utf8')
+  const screen = section(bar, '## Every screen')
+  assert.match(screen, /\*\*Worst-case data, realistic not random\.\*\* .*validation schema, database column or API contract.*"unbounded"/)
+  for (const shortCase of ['one- or two-letter name', 'exactly 0 and 1', 'missing avatar', 'empty list', 'through the fixtures or props', 'form limit shorter than its column']) assert.ok(screen.includes(shortCase), shortCase)
+  const mobile = section(bar, '## Dark mode and mobile')
+  for (const fix of ['16px or more', 'maximum-scale=1', '(hover: hover) and (pointer: fine)', '100dvh', '100svh', 'touch-action: manipulation', '-webkit-tap-highlight-color', 'env(safe-area-inset-*)', 'overscroll-behavior', 'user-select: none', 'theme-color']) assert.ok(mobile.includes(fix), fix)
+})
+
 test('app screens have their measured rules, and the UI skill reads them before building one', () => {
   const screens = readFileSync(join(REPO, 'skills', 'frontend-ui-engineering', 'references', 'app-screens.md'), 'utf8')
   const findings = section(screens, '## What real product screens do')
@@ -481,6 +490,7 @@ test('adapted design sources name their commit and keep their licence', () => {
     ['skills/front-end-design/references/craft.md', 'Dammyjay93/interface-design@2f9be32', 'dammyjay93-interface-design.LICENSE', '`2f9be32`'],
     ['skills/frontend-ui-engineering/references/baseline-ui.md', 'ibelick/ui-skills@55363c3', 'ibelick-ui-skills.LICENSE', '`55363c3`'],
     ['skills/frontend-ui-engineering/references/app-screens.md', 'Leonxlnx/taste-skill@6010f91', 'leonxlnx-taste-skill.LICENSE', '`6010f91`'],
+    ['skills/frontend-ui-engineering/references/quality-bar.md', 'emilkowalski/skills@2d22863', 'emilkowalski-skills.LICENSE', '`2d22863`'],
   ]
   const index = readFileSync(join(REPO, 'licenses', 'README.md'), 'utf8')
   for (const [file, source, license, commit] of sources) {

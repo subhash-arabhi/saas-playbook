@@ -10,7 +10,7 @@ steps:
   - id: 2
     title: "Worst-case data and phone fixes"
     summary: "The quality bar gets schema-backed worst-case data and the mobile fixes from Emil Kowalski's skills"
-    done: false
+    done: true
     checkpoint: false
   - id: 3
     title: "Merge danger and evidence in PRs"
@@ -81,9 +81,9 @@ Six improvements found in Leonxlnx/taste-skill, emilkowalski/skills, mattpocock/
 **Files:** `skills/frontend-ui-engineering/references/quality-bar.md` (edit), `licenses/emilkowalski-skills.LICENSE` (new), `licenses/README.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] The quality bar says where worst-case values come from and names the short cases
-- [ ] The mobile section has 16px inputs, hover gating, `dvh`, tap delay and highlight, safe areas and overscroll
-- [ ] The existing quality-bar test (motion inventory and waits) still passes
+- [x] The quality bar says where worst-case values come from and names the short cases
+- [x] The mobile section has 16px inputs, hover gating, `dvh`, tap delay and highlight, safe areas and overscroll
+- [x] The existing quality-bar test (motion inventory and waits) still passes
 
 **Check:** `npm test`
 
@@ -157,3 +157,4 @@ None.
 |---|---|---|---|
 | Plan | 2026-10-23 | Dry run | Dry run: 4 questions (Impeccable checker, /retro, gallery toggle, checkpoints), none left. |
 | 1 | 2026-10-23 | Done | `app-screens.md` is 113 lines; 107 tests (1 new; the source test now covers it). Decided: dropped Taste's "no entrance motion", its violet ban and its near-black primary, since the motion inventory and `DESIGN.md` decide those. Decided: added Taste's third-wave tells (cream with terracotta, serif as "premium") and two marketing tells to the AI-look table, but not its personal bans on monospace labels and thin rules, which app screens need. Also changed: `templates/DESIGN.md` (its KPI card listed a sparkline). `plan-open` fails only in the parallel full run (the known port clash) and passes alone. |
+| 2 | 2026-10-23 | Done | 108 tests (1 new; the source test covers `quality-bar.md`). Decided: the phone fixes are one sub-list under Mobile rather than separate lines at the top level, and the first-line comment says only the worst-case and phone rules are adapted. Decided: `inputmode`, `enterkeyhint`, long-press selection and `theme-color` from `mobile-native` were added too, since they're one line each. |
