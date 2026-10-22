@@ -6,6 +6,21 @@ Stack: the frontend framework is chosen per project (`.agents/rules/stack.md`). 
 - **Every frontend uses Tailwind CSS (v4, pinned).** No other styling system: no CSS-in-JS, no component library's default theme, no hand-written CSS beyond the generated tokens file and a small global base.
 - **Tailwind's theme comes from `DESIGN.md`:** `npx @google/design.md@<pinned> export --format css-tailwind` writes the `@theme` block. Never edit the generated file by hand.
 - **Use only theme classes** (`bg-primary`, `text-ink-muted`, `p-md`, `rounded-lg`). **Never** arbitrary values (`bg-[#1f2937]`, `p-[13px]`, `text-[15px]`) or inline `style` for design values.
+- **ESLint enforces it** with `eslint-plugin-better-tailwindcss` (pinned), added with the first UI step. Arbitrary variants (`[&>svg]:size-4`) and CSS-variable shorthands (`w-(--anchor-width)`) stay allowed:
+  ```js
+  import betterTailwind from "eslint-plugin-better-tailwindcss";
+  // in the flat config array:
+  {
+    files: ["**/*.{ts,tsx}"],
+    plugins: { "better-tailwindcss": betterTailwind },
+    settings: { "better-tailwindcss": { entryPoint: "app/globals.css" } }, // the file that imports Tailwind
+    rules: {
+      "better-tailwindcss/no-restricted-classes": ["error", {
+        restrict: [{ pattern: "^(.*:)?-?[a-z][\\w-]*-\\[.+\\]$", message: "Arbitrary value $0: use a DESIGN.md token." }],
+      }],
+    },
+  },
+  ```
 - **Dark theme:** use Tailwind's `dark:` variant with the `-dark` tokens from `DESIGN.md`.
 - **Repeated class lists become a shared component** (the components listed in `DESIGN.md`), not copy-pasted strings.
 - **Mobile first:** base classes are for 390×844, then `md:` / `lg:` / `xl:` for larger screens.
@@ -45,4 +60,5 @@ Stack: the frontend framework is chosen per project (`.agents/rules/stack.md`). 
 - **References always shape the design phase:** `/front-end-design` shortlists from `.agents/references/ui-templates/` and `.agents/references/design-systems/`, or screens the user supplied, and adapts them; never a near-copy.
 - Every data view has loading, empty and error states.
 - Accessibility basics always (real buttons and links, labels on inputs, visible focus, alt text). The full WCAG 2.2 AA audit happens only at publish (`.agents/workflows/publish.md`, using `.agents/references/accessibility-checklist.md`).
+- **Before every PR** (`.agents/workflows/pre-pr.md`), three script checks block: `DESIGN.md` lint errors, a shared component that isn't `approved` (`.agents/tools/design-coverage.mjs`), and arbitrary Tailwind values. No reviewer or screenshot pass is added for design.
 - **UI audit** (`web-design-guidelines` skill): on push, only over changed UI files, as warnings. It skips `[a11y]` rules unless the user asks, noting `Accessibility-only rules skipped; covered at publish.` Publish runs every rule.

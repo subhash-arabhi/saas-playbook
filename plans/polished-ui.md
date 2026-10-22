@@ -40,7 +40,7 @@ steps:
   - id: 8
     title: "Cheap design checks before every PR"
     summary: "Script-only rows in pre-pr.md: design.md lint, the coverage check and Tailwind's no-arbitrary-values lint"
-    done: false
+    done: true
     checkpoint: false
   - id: 9
     title: "Docs and release"
@@ -220,9 +220,9 @@ A project built only with this playbook looks designed by default. Before the bu
 **Files:** `workflows/pre-pr.md` (edit), `rules/frontend.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] The three rows run from `scripts/pre-pr.sh` and block as stated
-- [ ] A project without an Approvals table is blocked with "run /front-end-design"; a project without UI skips the rows
-- [ ] Tests pin each row
+- [x] The three rows run from `scripts/pre-pr.sh` and block as stated
+- [x] A project without an Approvals table is blocked with "run /front-end-design"; a project without UI skips the rows
+- [x] Tests pin each row
 
 **Check:** `npm test`
 
@@ -270,3 +270,4 @@ None.
 | 5 | 2026-10-22 | Done | Decided: `baseline-ui.md` drops the upstream review command (rules apply while building, no review pass) and its "no animation unless requested", "no custom easing" and Tailwind-default rules, which now point at `DESIGN.md`; the avoid-AI-look table bans a static app as well as generic motion. Also changed: `references/motion-cookbook.md` and `references/creation-gotchas.md` in design-motion-principles (restraint-first wording and source comments); `rules/frontend.md` routes new components through the design-change flow. |
 | 6 | 2026-10-22 | Done | Decided: tablecn and Tailark ship Base UI builds, so those are copied instead of their Radix ones; only Studio Admin needs the Radix-to-Base UI mapping. coss particles (529 files, 2.2 MB) and Tailark variants are capped at three per component or block to fit the budget. The coss licence file quotes its `LICENSING.md` with the standard MIT terms, since the repository names no copyright holder for `apps/ui/`. Verified: 404 files, Gitleaks and Semgrep `p/default` clean; `npm pack --dry-run` grows from 689 KB to 2,247 KB unpacked (+1.52 MB; tarball 238 KB to 514 KB). |
 | 7 | 2026-10-22 | Done | Decided: the Design step's checkpoint asks "Approve" or "Change something" with the gallery URL instead of continue or stop, and an approval is its own `Approve design` commit; the approvals check is a listed read of the Approvals table, not a script, because the components aren't in the code yet. The README `/build` row is updated in step 9 with the other docs. |
+| 8 | 2026-10-22 | Done | Decided: the three checks are pre-PR rows 9–11 (after the other script rows), so the agent rows move to 12–16; "has UI" means a `DESIGN.md` or a frontend package. The ESLint pattern `^(.*:)?-?[a-z][\w-]*-\[.+\]$` blocks arbitrary values but allows arbitrary variants and `w-(--var)`; checked with `eslint-plugin-better-tailwindcss` 4.10.0 in the scratch Next.js app (2 errors on a probe file, the gallery clean). |

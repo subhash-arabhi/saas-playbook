@@ -424,6 +424,35 @@ test('UI templates: every indexed source has its files, source comments and lice
   assert.ok(bytes < 2 * 1024 * 1024, `templates are ${bytes} bytes; keep them under 2 MB`)
 })
 
+test('pre-PR runs three blocking design scripts for UI projects, and adds no reviewer or screenshot step', () => {
+  const prePr = readFileSync(join(REPO, 'workflows', 'pre-pr.md'), 'utf8')
+  const rows = prePr.split('\n').filter((l) => /^\| \d+ \|/.test(l))
+  assert.deepEqual(rows.map((l) => Number(l.split('|')[1])), Array.from({ length: 16 }, (_, i) => i + 1), 'rows numbered 1–16')
+  const row = (n) => rows[n - 1].split('|').map((c) => c.trim())
+  assert.match(row(9)[2], /only if the project has UI/)
+  assert.match(row(9)[3], /^Script: `npx @google\/design\.md@<pinned> lint DESIGN\.md`$/)
+  assert.match(row(9)[4], /^Any error/)
+  assert.match(row(10)[3], /^Script: `node \.agents\/tools\/design-coverage\.mjs`/)
+  assert.match(row(10)[4], /isn't `approved`, or no Approvals table \("run \/front-end-design"\)/)
+  assert.match(row(11)[3], /^Script: ESLint with `eslint-plugin-better-tailwindcss`/)
+  assert.match(row(11)[4], /^Any `no-restricted-classes` error$/)
+  assert.match(prePr, /`scripts\/pre-pr\.sh` runs the \*\*automated\*\* steps \(3–11\)/)
+  assert.match(prePr, /Steps 1–2 and 12–16 are done by you/)
+  assert.match(prePr, /otherwise steps 9–11 print `SKIPPED`/)
+  assert.match(row(12)[4], /Never \(warnings\)/)
+  for (const n of [9, 10, 11]) assert.doesNotMatch(rows[n - 1], /reviewer|screenshot|You:/)
+  assert.deepEqual(rows.filter((l) => /\| You:/.test(l)).length, 7, 'agent steps unchanged: 1, 2, 12–16')
+  assert.ok(readFileSync(join(REPO, 'tools', 'design-coverage.mjs'), 'utf8').includes("'No Approvals table: run /front-end-design'"))
+})
+
+test('the frontend rule\'s ESLint pattern blocks arbitrary values and allows variants and CSS-variable shorthands', () => {
+  const frontend = readFileSync(join(REPO, 'rules', 'frontend.md'), 'utf8')
+  const pattern = new RegExp(JSON.parse(`"${frontend.match(/pattern: "((?:[^"\\]|\\.)*)"/)[1]}"`))
+  for (const cls of ['p-[13px]', 'md:bg-[#1f2937]', '-mt-[3px]', 'hover:text-[15px]', 'max-h-[calc(100dvh-4rem)]']) assert.match(cls, pattern, cls)
+  for (const cls of ['p-4', '[&>svg]:size-4', 'w-(--anchor-width)', 'md:grid-cols-2', 'data-[state=open]:opacity-100']) assert.doesNotMatch(cls, pattern, cls)
+  assert.match(frontend, /"better-tailwindcss\/no-restricted-classes": \["error"/)
+})
+
 test('adapted design sources name their commit and keep their licence', () => {
   const sources = [
     ['skills/front-end-design/references/direction.md', 'anthropics/skills@41bbe19', 'anthropic-skills-frontend-design.LICENSE', '`41bbe19`'],
