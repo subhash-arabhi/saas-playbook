@@ -20,7 +20,7 @@ steps:
   - id: 4
     title: "/front-end-design skill and design gallery"
     summary: "skills/front-end-design: style, palette, type, components, patterns, motion, freeze; the design-change flow; templates/design-gallery"
-    done: false
+    done: true
     checkpoint: false
   - id: 5
     title: "Strict quality bar and motion by default"
@@ -147,10 +147,10 @@ A project built only with this playbook looks designed by default. Before the bu
 **Files:** `skills/front-end-design/` (new), `templates/design-gallery/` (new), `licenses/` (new files), `licenses/README.md` (edit), `tests/repo.test.mjs` (edit)
 
 **Done when:**
-- [ ] `/front-end-design` walks style, palette, type, components, patterns, marketing, motion and freeze, asking with the question tool and pointing the user to the gallery
-- [ ] The design-change flow never builds on a `proposed` item
-- [ ] The gallery renders in a scratch Next.js app at 1440×900 and 390×844, light and dark, with no console errors, and returns 404 in production
-- [ ] Every adapted file names its source and commit, and every source has its license file
+- [x] `/front-end-design` walks style, palette, type, components, patterns, marketing, motion and freeze, asking with the question tool and pointing the user to the gallery
+- [x] The design-change flow never builds on a `proposed` item
+- [x] The gallery renders in a scratch Next.js app at 1440×900 and 390×844, light and dark, with no console errors, and returns 404 in production
+- [x] Every adapted file names its source and commit, and every source has its license file
 
 **Check:** `npm test`, the gallery in a scratch app at both sizes and themes
 
@@ -266,3 +266,4 @@ None.
 | 1 | 2026-10-22 | Done | Decided: a minimal `skills/front-end-design/SKILL.md` pointing to the rule, so the area-skill test passes at every commit; step 4 fills it in. Also changed: `skills/front-end-design/SKILL.md` (same reason). `plan-open.test.mjs` fails only in the parallel full run (port in use, as on `main`) and passes alone. |
 | 2 | 2026-10-22 | Done | Decided: the template carries a neutral grey and blue example scale in OKLCH instead of placeholders, so it lints as-is and `design-palette.mjs` replaces it. Lint on 0.4.0: 0 errors; the warnings are unreferenced scale steps and the `motion`, `breakpoints` and `iconSize` keys. |
 | 3 | 2026-10-22 | Done | Decided: `on-primary` is white or `neutral-12`, whichever contrasts more, so a light accent still gets readable button text; spring tokens export as `--motion-spring-*` strings for Motion (also `--json`). Also changed: `templates/DESIGN.md` (focus ring uses `accent-9`, since `accent-8` is under 3:1). A palette pasted into the template lints with 0 errors. |
+| 4 | 2026-10-22 | Done | Decided: the gallery reads token values straight from `DESIGN.md` (with `{colors.x}` references resolved), because Tailwind 4 outputs only the variables a class uses, so swatches built on `var(--color-*)` were blank; no route `dynamic` export, since Next.js 16.4 enables Cache Components by default and rejects it. Checked in a scratch Next.js 16.4.2 app: 1440×900 and 390×844, light and dark, no console errors or horizontal scroll, `/design` returns 404 after `next build` and `next start`. |

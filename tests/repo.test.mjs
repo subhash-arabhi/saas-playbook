@@ -322,6 +322,50 @@ test('the DESIGN.md template has every section, 7 component groups, 12-step scal
   assert.match(design, /^description: "<One sentence on who it's for and what they do with it\. The look is decided by \/front-end-design, not here\.>"$/m)
 })
 
+test('/front-end-design runs brand, style, palette, type, build-out and freeze in order, with no review passes', () => {
+  const skill = readFileSync(join(REPO, 'skills', 'front-end-design', 'SKILL.md'), 'utf8')
+  const flow = section(skill, '## New project')
+  let at = -1
+  for (const stage of ['Set up `DESIGN.md` and the gallery', '**Brand.**', '**Style.**', '**Palette.**', '**Type.**', '**Components, patterns, marketing and motion.**', '**Freeze v1.**']) {
+    const i = flow.indexOf(stage)
+    assert.ok(i > at, `new-project flow: "${stage}" missing or out of order`)
+    at = i
+  }
+  assert.match(flow, /design-palette\.mjs --hue <h>`.*Drop any that exits 1/)
+  assert.match(flow, /Ask once, with the gallery URL: "Approve" or "Change something"/)
+  assert.match(flow, /design-tokens\.mjs --out <file>/)
+  assert.match(skill, /no review passes, critique loops or screenshot rounds/)
+  const change = section(skill, '## Design change')
+  assert.match(change, /Never build on a `proposed` item/)
+  assert.match(change, /\*\*Ask\*\* which option[\s\S]*\*\*Approve:\*\*.*then build with it/)
+  assert.deepEqual(skill.match(/(?<![.\w/-])(rules|workflows|skills|templates|references|reviewers|tools)\/[\w./-]+/g) || [], [], 'playbook paths need .agents/')
+})
+
+test('the design gallery 404s in production, reads DESIGN.md, and its spec lists every section', () => {
+  const dir = join(REPO, 'templates', 'design-gallery', 'nextjs', 'app', '(dev)', 'design')
+  const page = readFileSync(join(dir, 'page.tsx'), 'utf8')
+  const body = page.split('export default function DesignGallery() {')[1]
+  assert.match(body.trim(), /^if \(process\.env\.NODE_ENV === 'production'\) notFound\(\)\n\s*const design = readDesignMd\(\)/)
+  for (const file of ['page.tsx', 'design-md.ts', 'registry.tsx', 'fixtures.ts', 'gallery-client.tsx']) assert.ok(existsSync(join(dir, file)), file)
+  const spec = readFileSync(join(REPO, 'templates', 'design-gallery', 'README.md'), 'utf8')
+  for (const item of ['**Colours:**', '**Typography:**', '**Spacing, radius and motion tokens:**', '**Components:**', '**Patterns and marketing sections:**', '**Motion inventory:**', 'messy on purpose', '**Never in production.**']) assert.ok(spec.includes(item), item)
+  assert.doesNotMatch(readFileSync(join(dir, 'registry.tsx'), 'utf8') + page, /\w-\[[^\]]+\]/, 'no arbitrary Tailwind values')
+})
+
+test('adapted design sources name their commit and keep their licence', () => {
+  const sources = [
+    ['skills/front-end-design/references/direction.md', 'anthropics/skills@41bbe19', 'anthropic-skills-frontend-design.LICENSE', '`41bbe19`'],
+    ['skills/front-end-design/references/craft.md', 'Dammyjay93/interface-design@2f9be32', 'dammyjay93-interface-design.LICENSE', '`2f9be32`'],
+  ]
+  const index = readFileSync(join(REPO, 'licenses', 'README.md'), 'utf8')
+  for (const [file, source, license, commit] of sources) {
+    const text = readFileSync(join(REPO, file), 'utf8')
+    assert.match(text.split('\n')[0], new RegExp(`^<!-- Adapted from ${source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} .*Changes: .+ -->$`), file)
+    assert.ok(existsSync(join(REPO, 'licenses', license)), license)
+    assert.ok(index.split('\n').some((l) => l.includes(license) && l.includes(commit)), `licenses/README.md row for ${license}`)
+  }
+})
+
 test('a finished build updates the flow document when the project has one', () => {
   const done = section(readFileSync(join(REPO, 'workflows', 'build-plan.md'), 'utf8'), '## 5. When all steps are done')
   assert.match(done, /^\d\. If the project has a flow document \(`docs\/flow\/flow\.json`\), update the steps this plan changed \(`\.agents\/skills\/flow-document\/SKILL\.md`\) and render it again\.$/m)
